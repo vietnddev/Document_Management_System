@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="deliveryNote" language="groovy" pageWidth="595" pageHeight="842" whenNoDataType="AllSectionsNoDetail" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="837bb78d-9ea0-4a47-9a93-0b199e848507">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="style1"/>
+	<style name="stylechung" hAlign="Left" vAlign="Middle" fontName="Times New Roman" fontSize="11" isBold="false" pdfFontName="Times-Roman"/>
+	<style name="stylechung_boder" hAlign="Left" vAlign="Middle" fontName="Times New Roman" fontSize="9" isBold="false" pdfFontName="Times-Roman">
+		<box leftPadding="1" rightPadding="1">
+			<topPen lineWidth="0.25"/>
+			<leftPen lineWidth="0.25"/>
+			<bottomPen lineWidth="0.25"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[]]></conditionExpression>
+			<style isBlankWhenNull="true" fontName="Times New Roman" fontSize="10" isBold="true" pdfFontName="Times-Roman"/>
+		</conditionalStyle>
+	</style>
+	<style name="stylechung_boder_1" hAlign="Left" vAlign="Middle" fontName="Times New Roman" fontSize="9" isBold="false" pdfFontName="Times-Roman">
+		<box leftPadding="1" rightPadding="1">
+			<leftPen lineWidth="0.25"/>
+			<bottomPen lineWidth="0.25"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{spMa}.equals( "Tổng cộng" )==true]]></conditionExpression>
+			<style isBlankWhenNull="true" fontName="Times New Roman" fontSize="10" isBold="true" pdfFontName="Times-Roman"/>
+		</conditionalStyle>
+	</style>
+	<style name="stylechung_boder_1_1" hAlign="Left" vAlign="Middle" fontName="Times New Roman" fontSize="9" isBold="false" pdfFontName="Times-Roman">
+		<box leftPadding="1" rightPadding="1">
+			<topPen lineWidth="0.25"/>
+			<leftPen lineWidth="0.25"/>
+			<bottomPen lineWidth="0.0"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+		<conditionalStyle>
+			<conditionExpression><![CDATA[$F{spMa}.equals( "Tổng cộng" )==true]]></conditionExpression>
+			<style isBlankWhenNull="true" fontName="Times New Roman" fontSize="10" isBold="true" pdfFontName="Times-Roman"/>
+		</conditionalStyle>
+	</style>
+	<style name="left-top-right">
+		<box topPadding="1" leftPadding="1" rightPadding="1">
+			<topPen lineWidth="0.25"/>
+			<leftPen lineWidth="0.25"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+	</style>
+	<style name="left-bottom-right">
+		<box leftPadding="1" bottomPadding="1" rightPadding="1">
+			<leftPen lineWidth="0.25"/>
+			<bottomPen lineWidth="0.25"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+	</style>
+	<style name="top-bottom">
+		<box>
+			<topPen lineWidth="0.25"/>
+			<bottomPen lineWidth="0.25"/>
+		</box>
+	</style>
+	<style name="left-right">
+		<box>
+			<leftPen lineWidth="0.25"/>
+			<rightPen lineWidth="0.25"/>
+		</box>
+	</style>
+	<parameter name="invoiceNumber" class="java.lang.String"/>
+	<parameter name="customerName" class="java.lang.String"/>
+	<parameter name="customerAddress" class="java.lang.String"/>
+	<parameter name="customerPhone" class="java.lang.String"/>
+	<parameter name="customerEmail" class="java.lang.String"/>
+	<parameter name="totalSubtotal" class="java.lang.String"/>
+	<parameter name="totalShippingCost" class="java.lang.String"/>
+	<parameter name="totalPayment" class="java.lang.String"/>
+	<parameter name="discount" class="java.lang.String"/>
+	<parameter name="paymentMethod" class="java.lang.String"/>
+	<parameter name="orderDate" class="java.lang.String"/>
+	<parameter name="nowDate" class="java.lang.String"/>
+	<parameter name="barcode" class="java.lang.String"/>
+	<parameter name="parameter14" class="java.lang.String"/>
+	<parameter name="parameter15" class="java.lang.String"/>
+	<parameter name="parameter1" class="java.lang.String"/>
+	<field name="productName" class="java.lang.String"/>
+	<field name="unitPrice" class="java.lang.String"/>
+	<field name="quantity" class="java.lang.String"/>
+	<field name="subTotal" class="java.lang.String"/>
+	<field name="note" class="java.lang.String"/>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="249" splitType="Stretch">
+			<staticText>
+				<reportElement x="95" y="0" width="352" height="61" uuid="989bc10d-c90d-4167-95d4-e817935bcf85"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" isItalic="false" pdfFontName="Times-Italic" pdfEncoding="Cp1258" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[<b>LIMITED COMPANY SHOPPINGTEAM</b>
+<br>
+<b>Address: </b><i>Conic Riverside Aparment, Ward 7, District 8, Ho Chi Minh City</i>
+<br>
+<b>Hotline: </b>
+<i>0777121298</i>
+<br>
+<b>Email: </b>
+<i>contact@shoppingteam.com</i>]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="447" y="0" width="108" height="20" uuid="3fb98ef6-5f45-423e-afe2-798f8fbbbbd8"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Invoice Number: </b>"+$P{invoiceNumber}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="51" width="555" height="30" uuid="8861c71c-2e32-411d-8172-b266322c8660"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font fontName="Times New Roman" size="18" isBold="true" pdfFontName="Times-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<text><![CDATA[DELIVERY NOTE
+]]></text>
+			</staticText>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="101" width="555" height="20" uuid="1a42a61b-50d6-45a2-955a-5713d74db426"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Cusomer Name: </b>" + $P{customerName}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" x="0" y="121" width="555" height="28" uuid="80b05785-dcb3-4707-ac49-0f9c4fc4da32"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Address: </b>" + $P{customerAddress}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="149" width="555" height="20" uuid="4242a411-a02c-4efb-b2f3-e6c82098d959"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Phone: </b>" + $P{customerPhone}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="169" width="555" height="20" uuid="615812e9-768b-4bb6-a3c2-812b16105190"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Email: </b>" + $P{customerEmail}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="189" width="187" height="20" uuid="931ddc13-385c-4796-a7bf-9ed5f7e8c2bd"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Subtotal: </b>" + $P{totalSubtotal}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="187" y="189" width="185" height="20" uuid="0e3e662f-822d-4713-bcf9-504b1dc84297"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Shipping Cost: </b>" + $P{totalShippingCost}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="209" width="555" height="20" uuid="42845f23-d71a-4dd0-a47c-e21257aee1eb"/>
+				<textElement textAlignment="Left" verticalAlignment="Top" markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Total Payment </b><i>(TOTAL = Subtotal + Shipping Cost - Discount): </i>" + "<b>"+$P{totalPayment}+"</b>"]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="372" y="189" width="183" height="20" uuid="9155e136-6d2e-4561-90a3-20b82a046c31"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Discount: </b>" +$P{discount}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true">
+				<reportElement x="0" y="229" width="555" height="20" uuid="b74cf964-a60f-4bb7-8fb7-41050f2e92b5"/>
+				<textElement markup="html">
+					<font fontName="Times New Roman" size="11" pdfFontName="Times-Roman"/>
+				</textElement>
+				<textFieldExpression><![CDATA["<b>Payment Method: </b>" + $P{paymentMethod}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="81" width="555" height="20" uuid="63cc62d1-a4dd-4e40-9599-1492fb95a924"/>
+				<textElement textAlignment="Center">
+					<font fontName="Times New Roman" size="11" isBold="true" pdfFontName="Times-Bold" isPdfEmbedded="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{orderDate}]]></textFieldExpression>
+			</textField>
+			<image hAlign="Left">
+				<reportElement x="447" y="20" width="108" height="50" uuid="87d67dc2-e4ad-4aee-ab45-9d3d40daa5de"/>
+				<imageExpression><![CDATA[$P{barcode}]]></imageExpression>
+			</image>
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement mode="Transparent" x="0" y="0" width="95" height="61" uuid="b03a6d4c-5c95-4482-b79c-0bd762049c9f"/>
+				<imageExpression><![CDATA["D:\\App\\FLOWIEE_SYSTEM\\src\\main\\resources\\static\\dist\\img\\FlowieeLogo.png"]]></imageExpression>
+			</image>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="40" splitType="Stretch">
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="0" y="0" width="57" height="40" backcolor="#FFFFCC" uuid="a8501a83-a778-4d73-8695-b4f05f4a14de"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Ordinal Numbers]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="57" y="0" width="226" height="40" backcolor="#FFFFCC" uuid="8042f355-801a-48f4-b6f9-9a0a24504efa"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Product Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="388" y="0" width="59" height="40" backcolor="#FFFFCC" uuid="68450a81-7bfe-4d92-b6d2-d33610c31f51"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Subtotal]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="283" y="0" width="56" height="40" backcolor="#FFFFCC" uuid="3788206c-af9c-4c7f-83c8-fad3a33b57c0"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Unit Price]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="339" y="0" width="49" height="40" backcolor="#FFFFCC" uuid="1ee10ecb-1076-4bd6-8ea1-82d2820a180e"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="stylechung_boder" mode="Opaque" x="447" y="0" width="108" height="40" backcolor="#FFFFCC" uuid="3ba19ac2-fdc8-4d01-a2c7-45aa684d821b"/>
+				<textElement textAlignment="Center">
+					<font size="11" isBold="true" pdfFontName="Times-Bold" pdfEncoding="Cp1252"/>
+				</textElement>
+				<text><![CDATA[Note]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="72" splitType="Stretch">
+			<textField>
+				<reportElement style="stylechung_boder" x="0" y="0" width="57" height="72" uuid="ff96f9fc-7a65-49c3-8118-56a064053715"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="stylechung_boder" x="57" y="0" width="226" height="72" uuid="fec199d7-c2f8-4bb5-a23c-aa8fcbdc10fc"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{productName}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0">
+				<reportElement style="stylechung_boder" x="283" y="0" width="56" height="72" uuid="92ec9c2e-4564-43dc-b10e-3d673aa537ec"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{unitPrice}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="stylechung_boder" x="339" y="0" width="49" height="72" uuid="702a5b3f-b3a5-428f-a04e-6715dc60c08d"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{quantity}]]></textFieldExpression>
+			</textField>
+			<textField pattern="¤ #,##0">
+				<reportElement style="stylechung_boder" x="388" y="0" width="59" height="72" uuid="435462d5-af4f-4ea6-979e-1ba9ab089b67"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{subTotal}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement style="stylechung_boder" x="447" y="0" width="108" height="72" uuid="2d55cd75-a9df-410b-8191-18649d1be542"/>
+				<box topPadding="2" leftPadding="0"/>
+				<textElement textAlignment="Center" verticalAlignment="Top">
+					<font size="11" pdfFontName="Times-Roman" pdfEncoding="Cp1252"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{note}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="116" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy HH.mm.ss" isBlankWhenNull="true">
+				<reportElement x="0" y="20" width="555" height="20" uuid="164cacc2-f2cf-4548-95ed-fe4929ea7434"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false" isItalic="false" pdfFontName="Times-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{nowDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="0" y="40" width="555" height="20" uuid="9a91efb4-cf9d-43a3-a722-6e75aa22b82d"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="14" isBold="false" pdfFontName="Times-Bold"/>
+				</textElement>
+				<text><![CDATA[Thank You For Your Choices]]></text>
+			</staticText>
+			<textField isBlankWhenNull="false">
+				<reportElement style="stylechung_boder" x="388" y="0" width="167" height="20" uuid="0a1cad14-2f13-4b09-a068-9de60797484d"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font fontName="Times New Roman" size="11" isBold="false" isItalic="false" pdfFontName="Times-Bold"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalPayment}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="stylechung_boder" x="283" y="0" width="105" height="20" uuid="ae422877-b0a6-4a0a-a050-e1ea52e60ee1"/>
+				<textElement textAlignment="Center" verticalAlignment="Bottom">
+					<font size="11" pdfFontName="Times-Bold"/>
+				</textElement>
+				<text><![CDATA[Total Payment]]></text>
+			</staticText>
+		</band>
+	</summary>
+</jasperReport>

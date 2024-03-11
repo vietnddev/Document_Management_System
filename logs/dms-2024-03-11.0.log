@@ -1,0 +1,134 @@
+2024-03-11 10:18:46,549 INFO o.s.b.StartupInfoLogger [restartedMain] Starting DmsApplication using Java 19.0.2 with PID 50364 (D:\App\FW_DMS\target\classes started by DELL in D:\App\FW_DMS)
+2024-03-11 10:18:46,550 INFO o.s.b.SpringApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2024-03-11 10:18:46,582 INFO o.s.b.l.DeferredLog [restartedMain] The Class-Path manifest attribute in C:\Users\DELL\.m2\repository\com\oracle\database\jdbc\ojdbc11\21.9.0.0\ojdbc11-21.9.0.0.jar referenced one or more files that do not exist: file:/C:/Users/DELL/.m2/repository/com/oracle/database/jdbc/ojdbc11/21.9.0.0/oraclepki.jar
+2024-03-11 10:18:46,583 INFO o.s.b.l.DeferredLog [restartedMain] Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-03-11 10:18:46,583 INFO o.s.b.l.DeferredLog [restartedMain] For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2024-03-11 10:18:47,031 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-03-11 10:18:47,047 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Finished Spring Data repository scanning in 8 ms. Found 0 JPA repository interfaces.
+2024-03-11 10:18:47,409 INFO o.s.b.w.e.t.TomcatWebServer [restartedMain] Tomcat initialized with port 8086 (http)
+2024-03-11 10:18:47,417 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting service [Tomcat]
+2024-03-11 10:18:47,418 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-03-11 10:18:47,461 INFO o.a.j.l.DirectJDKLog [restartedMain] Initializing Spring embedded WebApplicationContext
+2024-03-11 10:18:47,462 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [restartedMain] Root WebApplicationContext: initialization completed in 878 ms
+2024-03-11 10:18:47,610 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Starting...
+2024-03-11 10:18:47,621 WARN c.z.h.u.DriverDataSource [restartedMain] Registered driver with driverClassName=oracle.jdbc.driver.OracleDriver was not found, trying direct instantiation.
+2024-03-11 10:18:47,890 INFO c.z.h.p.HikariPool [restartedMain] HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@5dfef3f1
+2024-03-11 10:18:47,892 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Start completed.
+2024-03-11 10:18:47,930 INFO o.h.j.i.u.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-03-11 10:18:48,005 INFO o.h.Version [restartedMain] HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-03-11 10:18:48,058 INFO o.h.c.i.RegionFactoryInitiator [restartedMain] HHH000026: Second-level cache disabled
+2024-03-11 10:18:48,336 INFO o.s.o.j.p.SpringPersistenceUnitInfo [restartedMain] No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-03-11 10:18:48,815 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [restartedMain] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-03-11 10:18:48,819 INFO o.s.o.j.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 10:18:48,858 WARN o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration [restartedMain] spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-03-11 10:18:49,050 WARN o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration [restartedMain] Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2024-03-11 10:18:49,132 INFO o.s.b.d.a.OptionalLiveReloadServer [restartedMain] LiveReload server is running on port 35729
+2024-03-11 10:18:49,155 INFO o.s.b.w.e.t.TomcatWebServer [restartedMain] Tomcat started on port 8086 (http) with context path ''
+2024-03-11 10:18:49,161 INFO o.s.b.StartupInfoLogger [restartedMain] Started DmsApplication in 2.985 seconds (process running for 3.763)
+2024-03-11 10:33:23,781 INFO o.s.o.j.AbstractEntityManagerFactoryBean [SpringApplicationShutdownHook] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 10:33:23,800 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown initiated...
+2024-03-11 10:33:23,829 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown completed.
+2024-03-11 13:27:52,960 INFO o.s.b.StartupInfoLogger [restartedMain] Starting DmsApplication using Java 19.0.2 with PID 76132 (D:\App\FW_DMS\target\classes started by DELL in D:\App\FW_DMS)
+2024-03-11 13:27:52,964 INFO o.s.b.SpringApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2024-03-11 13:27:53,007 INFO o.s.b.l.DeferredLog [restartedMain] The Class-Path manifest attribute in C:\Users\DELL\.m2\repository\com\oracle\database\jdbc\ojdbc11\21.9.0.0\ojdbc11-21.9.0.0.jar referenced one or more files that do not exist: file:/C:/Users/DELL/.m2/repository/com/oracle/database/jdbc/ojdbc11/21.9.0.0/oraclepki.jar
+2024-03-11 13:27:53,007 INFO o.s.b.l.DeferredLog [restartedMain] Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-03-11 13:27:53,007 INFO o.s.b.l.DeferredLog [restartedMain] For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2024-03-11 13:27:55,296 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-03-11 13:27:55,364 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Finished Spring Data repository scanning in 60 ms. Found 10 JPA repository interfaces.
+2024-03-11 13:27:55,805 INFO o.s.b.w.e.t.TomcatWebServer [restartedMain] Tomcat initialized with port 8086 (http)
+2024-03-11 13:27:55,815 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting service [Tomcat]
+2024-03-11 13:27:55,815 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-03-11 13:27:55,852 INFO o.a.j.l.DirectJDKLog [restartedMain] Initializing Spring embedded WebApplicationContext
+2024-03-11 13:27:55,852 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [restartedMain] Root WebApplicationContext: initialization completed in 2844 ms
+2024-03-11 13:27:55,988 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Starting...
+2024-03-11 13:27:55,996 WARN c.z.h.u.DriverDataSource [restartedMain] Registered driver with driverClassName=oracle.jdbc.driver.OracleDriver was not found, trying direct instantiation.
+2024-03-11 13:27:56,326 INFO c.z.h.p.HikariPool [restartedMain] HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@2eeeb8e6
+2024-03-11 13:27:56,328 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Start completed.
+2024-03-11 13:27:56,362 INFO o.h.j.i.u.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-03-11 13:27:56,416 INFO o.h.Version [restartedMain] HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-03-11 13:27:56,448 INFO o.h.c.i.RegionFactoryInitiator [restartedMain] HHH000026: Second-level cache disabled
+2024-03-11 13:27:56,653 INFO o.s.o.j.p.SpringPersistenceUnitInfo [restartedMain] No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-03-11 13:27:57,720 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [restartedMain] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-03-11 13:27:57,722 INFO o.s.o.j.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 13:27:57,958 INFO o.s.d.j.r.q.QueryEnhancerFactory [restartedMain] Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-03-11 13:27:58,214 WARN o.s.c.s.AbstractApplicationContext [restartedMain] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'accountRoleServiceImpl' defined in file [D:\App\FW_DMS\target\classes\com\flowiee\dms\service\impl\AccountRoleServiceImpl.class]: Unsatisfied dependency expressed through constructor parameter 1: Error creating bean with name 'accountServiceImpl': Unsatisfied dependency expressed through field 'roleService': Error creating bean with name 'accountRoleServiceImpl': Requested bean is currently in creation: Is there an unresolvable circular reference?
+2024-03-11 13:27:58,216 INFO o.s.o.j.AbstractEntityManagerFactoryBean [restartedMain] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 13:27:58,219 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Shutdown initiated...
+2024-03-11 13:27:58,229 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Shutdown completed.
+2024-03-11 13:27:58,232 INFO o.a.j.l.DirectJDKLog [restartedMain] Stopping service [Tomcat]
+2024-03-11 13:27:58,240 INFO o.s.b.a.l.ConditionEvaluationReportLogger [restartedMain] 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2024-03-11 13:27:58,253 ERROR o.s.b.d.LoggingFailureAnalysisReporter [restartedMain] 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The dependencies of some of the beans in the application context form a cycle:
+
+┌─────┐
+|  accountRoleServiceImpl defined in file [D:\App\FW_DMS\target\classes\com\flowiee\dms\service\impl\AccountRoleServiceImpl.class]
+↑     ↓
+|  accountServiceImpl (field private com.flowiee.dms.service.RoleService com.flowiee.dms.service.impl.AccountServiceImpl.roleService)
+└─────┘
+
+
+Action:
+
+Relying upon circular references is discouraged and they are prohibited by default. Update your application to remove the dependency cycle between beans. As a last resort, it may be possible to break the cycle automatically by setting spring.main.allow-circular-references to true.
+
+2024-03-11 13:29:08,738 INFO o.s.b.StartupInfoLogger [restartedMain] Starting DmsApplication using Java 19.0.2 with PID 84788 (D:\App\FW_DMS\target\classes started by DELL in D:\App\FW_DMS)
+2024-03-11 13:29:08,740 INFO o.s.b.SpringApplication [restartedMain] No active profile set, falling back to 1 default profile: "default"
+2024-03-11 13:29:08,769 INFO o.s.b.l.DeferredLog [restartedMain] The Class-Path manifest attribute in C:\Users\DELL\.m2\repository\com\oracle\database\jdbc\ojdbc11\21.9.0.0\ojdbc11-21.9.0.0.jar referenced one or more files that do not exist: file:/C:/Users/DELL/.m2/repository/com/oracle/database/jdbc/ojdbc11/21.9.0.0/oraclepki.jar
+2024-03-11 13:29:08,769 INFO o.s.b.l.DeferredLog [restartedMain] Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2024-03-11 13:29:08,770 INFO o.s.b.l.DeferredLog [restartedMain] For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2024-03-11 13:29:09,217 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-03-11 13:29:09,271 INFO o.s.d.r.c.RepositoryConfigurationDelegate [restartedMain] Finished Spring Data repository scanning in 50 ms. Found 10 JPA repository interfaces.
+2024-03-11 13:29:09,639 INFO o.s.b.w.e.t.TomcatWebServer [restartedMain] Tomcat initialized with port 8086 (http)
+2024-03-11 13:29:09,647 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting service [Tomcat]
+2024-03-11 13:29:09,647 INFO o.a.j.l.DirectJDKLog [restartedMain] Starting Servlet engine: [Apache Tomcat/10.1.19]
+2024-03-11 13:29:09,680 INFO o.a.j.l.DirectJDKLog [restartedMain] Initializing Spring embedded WebApplicationContext
+2024-03-11 13:29:09,680 INFO o.s.b.w.s.c.ServletWebServerApplicationContext [restartedMain] Root WebApplicationContext: initialization completed in 910 ms
+2024-03-11 13:29:09,774 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Starting...
+2024-03-11 13:29:09,780 WARN c.z.h.u.DriverDataSource [restartedMain] Registered driver with driverClassName=oracle.jdbc.driver.OracleDriver was not found, trying direct instantiation.
+2024-03-11 13:29:09,942 INFO c.z.h.p.HikariPool [restartedMain] HikariPool-1 - Added connection oracle.jdbc.driver.T4CConnection@6aed9f63
+2024-03-11 13:29:09,943 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Start completed.
+2024-03-11 13:29:09,968 INFO o.h.j.i.u.LogHelper [restartedMain] HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-03-11 13:29:09,996 INFO o.h.Version [restartedMain] HHH000412: Hibernate ORM core version 6.4.4.Final
+2024-03-11 13:29:10,016 INFO o.h.c.i.RegionFactoryInitiator [restartedMain] HHH000026: Second-level cache disabled
+2024-03-11 13:29:10,148 INFO o.s.o.j.p.SpringPersistenceUnitInfo [restartedMain] No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-03-11 13:29:11,007 INFO o.h.e.t.j.p.i.JtaPlatformInitiator [restartedMain] HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-03-11 13:29:11,009 INFO o.s.o.j.AbstractEntityManagerFactoryBean [restartedMain] Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 13:29:11,216 INFO o.s.d.j.r.q.QueryEnhancerFactory [restartedMain] Hibernate is in classpath; If applicable, HQL parser will be used.
+2024-03-11 13:29:11,425 WARN o.s.c.s.AbstractApplicationContext [restartedMain] Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'accountRoleServiceImpl': Unsatisfied dependency expressed through field 'accountService': Error creating bean with name 'accountServiceImpl': Unsatisfied dependency expressed through field 'roleService': Error creating bean with name 'accountRoleServiceImpl': Requested bean is currently in creation: Is there an unresolvable circular reference?
+2024-03-11 13:29:11,425 INFO o.s.o.j.AbstractEntityManagerFactoryBean [restartedMain] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-03-11 13:29:11,427 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Shutdown initiated...
+2024-03-11 13:29:11,432 INFO c.z.h.HikariDataSource [restartedMain] HikariPool-1 - Shutdown completed.
+2024-03-11 13:29:11,434 INFO o.a.j.l.DirectJDKLog [restartedMain] Stopping service [Tomcat]
+2024-03-11 13:29:11,441 INFO o.s.b.a.l.ConditionEvaluationReportLogger [restartedMain] 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2024-03-11 13:29:11,454 ERROR o.s.b.d.LoggingFailureAnalysisReporter [restartedMain] 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+The dependencies of some of the beans in the application context form a cycle:
+
+┌─────┐
+|  accountRoleServiceImpl (field private com.flowiee.dms.service.AccountService com.flowiee.dms.service.impl.AccountRoleServiceImpl.accountService)
+↑     ↓
+|  accountServiceImpl (field private com.flowiee.dms.service.RoleService com.flowiee.dms.service.impl.AccountServiceImpl.roleService)
+└─────┘
+
+
+Action:
+
+Relying upon circular references is discouraged and they are prohibited by default. Update your application to remove the dependency cycle between beans. As a last resort, it may be possible to break the cycle automatically by setting spring.main.allow-circular-references to true.
+
