@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 public class SystemLogServiceImpl implements SystemLogService {
     @Autowired private SystemLogRepository systemLogRepo;
-    @Autowired private EntityManager       entityManager;
+    @Autowired private EntityManager entityManager;
 
     @Override
     public Page<SystemLog> findAll(int pageSize, int pageNum) {
@@ -53,18 +53,6 @@ public class SystemLogServiceImpl implements SystemLogService {
     }
 
     @Override
-    public SystemLog writeLog(String module, String action, String content) {
-        SystemLog systemLog = new SystemLog();
-        systemLog.setModule(module);
-        systemLog.setAction(action);
-        systemLog.setContent(content);
-        systemLog.setContentChange(null);
-        systemLog.setCreatedBy(CommonUtils.getCurrentAccountId());
-        systemLog.setIp(CommonUtils.getCurrentAccountIp());
-        return systemLogRepo.save(systemLog);
-    }
-
-    @Override
     public SystemLog writeLog(String module, String action, String content, String contentChange) {
         SystemLog systemLog = new SystemLog();
         systemLog.setModule(module);
@@ -74,5 +62,25 @@ public class SystemLogServiceImpl implements SystemLogService {
         systemLog.setCreatedBy(CommonUtils.getCurrentAccountId());
         systemLog.setIp(CommonUtils.getCurrentAccountIp());
         return systemLogRepo.save(systemLog);
+    }
+
+    @Override
+    public SystemLog findById(Integer entityId) {
+        return null;
+    }
+
+    @Override
+    public SystemLog save(SystemLog entity) {
+        return null;
+    }
+
+    @Override
+    public SystemLog update(SystemLog entity, Integer entityId) {
+        return null;
+    }
+
+    @Override
+    public String delete(Integer entityId) {
+        return null;
     }
 }

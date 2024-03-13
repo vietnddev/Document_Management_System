@@ -1,4 +1,4 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.entity.Account;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping
-public class ProfileUIController extends BaseController {
+public class ProfileControllerUI extends BaseController {
 	@GetMapping(EndPointUtil.SYS_PROFILE)
 	public ModelAndView showInformation(@ModelAttribute("message") String message) {
 		ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_PROFILE);

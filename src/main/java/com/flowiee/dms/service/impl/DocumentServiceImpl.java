@@ -2,16 +2,12 @@ package com.flowiee.dms.service.impl;
 
 import com.flowiee.dms.core.exception.AppException;
 import com.flowiee.dms.core.exception.BadRequestException;
-import com.flowiee.dms.entity.DocData;
-import com.flowiee.dms.entity.DocField;
-import com.flowiee.dms.entity.Document;
+import com.flowiee.dms.entity.*;
+import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.DocumentRepository;
-import com.flowiee.dms.service.DocDataService;
-import com.flowiee.dms.service.DocumentService;
-import com.flowiee.dms.service.FileStorageService;
-import com.flowiee.dms.service.SystemLogService;
+import com.flowiee.dms.service.*;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
@@ -31,6 +27,7 @@ import javax.persistence.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -42,16 +39,7 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired private EntityManager entityManager;
     @Autowired private SystemLogService systemLogService;
     @Autowired private FileStorageService fileService;
-
-//    @Autowired
-//    public DocumentServiceImpl(DocumentRepository documentRepo, DocDataService docDataService, EntityManager entityManager,
-//                               SystemLogService systemLogService, FileStorageService fileService) {
-//        this.documentRepo = documentRepo;
-//        this.docDataService = docDataService;
-//        this.entityManager = entityManager;
-//        this.systemLogService = systemLogService;
-//        this.fileService = fileService;
-//    }
+    @Autowired private DocShareService docShareService;
 
     @Override
     public Page<Document> findDocuments(Integer pageSize, Integer pageNum, Integer parentId) {
@@ -60,18 +48,8 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public List<Document> findDocumentByParentId(Integer parentId) {
-        return documentRepo.findListDocumentByParentId(parentId);
-    }
-
-    @Override
     public List<DocumentDTO> findFolderByParentId(Integer parentId) {
         return this.generateFolderTree(parentId);
-    }
-
-    @Override
-    public List<Document> findFileByParentId(Integer parentId) {
-        return documentRepo.findListFileByParentId(parentId);
     }
 
     @Override
@@ -92,8 +70,8 @@ public class DocumentServiceImpl implements DocumentService {
         }
         document.setName(data.getName());
         document.setDescription(data.getDescription());
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_UPDATE.name(), "Cập nhật tài liệu: " + document.toString());
-        logger.info(DocumentServiceImpl.class.getName() + ": Cập nhật tài liệu " + document.toString());
+        systemLogService.writeLog(module, ACTION.STG_DOC_UPDATE.name(), "Update document: docId=" + documentId, null);
+        logger.info(DocumentServiceImpl.class.getName() + ": Update document docId=" + documentId);
         return documentRepo.save(document);
     }
 
@@ -115,7 +93,7 @@ public class DocumentServiceImpl implements DocumentService {
                 docDataService.save(docData);
             }
         }
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_UPDATE.name(), "Update metadata: docId=" + documentId);
+        systemLogService.writeLog(module, ACTION.STG_DOC_UPDATE.name(), "Update metadata: docId=" + documentId, null);
         logger.info(DocumentServiceImpl.class.getName() + ": Update metadata docId=" + documentId);
         return MessageUtils.UPDATE_SUCCESS;
     }
@@ -128,8 +106,8 @@ public class DocumentServiceImpl implements DocumentService {
             throw new BadRequestException();
         }
         documentRepo.deleteById(documentId);
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_DELETE.name(), "Xóa tài liệu: " + document.toString());
-        logger.info(DocumentServiceImpl.class.getName() + ": Xóa tài liệu " + document.toString());
+        systemLogService.writeLog(module, ACTION.STG_DOC_DELETE.name(), "Xóa tài liệu: docId=" + documentId, null);
+        logger.info(DocumentServiceImpl.class.getName() + ": Delete document docId=" + documentId);
         return MessageUtils.DELETE_SUCCESS;
     }
 
@@ -183,7 +161,7 @@ public class DocumentServiceImpl implements DocumentService {
 //                    }
 //                }
             }
-            systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_CREATE.name(), "Thêm mới tài liệu: " + document.toString());
+            systemLogService.writeLog(module, ACTION.STG_DOC_CREATE.name(), "Thêm mới tài liệu: " + documentSaved.toString(), null);
             logger.info(DocumentServiceImpl.class.getName() + ": Thêm mới tài liệu " + document.toString());
             return DocumentDTO.fromDocument(documentSaved);
         } catch (RuntimeException | IOException ex) {
@@ -325,5 +303,55 @@ public class DocumentServiceImpl implements DocumentService {
             }
         }
         return listSubFolders;
+    }
+
+    @Override
+    public DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy) {
+        Document doc = this.findById(docId);
+        //Copy doc
+        doc.setId(0);
+        doc.setName(nameCopy);
+        doc.setAsName(CommonUtils.generateAliasName(nameCopy));
+        Document docCopied = this.save(doc);
+        //Copy metadata
+        for (DocData docData : docDataService.findByDocument(docId)) {
+            docData.setId(0);
+            docData.setDocument(docCopied);
+            docDataService.save(docData);
+        }
+        return DocumentDTO.fromDocument(docCopied);
+    }
+
+    @Transactional
+    @Override
+    public String moveDoc(Integer docId, Integer destinationId) {
+        documentRepo.updateParentId(destinationId, docId);
+        return "Move successfully!";
+    }
+
+    @Transactional
+    @Override
+    public List<DocShare> shareDoc(Integer docId, Map<Integer, List<String>> accountShares) {
+        Document doc = this.findById(docId);
+        if (doc == null || accountShares.isEmpty()) {
+            throw new BadRequestException();
+        }
+        List<DocShare> docShared = new ArrayList<>();
+        docShareService.deleteByDocument(docId);
+        for (Map.Entry<Integer, List<String>> entry : accountShares.entrySet()) {
+            int accountId = entry.getKey();
+            List<String> roles = entry.getValue();
+            if (roles == null) {
+                continue;
+            }
+            for (String role : roles) {
+                DocShare docShare = new DocShare();
+                docShare.setDocument(new Document(docId));
+                docShare.setAccount(new Account(accountId));
+                docShare.setRole(role);
+                docShared.add(docShareService.save(docShare));
+            }
+        }
+        return docShared;
     }
 }

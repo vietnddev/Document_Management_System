@@ -2,12 +2,12 @@ package com.flowiee.dms.service;
 
 import com.flowiee.dms.entity.AccountRole;
 import com.flowiee.dms.model.role.ActionModel;
-import com.flowiee.dms.model.role.FlowieeRole;
+import com.flowiee.dms.model.role.RoleModel;
 
 import java.util.List;
 
 public interface RoleService {
-    List<FlowieeRole> findAllRoleByAccountId(Integer accountId);
+    List<RoleModel> findAllRoleByAccountId(Integer accountId);
 
     List<ActionModel> findAllAction();
 

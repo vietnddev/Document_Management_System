@@ -1,4 +1,4 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.core.vld.ValidateModuleSystem;
@@ -6,8 +6,7 @@ import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.core.exception.DataExistsException;
 import com.flowiee.dms.core.exception.NotFoundException;
 import com.flowiee.dms.model.role.ActionModel;
-import com.flowiee.dms.model.role.FlowieeRole;
-import com.flowiee.dms.model.role.Role;
+import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.RoleService;
 import com.flowiee.dms.utils.CommonUtils;
@@ -18,12 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/sys/tai-khoan")
-public class AccountUIController extends BaseController {
+public class AccountControllerUI extends BaseController {
     @Autowired private AccountService accountService;
     @Autowired private RoleService roleService;
     @Autowired private ValidateModuleSystem validateModuleSystem;
@@ -34,8 +32,6 @@ public class AccountUIController extends BaseController {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_ACCOUNT);
         modelAndView.addObject("account", new Account());
         modelAndView.addObject("listAccount", accountService.findAll());
-        List<Role> newRole = new ArrayList<>();
-        modelAndView.addObject("list", newRole);
         return baseView(modelAndView);
     }
 
@@ -46,7 +42,7 @@ public class AccountUIController extends BaseController {
             throw new NotFoundException("Account not found!");
         }
         ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_ACCOUNT_DETAIL);
-        List<FlowieeRole> roleOfAccount = roleService.findAllRoleByAccountId(accountId);
+        List<RoleModel> roleOfAccount = roleService.findAllRoleByAccountId(accountId);
         modelAndView.addObject("listRole", roleOfAccount);
         modelAndView.addObject("accountInfo", accountService.findById(accountId));
         return baseView(modelAndView);

@@ -7,7 +7,7 @@ import com.flowiee.dms.core.exception.BadRequestException;
 import com.flowiee.dms.core.exception.DataExistsException;
 import com.flowiee.dms.core.exception.NotFoundException;
 import com.flowiee.dms.model.ApiResponse;
-import com.flowiee.dms.model.role.FlowieeRole;
+import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.RoleService;
 import com.flowiee.dms.utils.MessageUtils;
@@ -87,7 +87,7 @@ public class AccountController extends BaseController {
     }
 
     @PutMapping("/update-permission/{accountId}")
-    public ApiResponse<List<FlowieeRole>> updatePermission(@RequestBody String[] actions, @PathVariable("accountId") Integer accountId) {
+    public ApiResponse<List<RoleModel>> updatePermission(@RequestBody String[] actions, @PathVariable("accountId") Integer accountId) {
         if (!super.vldModuleSystem.updateAccount(true)) {
             return null;
         }
@@ -130,7 +130,7 @@ public class AccountController extends BaseController {
 
     @Operation(summary = "Find roles of account")
     @GetMapping("/{accountId}/role")
-    public ApiResponse<List<FlowieeRole>> findRolesOfAccount(@PathVariable("accountId") Integer accountId) {
+    public ApiResponse<List<RoleModel>> findRolesOfAccount(@PathVariable("accountId") Integer accountId) {
         if (!super.vldModuleSystem.readAccount(true)) {
             return null;
         }

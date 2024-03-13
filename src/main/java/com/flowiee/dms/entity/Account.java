@@ -3,7 +3,6 @@ package com.flowiee.dms.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.core.BaseEntity;
-import com.flowiee.dms.model.role.Role;
 import javax.persistence.*;
 import lombok.*;
 
@@ -66,9 +65,6 @@ public class Account extends BaseEntity implements Serializable {
 	private List<DocShare> listDocShare;
 
 	@Transient
-	private List<Role> listRole;
-
-	@Transient
 	private String ip;
 
 	public Account(Integer id) {
@@ -84,28 +80,18 @@ public class Account extends BaseEntity implements Serializable {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("Account [username=");
-		builder.append(username);
-		builder.append(", fullName=");
-		builder.append(fullName);
-		builder.append(", sex=");
-		builder.append(sex);
-		builder.append(", phoneNumber=");
-		builder.append(phoneNumber);
-		builder.append(", email=");
-		builder.append(email);
-		builder.append(", diaChi=");
-		builder.append(diaChi);
-		builder.append(", avatar=");
-		builder.append(avatar);
-		builder.append(", remark=");
-		builder.append(remark);
-		builder.append(", remark=");
-		builder.append(role);
-		builder.append(", trangThai=");
-		builder.append(status);
-		builder.append(", ip=");
-		builder.append(ip);
+		builder.append("Account [");
+		builder.append("username=").append(username);
+		builder.append(", fullName=").append(fullName);
+		builder.append(", sex=").append(sex);
+		builder.append(", phoneNumber=").append(phoneNumber);
+		builder.append(", email=").append(email);
+		builder.append(", diaChi=").append(diaChi);
+		builder.append(", avatar=").append(avatar);
+		builder.append(", remark=").append(remark);
+		builder.append(", role=").append(role);
+		builder.append(", status=").append(status);
+		builder.append(", ip=").append(ip);
 		builder.append("]");
 		return builder.toString();
 	}

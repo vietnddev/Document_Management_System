@@ -3,6 +3,7 @@ package com.flowiee.dms.core.config;
 import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.AccountRole;
 import com.flowiee.dms.entity.SystemLog;
+import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.RoleService;
 import com.flowiee.dms.service.SystemLogService;
@@ -52,7 +53,7 @@ public class AccountDetailService implements UserDetailsService {
 					details = (WebAuthenticationDetails) authDetails;
 				}
 			}
-			SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), AppConstants.SYSTEM_ACTION.SYS_LOGIN.name(), "LOGIN", null, accountEntity.getId(), details != null ? details.getRemoteAddress() : "unknown");
+			SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), ACTION.SYS_LOGIN.name(), "LOGIN", null, accountEntity.getId(), details != null ? details.getRemoteAddress() : "unknown");
 			systemLogService.writeLog(systemLog);
 		} else {
 			System.out.println("Login thất bại");

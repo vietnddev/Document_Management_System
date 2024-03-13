@@ -1,4 +1,4 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.entity.SystemConfig;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/sys")
-public class SystemUIController extends BaseController {
+public class SystemControllerUI extends BaseController {
     @Autowired private ConfigService configService;
 
     @GetMapping("/notification")

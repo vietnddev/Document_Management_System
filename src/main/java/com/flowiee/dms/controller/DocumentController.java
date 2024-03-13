@@ -3,9 +3,12 @@ package com.flowiee.dms.controller;
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.core.exception.AppException;
 import com.flowiee.dms.core.exception.NotFoundException;
+import com.flowiee.dms.entity.DocShare;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
+import com.flowiee.dms.service.DocShareService;
 import com.flowiee.dms.utils.MessageUtils;
 import com.flowiee.dms.entity.Document;
 import com.flowiee.dms.service.DocFieldService;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg")
@@ -24,11 +28,14 @@ public class DocumentController extends BaseController {
     private final DocumentService documentService;
     private final DocFieldService docFieldService;
     private final FileStorageService fileStorageService;
+    private final DocShareService docShareService;
 
-    public DocumentController(DocumentService documentService, DocFieldService docFieldService, FileStorageService fileStorageService) {
+    public DocumentController(DocumentService documentService, DocFieldService docFieldService, FileStorageService fileStorageService,
+                              DocShareService docShareService) {
         this.documentService = documentService;
         this.docFieldService = docFieldService;
         this.fileStorageService = fileStorageService;
+        this.docShareService = docShareService;
     }
 
     @Operation(summary = "Find all documents")
@@ -103,5 +110,33 @@ public class DocumentController extends BaseController {
     public ApiResponse<List<FileDTO>> getAllFilesOfDoc(@PathVariable("id") Integer docId) {
         vldModuleStorage.readDoc(true);
         return ApiResponse.ok(FileDTO.fromFileStorages(fileStorageService.getFileOfDocument(docId)));
+    }
+
+    @Operation(summary = "Copy document")
+    @GetMapping("/doc/copy/{id}")
+    public ApiResponse<DocumentDTO> copyDoc(@PathVariable("id") Integer docId, @RequestParam("nameCopy") String nameCopy) {
+        vldModuleStorage.copyDoc(true);
+        return ApiResponse.ok(documentService.copyDoc(docId, null, nameCopy));
+    }
+
+    @Operation(summary = "Move document")
+    @GetMapping("/doc/move/{id}")
+    public ApiResponse<String> moveDoc(@PathVariable("id") Integer docId, @RequestParam("destinationId") Integer destinationId) {
+        vldModuleStorage.moveDoc(true);
+        return ApiResponse.ok(documentService.moveDoc(docId, destinationId));
+    }
+
+    @Operation(summary = "Get detail shared role of document")
+    @GetMapping("/doc/share/{id}")
+    public ApiResponse<List<DocShareModel>> shareDoc(@PathVariable("id") Integer docId) {
+        vldModuleStorage.moveDoc(true);
+        return ApiResponse.ok(docShareService.findDetailRolesOfDocument(docId));
+    }
+
+    @Operation(summary = "Share document")
+    @PutMapping("/doc/share/{id}")
+    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId, @RequestBody Map<Integer, List<String>> accountShares) {
+        vldModuleStorage.moveDoc(true);
+        return ApiResponse.ok(documentService.shareDoc(docId, accountShares));
     }
 }

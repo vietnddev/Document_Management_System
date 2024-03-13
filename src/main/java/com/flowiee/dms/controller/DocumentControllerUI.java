@@ -1,4 +1,4 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.entity.Category;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/stg")
-public class DocumentUIController extends BaseController {
+public class DocumentControllerUI extends BaseController {
     private final DocumentService documentService;
     private final DocFieldService docFieldService;
     private final FileStorageService fileStorageService;
@@ -32,7 +32,7 @@ public class DocumentUIController extends BaseController {
     private final CategoryService categoryService;
 
     @Autowired
-    public DocumentUIController(DocumentService documentService, DocFieldService docFieldService, FileStorageService fileStorageService,
+    public DocumentControllerUI(DocumentService documentService, DocFieldService docFieldService, FileStorageService fileStorageService,
                                 DocShareService docShareService, CategoryService categoryService) {
         this.documentService = documentService;
         this.docFieldService = docFieldService;

@@ -1,7 +1,6 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
-import com.flowiee.dms.core.vld.ValidateModuleCategory;
 import com.flowiee.dms.entity.Category;
 import com.flowiee.dms.core.exception.NotFoundException;
 import com.flowiee.dms.service.CategoryService;
@@ -15,13 +14,17 @@ import org.springframework.web.servlet.ModelAndView;
 @CrossOrigin
 @RestController
 @RequestMapping("/system/category")
-public class CategoryUIController extends BaseController {
-    @Autowired private CategoryService categoryService;
-    @Autowired private ValidateModuleCategory validateModuleCategory;
+public class CategoryControllerUI extends BaseController {
+    private final CategoryService categoryService;
+
+    @Autowired
+    public CategoryControllerUI(CategoryService categoryService) {
+        this.categoryService = categoryService;
+    }
 
     @GetMapping
     public ModelAndView viewRootCategory() {
-        validateModuleCategory.readCategory(true);
+        vldModuleCategory.readCategory(true);
         ModelAndView modelAndView = new ModelAndView(PagesUtils.CTG_CATEGORY);
         modelAndView.addObject("category", new Category());
         modelAndView.addObject("listCategory", categoryService.findRootCategory());
@@ -30,7 +33,7 @@ public class CategoryUIController extends BaseController {
 
     @GetMapping("/{type}")
     public ModelAndView viewSubCategory(@PathVariable("type") String categoryType) {
-        validateModuleCategory.readCategory(true);
+        vldModuleCategory.readCategory(true);
         if (CommonUtils.getCategoryType(categoryType) == null) {
             throw new NotFoundException("Category not found!");
         }

@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 public class CommonUtils {
     public static String rootPath = "src/main/resources/static";
     public static String fileUploadPath = rootPath + "/uploads/";
-    public static String reportTemplatePath = rootPath + "/report";
     public static String ADMINISTRATOR = "admin";
     public static Date START_APP_TIME = null;
 
@@ -43,9 +42,6 @@ public class CommonUtils {
                 case STORAGE:
                     path.append("storage");
                     break;
-                case PRODUCT:
-                    path.append("product");
-                    break;
                 case CATEGORY:
                     path.append("category");
                     break;
@@ -74,8 +70,6 @@ public class CommonUtils {
             StringBuilder path = new StringBuilder(fileUploadPath);
             if (AppConstants.SYSTEM_MODULE.STORAGE.name().equals(systemModule)) {
                 path.append("storage");
-            } else if (AppConstants.SYSTEM_MODULE.PRODUCT.name().equals(systemModule)) {
-                path.append("product");
             } else if (AppConstants.SYSTEM_MODULE.CATEGORY.name().equals(systemModule)) {
                 path.append("category");
             }

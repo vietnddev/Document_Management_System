@@ -1,31 +1,52 @@
 package com.flowiee.dms.service.impl;
 
+import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.DocShare;
+import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.DocShareService;
 import com.flowiee.dms.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DocShareServiceImpl implements DocShareService {
-    @Autowired
-    private DocShareRepository docShareRepository;
-
-    @Autowired
-    private AccountService accountService;
+    @Autowired private DocShareRepository docShareRepo;
+    @Autowired private AccountService accountService;
 
     @Override
     public List<DocShare> findAll() {
-        return docShareRepository.findAll();
+        return docShareRepo.findAll();
     }
 
     @Override
-    public DocShare findById(int id) {
-        return docShareRepository.findById(id).orElse(null);
+    public List<DocShareModel> findDetailRolesOfDocument(Integer docId) {
+        List<DocShareModel> lsModel = new ArrayList<>();
+        for (Account account : accountService.findAll()) {
+            DocShareModel model = new DocShareModel();
+            model.setDocumentId(docId);
+            model.setAccountId(account.getId());
+            model.setAccountName(account.getFullName());
+            for (DocShare docShare : docShareRepo.findByDocAndAccount(docId, account.getId())) {
+                if ("R".equals(docShare.getRole())) model.setDoRead(true);
+                if ("U".equals(docShare.getRole())) model.setDoUpdate(true);
+                if ("D".equals(docShare.getRole())) model.setDoDelete(true);
+                if ("M".equals(docShare.getRole())) model.setDoMove(true);
+                if ("S".equals(docShare.getRole())) model.setDoShare(true);
+            }
+            lsModel.add(model);
+        }
+        return lsModel;
+    }
+
+    @Override
+    public DocShare findById(Integer id) {
+        return docShareRepo.findById(id).orElse(null);
     }
 
     @Override
@@ -33,6 +54,33 @@ public class DocShareServiceImpl implements DocShareService {
         if (CommonUtils.ADMINISTRATOR.equals(CommonUtils.getCurrentAccountUsername())) {
             return true;
         }
-        return docShareRepository.findByDocAndAccount(documentId, CommonUtils.getCurrentAccountId()) != null;
+        return docShareRepo.findByDocAndAccount(documentId, CommonUtils.getCurrentAccountId()) != null;
+    }
+
+    @Transactional
+    @Override
+    public void deleteByAccount(Integer accountId) {
+        docShareRepo.deleteAllByAccount(accountId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteByDocument(Integer documentId) {
+        docShareRepo.deleteAllByDocument(documentId);
+    }
+
+    @Override
+    public DocShare save(DocShare entity) {
+        return null;
+    }
+
+    @Override
+    public DocShare update(DocShare entity, Integer entityId) {
+        return null;
+    }
+
+    @Override
+    public String delete(Integer entityId) {
+        return null;
     }
 }

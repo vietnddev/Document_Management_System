@@ -43,6 +43,11 @@ public class DocDataServiceImpl implements DocDataService {
     }
 
     @Override
+    public List<DocData> findByDocument(Integer documentId) {
+        return docDataRepository.findByDocumentId(documentId);
+    }
+
+    @Override
     public DocData findByFieldIdAndDocId(Integer docFieldId, Integer documentId) {
         return docDataRepository.findByFieldIdAndDocId(docFieldId, documentId);
     }

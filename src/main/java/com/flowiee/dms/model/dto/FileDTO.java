@@ -20,7 +20,6 @@ public class FileDTO implements Serializable{
 
     private Integer id;
     private Integer documentId;
-    private Integer orderId;
     private Integer sort;
     private String name;
     private String storageName;

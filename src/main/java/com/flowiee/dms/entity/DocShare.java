@@ -5,6 +5,7 @@ import com.flowiee.dms.core.BaseEntity;
 import javax.persistence.*;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Builder
@@ -16,6 +17,7 @@ import java.io.Serializable;
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DocShare extends BaseEntity implements Serializable {
+    @Serial
 	private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,6 +27,9 @@ public class DocShare extends BaseEntity implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
+
+    @Column(name = "role", nullable = false)
+    private String role;
 
 	@Override
 	public String toString() {

@@ -2,6 +2,7 @@ package com.flowiee.dms.service.impl;
 
 import com.flowiee.dms.core.exception.DataInUseException;
 import com.flowiee.dms.entity.DocField;
+import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.repository.DocFieldRepository;
 import com.flowiee.dms.service.DocDataService;
 import com.flowiee.dms.service.DocFieldService;
@@ -48,9 +49,8 @@ public class DocFieldServiceImpl implements DocFieldService {
     @Override
     public DocField save(DocField docField) {
         DocField docFieldSaved = docFieldRepository.save(docField);
-
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Thêm mới doc_field: " + docField.toString());
-        logger.info(DocumentServiceImpl.class.getName() + ": Thêm mới doc_field " + docField.toString());
+        systemLogService.writeLog(module, ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Thêm mới doc_field id=" + docField.getId(), null);
+        logger.info(DocumentServiceImpl.class.getName() + ": Thêm mới doc_field id=" + docField.getId());
         return docFieldSaved;
     }
 
@@ -58,8 +58,8 @@ public class DocFieldServiceImpl implements DocFieldService {
     public DocField update(DocField docField, Integer docFieldId) {
         docField.setId(docFieldId);
         DocField docFieldUpdated = docFieldRepository.save(docField);
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Cập nhật doc_field: " + docField.toString());
-        logger.info(DocumentServiceImpl.class.getName() + ": Cập nhật doc_field " + docFieldId.toString());
+        systemLogService.writeLog(module, ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Cập nhật doc_field id=" + docFieldId, null);
+        logger.info(DocumentServiceImpl.class.getName() + ": Cập nhật doc_field " + docFieldId);
         return docFieldUpdated;
     }
 
@@ -70,7 +70,7 @@ public class DocFieldServiceImpl implements DocFieldService {
             throw new DataInUseException(MessageUtils.ERROR_DATA_LOCKED);
         }
         docFieldRepository.deleteById(id);
-        systemLogService.writeLog(module, AppConstants.STORAGE_ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Xóa doc_field id=" + id);
+        systemLogService.writeLog(module, ACTION.STG_DOC_DOCTYPE_CONFIG.name(), "Xóa doc_field id=" + id, null);
         logger.info(DocumentServiceImpl.class.getName() + ": Xóa doc_field id=" + id);
         return MessageUtils.DELETE_SUCCESS;
     }

@@ -13,6 +13,9 @@ public interface DocDataRepository extends JpaRepository<DocData, Integer> {
     @Query("from DocData d where d.docField.id=:docFieldId")
     List<DocData> findByDocField(@Param("docFieldId") Integer docFieldId);
 
+    @Query("from DocData d where d.document.id=:documentId")
+    List<DocData> findByDocumentId(@Param("documentId") Integer documentId);
+
     @Query("from DocData d where d.docField.id=:docFieldId and d.document.id=:documentId")
     DocData findByFieldIdAndDocId(@Param("docFieldId") Integer docFieldId, @Param("documentId") Integer documentId);
 }

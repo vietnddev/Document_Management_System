@@ -1,4 +1,4 @@
-package com.flowiee.dms.controller.view;
+package com.flowiee.dms.controller;
 
 import com.flowiee.dms.core.BaseController;
 import com.flowiee.dms.core.exception.ErrorResponse;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/error")
-public class ErrorController extends BaseController {
+public class ErrorControllerUI extends BaseController {
     @GetMapping("/403")
     public ModelAndView forbiddenException() {
         ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), MessageUtils.ERROR_FORBIDDEN);

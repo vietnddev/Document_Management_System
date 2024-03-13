@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.Document;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,4 +42,8 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                    "order by f.sort",
            nativeQuery = true)
     List<Object[]> findMetadata(@Param("documentId") Integer documentId);
+
+    @Modifying
+    @Query("update Document d set d.parentId=:parentId where d.id=:docId")
+    void updateParentId(Integer parentId, Integer docId);
 }

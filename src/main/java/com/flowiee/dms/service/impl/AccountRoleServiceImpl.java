@@ -2,13 +2,13 @@ package com.flowiee.dms.service.impl;
 
 import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.AccountRole;
+import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.role.ActionModel;
-import com.flowiee.dms.model.role.FlowieeRole;
+import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.model.role.ModuleModel;
 import com.flowiee.dms.repository.AccountRoleRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.RoleService;
-import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,36 +22,14 @@ public class AccountRoleServiceImpl implements RoleService {
     @Autowired private AccountService accountService;
 
     @Override
-    public List<FlowieeRole> findAllRoleByAccountId(Integer accountId) {
+    public List<RoleModel> findAllRoleByAccountId(Integer accountId) {
         Account account = accountService.findById(accountId);
         if (account == null) {
             return null;
         }
-        List<FlowieeRole> listReturn = new ArrayList<>();
-
-        for (AppConstants.SYSTEM_MODULE sys : AppConstants.SYSTEM_MODULE.values()) {
-            switch (sys) {  
-                case PRODUCT:
-                    for (AppConstants.PRODUCT_ACTION actions : AppConstants.PRODUCT_ACTION.values()) {
-                        listReturn.add(buildFlowieeRole(accountId, sys.name(), sys.getLabel(),actions.name(), actions.getLabel()));
-                    }
-                    break;
-                case STORAGE:
-                    for (AppConstants.STORAGE_ACTION actions : AppConstants.STORAGE_ACTION.values()) {
-                        listReturn.add(buildFlowieeRole(accountId, sys.name(), sys.getLabel(),actions.name(), actions.getLabel()));
-                    }
-                    break;
-                case SYSTEM:
-                    for (AppConstants.SYSTEM_ACTION actions : AppConstants.SYSTEM_ACTION.values()) {
-                        listReturn.add(buildFlowieeRole(accountId, sys.name(), sys.getLabel(),actions.name(), actions.getLabel()));
-                    }
-                    break;
-                case CATEGORY:
-                    for (AppConstants.CATEGORY_ACTION actions : AppConstants.CATEGORY_ACTION.values()) {
-                        listReturn.add(buildFlowieeRole(accountId, sys.name(), sys.getLabel(),actions.name(), actions.getLabel()));
-                    }
-                    break;
-            }
+        List<RoleModel> listReturn = new ArrayList<>();
+        for (ACTION act : ACTION.values()) {
+            listReturn.add(buildFlowieeRole(accountId, act.getModuleKey(), act.getModuleLabel(), act.name(), act.getActionLabel()));
         }
         return listReturn;
     }
@@ -59,29 +37,8 @@ public class AccountRoleServiceImpl implements RoleService {
     @Override
     public List<ActionModel> findAllAction() {
         List<ActionModel> listAction = new ArrayList<>();
-        for (AppConstants.SYSTEM_MODULE sysModule : AppConstants.SYSTEM_MODULE.values()) {
-            switch (sysModule) {
-                case PRODUCT:
-                    for (AppConstants.PRODUCT_ACTION sysAction : AppConstants.PRODUCT_ACTION.values()) {
-                        listAction.add(new ActionModel(sysAction.name(), sysAction.getLabel(), sysModule.name()));
-                    }
-                    break;
-                case STORAGE:
-                    for (AppConstants.STORAGE_ACTION sysAction : AppConstants.STORAGE_ACTION.values()) {
-                    	listAction.add(new ActionModel(sysAction.name(), sysAction.getLabel(), sysModule.name()));
-                    }
-                    break;
-                case SYSTEM:
-                    for (AppConstants.SYSTEM_ACTION sysAction : AppConstants.SYSTEM_ACTION.values()) {
-                    	listAction.add(new ActionModel(sysAction.name(), sysAction.getLabel(), sysModule.name()));
-                    }
-                    break;
-                case CATEGORY:
-                    for (AppConstants.CATEGORY_ACTION sysAction : AppConstants.CATEGORY_ACTION.values()) {
-                    	listAction.add(new ActionModel(sysAction.name(), sysAction.getLabel(), sysModule.name()));
-                    }
-                    break;
-            }
+        for (ACTION sysAction : ACTION.values()) {
+            listAction.add(new ActionModel(sysAction.getActionKey(), sysAction.getActionLabel(), sysAction.getModuleKey()));
         }
         return listAction;
     }
@@ -113,25 +70,25 @@ public class AccountRoleServiceImpl implements RoleService {
         return MessageUtils.DELETE_SUCCESS;
     }
 
-    private FlowieeRole buildFlowieeRole(Integer pAccountId, String pModuleKey, String pModuleLabel, String pActionKey, String pActionLabel) {
-        FlowieeRole flowieeRole = new FlowieeRole();
+    private RoleModel buildFlowieeRole(Integer pAccountId, String pModuleKey, String pModuleLabel, String pActionKey, String pActionLabel) {
+        RoleModel roleModel = new RoleModel();
 
         ModuleModel module = new ModuleModel();
         module.setModuleKey(pModuleKey);
         module.setModuleLabel(pModuleLabel);
-        flowieeRole.setModule(module);
+        roleModel.setModule(module);
 
         ActionModel action = new ActionModel();
         action.setActionKey(pActionKey);
         action.setActionLabel(pActionLabel);
         action.setModuleKey(pModuleKey);
-        flowieeRole.setAction(action);
+        roleModel.setAction(action);
 
         AccountRole isAuthor = accountRoleRepo.isAuthorized(pAccountId, pModuleKey, pActionKey);
-        flowieeRole.setIsAuthor(isAuthor != null);
+        roleModel.setIsAuthor(isAuthor != null);
 
-        flowieeRole.setAccountId(pAccountId);
+        roleModel.setAccountId(pAccountId);
 
-        return flowieeRole;
+        return roleModel;
     }
 }

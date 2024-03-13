@@ -107,6 +107,43 @@
                                         </form>
                                     </div>
                                 </div>
+
+                                <!-- Modal share role -->
+                                <div class="modal fade" id="modalShare">
+                                    <div class="modal-dialog modal-lg">
+                                        <form id="formShare" enctype="multipart/form-data">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <strong class="modal-title">Phân quyền tài liệu</strong>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="card mb-0">
+                                                        <div class="card-body table-responsive p-0">
+                                                            <table class="table table-hover text-nowrap">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>Account name</th>
+                                                                        <th class="text-center">Read</th>
+                                                                        <th class="text-center">Update</th>
+                                                                        <th class="text-center">Delete</th>
+                                                                        <th class="text-center">Move</th>
+                                                                        <th class="text-center">Share</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody id="tblSysAccountShare"></tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer justify-content-end">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                                                    <button type="submit" class="btn btn-primary" id="btnSubmitShare">Lưu</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -135,6 +172,7 @@
             init();
             createDocument();
             loadFolderTree();
+            shareDoc();
         });
 
         function init() {
@@ -176,12 +214,9 @@
                                 <td>${d.docTypeName}</td>
                                 <td>${d.description}</td>
                                 <td>
-                                    <button class="btn btn-warning btn-sm btn-update" docId="${d.id}" style="margin-bottom: 4px;">
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-danger btn-sm btn-delete" docId="${d.id}">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    <button class="btn btn-warning btn-sm btn-update" docId="${d.id}"> <i class="fa-solid fa-pencil"></i> </button>
+                                    <button class="btn btn-info btn-sm btn-share" docId="${d.id}"> <i class="fa-solid fa-share"></i> </button>
+                                    <button class="btn btn-danger btn-sm btn-delete" docId="${d.id}"> <i class="fa-solid fa-trash"></i> </button>
                                 </td>
                             </tr>
                         `);
@@ -255,6 +290,53 @@
                         showErrorModal("Could not connect to the server");
                     }
                 });
+            })
+        }
+
+        function shareDoc() {
+            $(document).on("click", ".btn-share", function () {
+                let apiURL = mvHostURLCallApi + '/stg/doc/share/' + parseInt($(this).attr("docId"));
+                $.get(apiURL, function (response) {
+                    if (response.status === "OK") {
+                        let tableShare = $("#tblSysAccountShare");
+                        tableShare.empty();
+                        $.each(response.data, function (index, d) {
+                            let doRead = "";
+                            let doUpdate = "";
+                            let doDelete = "";
+                            let doMove = "";
+                            let doShare = "";
+                            if (d.doRead === true) {
+                                doRead = "checked";
+                            }
+                            if (d.doUpdate === true) {
+                                doUpdate = "checked";
+                            }
+                            if (d.doDelete === true) {
+                                doDelete = "checked";
+                            }
+                            if (d.doMove === true) {
+                                doMove = "checked";
+                            }
+                            if (d.doShare === true) {
+                                doShare = "checked";
+                            }
+                            tableShare.append(`
+                                <tr>
+                                    <td>${d.accountName}</td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${doRead}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${doUpdate}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${doDelete}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${doMove}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${doShare}></td>
+                                </tr>
+                            `);
+                        })
+                    }
+                }).fail(function () {
+                    showErrorModal("Could not connect to the server");
+                });
+                $("#modalShare").modal();
             })
         }
     </script>
