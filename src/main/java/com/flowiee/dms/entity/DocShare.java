@@ -34,5 +34,5 @@ public class DocShare extends BaseEntity implements Serializable {
 	@Override
 	public String toString() {
 		return "DocShare [id=" + super.id + ", document=" + document + ", account=" + account + "]";
-	}        
+	}
 }

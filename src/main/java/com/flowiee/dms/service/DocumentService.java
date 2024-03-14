@@ -34,4 +34,6 @@ public interface DocumentService extends BaseService<Document> {
     String moveDoc(Integer docId, Integer destinationId);
 
     List<DocShare> shareDoc(Integer docId, Map<Integer, List<String>> accountShares);
+
+    List<DocumentDTO> findSharedDocFromOthers(Integer accountId);
 }

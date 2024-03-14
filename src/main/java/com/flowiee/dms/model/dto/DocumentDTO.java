@@ -1,5 +1,6 @@
 package com.flowiee.dms.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.flowiee.dms.entity.Document;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -24,6 +26,9 @@ public class DocumentDTO extends Document implements Serializable {
     private MultipartFile fileUpload;
     private String hasSubFolder;
     private List<DocumentDTO> subFolders;
+    private String sharedBy;
+    @JsonFormat(pattern = "HH:mm:ss dd/MM/yyyy")
+    private Date sharedAt;
 
     public static DocumentDTO fromDocument(Document document) {
         DocumentDTO dto = new DocumentDTO();

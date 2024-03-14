@@ -6,6 +6,7 @@ import com.flowiee.dms.entity.*;
 import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
+import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.repository.DocumentRepository;
 import com.flowiee.dms.service.*;
 import com.flowiee.dms.utils.AppConstants;
@@ -40,11 +41,13 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired private SystemLogService systemLogService;
     @Autowired private FileStorageService fileService;
     @Autowired private DocShareService docShareService;
+    @Autowired private DocShareRepository docShareRepo;
 
     @Override
     public Page<Document> findDocuments(Integer pageSize, Integer pageNum, Integer parentId) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
-        return documentRepo.findAll(parentId, pageable);
+        boolean isAdmin = CommonUtils.ADMINISTRATOR.equals(CommonUtils.getCurrentAccountUsername());
+        return documentRepo.findAll(parentId, isAdmin, CommonUtils.getCurrentAccountId(), pageable);
     }
 
     @Override
@@ -105,6 +108,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (document == null) {
             throw new BadRequestException();
         }
+        docShareService.deleteByDocument(documentId);
         documentRepo.deleteById(documentId);
         systemLogService.writeLog(module, ACTION.STG_DOC_DELETE.name(), "Xóa tài liệu: docId=" + documentId, null);
         logger.info(DocumentServiceImpl.class.getName() + ": Delete document docId=" + documentId);
@@ -150,19 +154,18 @@ public class DocumentServiceImpl implements DocumentService {
             Document documentSaved = documentRepo.save(document);
             if ("N".equals(document.getIsFolder()) && documentDTO.getFileUpload() != null) {
                 fileService.saveFileOfDocument(documentDTO.getFileUpload(), documentSaved.getId());
-//                //Default docData
-//                if (documentSaved.getLoaiTaiLieu() != null) {
-//                    for (DocField docField : docFieldService.findByDocTypeId(document.getLoaiTaiLieu().getId())) {
-//                        DocData docData = DocData.builder()
-//                                                 .docField(new DocField(docField.getId()))
-//                                                 .document(new Document(documentSaved.getId()))
-//                                                 .value("").build();
-//                        docDataService.save(docData);
-//                    }
-//                }
             }
-            systemLogService.writeLog(module, ACTION.STG_DOC_CREATE.name(), "Thêm mới tài liệu: " + documentSaved.toString(), null);
-            logger.info(DocumentServiceImpl.class.getName() + ": Thêm mới tài liệu " + document.toString());
+            List<DocShare> roleSharesOfDocument = docShareRepo.findByDocument(documentSaved.getParentId());
+            for (DocShare docShare : roleSharesOfDocument) {
+                DocShare roleNew = new DocShare();
+                roleNew.setDocument(new Document(documentSaved.getId()));
+                roleNew.setAccount(new Account(docShare.getAccount().getId()));
+                roleNew.setRole(docShare.getRole());
+                docShareService.save(roleNew);
+            }
+            //docShareService.save();
+            systemLogService.writeLog(module, ACTION.STG_DOC_CREATE.name(), "Thêm mới tài liệu: " + DocumentDTO.fromDocument(documentSaved), null);
+            logger.info(DocumentServiceImpl.class.getName() + ": Thêm mới tài liệu " + DocumentDTO.fromDocument(documentSaved));
             return DocumentDTO.fromDocument(documentSaved);
         } catch (RuntimeException | IOException ex) {
             throw new AppException(ex);
@@ -353,5 +356,10 @@ public class DocumentServiceImpl implements DocumentService {
             }
         }
         return docShared;
+    }
+
+    @Override
+    public List<DocumentDTO> findSharedDocFromOthers(Integer accountId) {
+        return DocumentDTO.fromDocuments(documentRepo.findWasSharedDoc(accountId));
     }
 }

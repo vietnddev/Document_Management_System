@@ -301,34 +301,34 @@
                         let tableShare = $("#tblSysAccountShare");
                         tableShare.empty();
                         $.each(response.data, function (index, d) {
-                            let doRead = "";
-                            let doUpdate = "";
-                            let doDelete = "";
-                            let doMove = "";
-                            let doShare = "";
-                            if (d.doRead === true) {
-                                doRead = "checked";
+                            let canRead = "";
+                            let canUpdate = "";
+                            let canDelete = "";
+                            let canMove = "";
+                            let canShare = "";
+                            if (d.canRead === true) {
+                                canRead = "checked";
                             }
-                            if (d.doUpdate === true) {
-                                doUpdate = "checked";
+                            if (d.canUpdate === true) {
+                                canUpdate = "checked";
                             }
-                            if (d.doDelete === true) {
-                                doDelete = "checked";
+                            if (d.canDelete === true) {
+                                canDelete = "checked";
                             }
-                            if (d.doMove === true) {
-                                doMove = "checked";
+                            if (d.canMove === true) {
+                                canMove = "checked";
                             }
-                            if (d.doShare === true) {
-                                doShare = "checked";
+                            if (d.canShare === true) {
+                                canShare = "checked";
                             }
                             tableShare.append(`
                                 <tr>
                                     <td>${d.accountName}</td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${doRead}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${doUpdate}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${doDelete}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${doMove}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${doShare}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${canRead}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${canUpdate}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${canDelete}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${canMove}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" ${canShare}></td>
                                 </tr>
                             `);
                         })

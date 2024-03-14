@@ -11,20 +11,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, Integer> {
-    @Query("from Document d where d.parentId=:parentId")
-    Page<Document> findAll(@Param("parentId") Integer parentId, Pageable pageable);
-
-    @Query("from Document d where d.parentId =:parentId order by d.isFolder desc")
-    List<Document> findListDocumentByParentId(@Param("parentId") Integer parentId);
-
-    @Query("from Document d where d.parentId =:parentId and d.isFolder = 'Y' order by d.isFolder desc")
-    List<Document> findListFolderByParentId(@Param("parentId") Integer parentId);
-
-    @Query("from Document d where d.parentId =:parentId and d.isFolder = 'N' order by d.isFolder desc")
-    List<Document> findListFileByParentId(@Param("parentId") Integer parentId);
-
-    @Query("from Document d where d.isFolder=:isThuMuc")
-    List<Document> findAllFolder(@Param("isThuMuc") String isThuMuc);
+    @Query("select distinct d from Document d " +
+           "left join DocShare ds on ds.document.id = d.id " +
+           "where 1=1 " +
+           "and d.parentId=:parentId " +
+           "and :isAdmin is true or ds.account.id=:accountId")
+    Page<Document> findAll(@Param("parentId") Integer parentId,
+                           @Param("isAdmin") boolean isAdmin,
+                           @Param("accountId") Integer accountId,
+                           Pageable pageable);
 
     @Query("from Document d where d.docType.id=:docTypeId")
     List<Document> findDocumentByDocTypeId(@Param("docTypeId") Integer docTypeId);
@@ -45,5 +40,16 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Modifying
     @Query("update Document d set d.parentId=:parentId where d.id=:docId")
-    void updateParentId(Integer parentId, Integer docId);
+    void updateParentId(@Param("parentId") Integer parentId, @Param("docId") Integer docId);
+
+    @Query("from Document d where d.id in (select ds.document.id from DocShare ds where ds.account.id=:accountId) order by d.isFolder, d.createdAt")
+    List<Document> findWasSharedDoc(@Param("accountId") Integer accountId);
+
+    @Query("select " +
+           "count(case when d.isFolder = 'Y' then 1 end) as total_folder, " +
+           "count(case when d.isFolder = 'N' then 1 end) as total_file, " +
+           "concat(to_char(sum(f.fileSize) / 1024 / 1024, 'FM9999999990.99'), ' MB') AS total_size " +
+           "from Document d " +
+           "left join FileStorage f on f.document.id = d.id")
+    List<Object[]> summaryStorage();
 }

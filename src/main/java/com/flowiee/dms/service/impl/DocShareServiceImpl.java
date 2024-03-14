@@ -7,6 +7,7 @@ import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.DocShareService;
 import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,11 +34,11 @@ public class DocShareServiceImpl implements DocShareService {
             model.setAccountId(account.getId());
             model.setAccountName(account.getFullName());
             for (DocShare docShare : docShareRepo.findByDocAndAccount(docId, account.getId())) {
-                if ("R".equals(docShare.getRole())) model.setDoRead(true);
-                if ("U".equals(docShare.getRole())) model.setDoUpdate(true);
-                if ("D".equals(docShare.getRole())) model.setDoDelete(true);
-                if ("M".equals(docShare.getRole())) model.setDoMove(true);
-                if ("S".equals(docShare.getRole())) model.setDoShare(true);
+                if ("R".equals(docShare.getRole())) model.setCanRead(true);
+                if ("U".equals(docShare.getRole())) model.setCanUpdate(true);
+                if ("D".equals(docShare.getRole())) model.setCanDelete(true);
+                if ("M".equals(docShare.getRole())) model.setCanMove(true);
+                if ("S".equals(docShare.getRole())) model.setCanShare(true);
             }
             lsModel.add(model);
         }
@@ -71,16 +72,18 @@ public class DocShareServiceImpl implements DocShareService {
 
     @Override
     public DocShare save(DocShare entity) {
-        return null;
+        return docShareRepo.save(entity);
     }
 
     @Override
     public DocShare update(DocShare entity, Integer entityId) {
-        return null;
+        entity.setId(entityId);
+        return docShareRepo.save(entity);
     }
 
     @Override
     public String delete(Integer entityId) {
-        return null;
+        docShareRepo.deleteById(entityId);
+        return MessageUtils.DELETE_SUCCESS;
     }
 }

@@ -9,17 +9,17 @@ public class DocShareModel {
     Integer documentId;
     Integer accountId;
     String accountName;
-    Boolean doRead;
-    Boolean doUpdate;
-    Boolean doDelete;
-    Boolean doMove;
-    Boolean doShare;
+    Boolean canRead;
+    Boolean canUpdate;
+    Boolean canDelete;
+    Boolean canMove;
+    Boolean canShare;
 
     public DocShareModel() {
-        doRead = false;
-        doUpdate = false;
-        doDelete = false;
-        doMove = false;
-        doShare = false;
+        canRead = false;
+        canUpdate = false;
+        canDelete = false;
+        canMove = false;
+        canShare = false;
     }
 }

@@ -14,6 +14,9 @@ public interface DocShareRepository extends JpaRepository<DocShare, Integer> {
     @Query("from DocShare d where d.document.id=:documentId and d.account.id=:accountId")
     List<DocShare> findByDocAndAccount(@Param("documentId") Integer documentId, @Param("accountId") Integer accountId);
 
+    @Query("from DocShare d where d.document.id=:documentId")
+    List<DocShare> findByDocument(@Param("documentId") Integer documentId);
+
     @Modifying
     @Query("delete DocShare d where d.account.id=:accountId")
     void deleteAllByAccount(@Param("accountId") Integer accountId);
