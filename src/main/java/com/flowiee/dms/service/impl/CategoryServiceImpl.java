@@ -107,14 +107,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<Category> findSubCategory(String categoryType, Integer parentId) {
-        return categoryRepo.findSubCategory(categoryType, parentId, Pageable.unpaged()).getContent();
+    public List<Category> findSubCategory(String categoryType, Integer parentId, Integer idNotIn) {
+        return categoryRepo.findSubCategory(categoryType, parentId, idNotIn, Pageable.unpaged()).getContent();
     }
 
     @Override
     public Page<Category> findSubCategory(String categoryType, Integer parentId, int pageSize, int pageNum) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
-        return categoryRepo.findSubCategory(categoryType, parentId, pageable);
+        return categoryRepo.findSubCategory(categoryType, parentId, null, pageable);
     }
 
     @Override

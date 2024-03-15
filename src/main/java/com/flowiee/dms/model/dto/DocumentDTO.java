@@ -39,7 +39,7 @@ public class DocumentDTO extends Document implements Serializable {
         dto.setParentId(document.getParentId());
         if (document.getDocType() != null) {
             dto.setDocTypeId(document.getDocType().getId());
-            dto.setDocTypeName(document.getDocType().getName());
+            dto.setDocTypeName(document.getDocType().getName() != null ? document.getDocType().getName() : null);
         }
         dto.setIsFolder(document.getIsFolder());
         dto.setCreatedAt(document.getCreatedAt());

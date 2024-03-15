@@ -46,7 +46,7 @@ public class DocumentControllerUI extends BaseController {
         vldModuleStorage.dashboard(true);
         ModelAndView modelAndView = new ModelAndView(PagesUtils.STG_DASHBOARD);
         //Loại tài liệu
-        List<Category> listLoaiTaiLieu = categoryService.findSubCategory(AppConstants.CATEGORY.DOCUMENT_TYPE.getName(), null);
+        List<Category> listLoaiTaiLieu = categoryService.findSubCategory(AppConstants.CATEGORY.DOCUMENT_TYPE.getName(), null, null);
         List<String> listTenOfDocType = new ArrayList<>();
         List<Integer> listSoLuongOfDocType = new ArrayList<>();
         for (Category docType : listLoaiTaiLieu) {

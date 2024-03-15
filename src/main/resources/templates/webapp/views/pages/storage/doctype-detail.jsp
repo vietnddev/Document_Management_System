@@ -194,7 +194,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="modal-footer justify-content-end" style="margin-bottom: -15px;">
+                                        <div class="modal-footer justify-content-end">
                                             <input type="hidden" name="docType" th:value="${docTypeId}">
                                             <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
                                             <button type="submit" class="btn btn-primary">Lưu</button>

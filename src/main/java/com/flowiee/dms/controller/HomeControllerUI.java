@@ -13,7 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class HomeControllerUI {
     @Autowired private AccountService accountService;
 
-    @GetMapping(EndPointUtil.SYS_LOGIN)
+    @GetMapping("/sys/login")
     public ModelAndView showLoginPage() {
 //        if (accountService.findByUsername("admin") == null) {
 //            Account account = new Account();

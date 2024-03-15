@@ -23,7 +23,7 @@
         <div th:fragment="confirm_modal" class="modal fade" id="confirmModal"><!-- bootstrap modal -->
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header">
+                    <div class="modal-header bg-danger">
                         <strong class="modal-title" id="confirmTitle">Xác nhận xóa</strong>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>

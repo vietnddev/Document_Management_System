@@ -95,6 +95,20 @@ public class DocumentController extends BaseController {
         }
     }
 
+    @Operation(summary = "Update document")
+    @PutMapping("/doc/update/{id}")
+    public ApiResponse<DocumentDTO> updateDoc(@PathVariable("id") Integer docId, @RequestParam DocumentDTO documentDTO) {
+        vldModuleStorage.updateDoc(true);
+        return ApiResponse.ok(documentService.update(documentDTO, docId));
+    }
+
+    @Operation(summary = "Delete document")
+    @DeleteMapping("/doc/delete/{id}")
+    public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
+        vldModuleStorage.deleteDoc(true);
+        return ApiResponse.ok(documentService.delete(docId));
+    }
+
     @Operation(summary = "Delete field")
     @DeleteMapping("/doc/doc-field/delete/{id}")
     public ApiResponse<String> deleteDocField(@PathVariable("id") Integer docFiledId) {
@@ -135,7 +149,7 @@ public class DocumentController extends BaseController {
 
     @Operation(summary = "Share document")
     @PutMapping("/doc/share/{id}")
-    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId, @RequestBody Map<Integer, List<String>> accountShares) {
+    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId, @RequestBody List<DocShareModel> accountShares) {
         vldModuleStorage.moveDoc(true);
         return ApiResponse.ok(documentService.shareDoc(docId, accountShares));
     }

@@ -12,7 +12,7 @@ public interface CategoryService extends BaseService<Category> {
 
     List<Category> findRootCategory();
 
-    List<Category> findSubCategory(String categoryType, Integer parentId);
+    List<Category> findSubCategory(String categoryType, Integer parentId, Integer idNotIn);
 
     Page<Category> findSubCategory(String categoryType, Integer parentId, int pageSize, int pageNum);
 

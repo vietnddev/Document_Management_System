@@ -71,8 +71,8 @@
                                     <div class="modal-dialog modal-lg">
                                         <form id="formInsertOrUpdate" enctype="multipart/form-data">
                                             <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <strong class="modal-title">Thêm mới tài liệu</strong>
+                                                <div id="headerModalIU">
+                                                    <strong class="modal-title" id="titleInsertOrUpdate"></strong>
                                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                         <span aria-hidden="true">&times;</span>
                                                     </button>
@@ -111,37 +111,37 @@
                                 <!-- Modal share role -->
                                 <div class="modal fade" id="modalShare">
                                     <div class="modal-dialog modal-lg">
-                                        <form id="formShare" enctype="multipart/form-data">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <strong class="modal-title">Phân quyền tài liệu</strong>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="card mb-0">
-                                                        <div class="card-body table-responsive p-0">
-                                                            <table class="table table-hover text-nowrap">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th>Account name</th>
-                                                                        <th class="text-center">Read</th>
-                                                                        <th class="text-center">Update</th>
-                                                                        <th class="text-center">Delete</th>
-                                                                        <th class="text-center">Move</th>
-                                                                        <th class="text-center">Share</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody id="tblSysAccountShare"></tbody>
-                                                            </table>
-                                                        </div>
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info">
+                                                <strong class="modal-title">Phân quyền tài liệu</strong>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="card mb-0">
+                                                    <div class="card-body table-responsive p-0">
+                                                        <table class="table table-hover text-nowrap">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Account name</th>
+                                                                    <th class="text-center">Read</th>
+                                                                    <th class="text-center">Update</th>
+                                                                    <th class="text-center">Delete</th>
+                                                                    <th class="text-center">Move</th>
+                                                                    <th class="text-center">Share</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="tblSysAccountShare"></tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer justify-content-end">
-                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                                    <button type="submit" class="btn btn-primary" id="btnSubmitShare">Lưu</button>
-                                                </div>
                                             </div>
-                                        </form>
+                                            <div class="modal-footer justify-content-end">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                                                <button type="submit" class="btn btn-primary" id="btnSubmitShare">Lưu</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -173,6 +173,8 @@
             createDocument();
             loadFolderTree();
             shareDoc();
+            updateDocument();
+            deleteDocument();
         });
 
         function init() {
@@ -227,9 +229,15 @@
             });
         }
 
-        function loadProductTypeCategory() {
-            $.get(mvHostURLCallApi + '/category/document-type', function (response) {
-                mvDocType.append('<option>Chọn loại tài liệu</option>');
+        function loadDocTypeCategory(defaultValue, idNotIn) {
+            let apiURL = mvHostURLCallApi + "/category/document-type";
+            if (idNotIn != null) {
+                apiURL = apiURL + "?idNotIn=" + idNotIn;
+            }
+            $.get(apiURL, function (response) {
+                if (defaultValue) {
+                    mvDocType.append('<option>Chọn loại tài liệu</option>');
+                }
                 if (response.status === "OK") {
                     $.each(response.data, function (index, d) {
                         mvDocType.append('<option value=' + d.id + '>' + d.name + '</option>');
@@ -243,10 +251,13 @@
         function createDocument() {
             $("#btnInsertFile").on("click", function () {
                 mvDocType.empty();
-                loadProductTypeCategory();
+                loadDocTypeCategory(true, null);
                 $("#docTypeBlock").show();
                 $("#fileBlock").show();
                 $("#btnSubmit").attr("isFolder", "N");
+                $("#titleInsertOrUpdate").text("Thêm mới tài liệu");
+                $("#headerModalIU").attr("class", "modal-header bg-primary");
+                $("#btnSubmit").attr("action", "create");
                 $("#modalInsertOrUpdate").modal();
             })
 
@@ -254,81 +265,34 @@
                 $("#docTypeBlock").hide();
                 $("#fileBlock").hide();
                 $("#btnSubmit").attr("isFolder", "Y");
+                $("#titleInsertOrUpdate").text("Thêm mới tài liệu");
+                $("#headerModalIU").attr("class", "modal-header bg-primary");
+                $("#btnSubmit").attr("action", "create");
                 $("#modalInsertOrUpdate").modal();
             })
 
-            $("#formInsertOrUpdate").submit(function (e) {
-                e.preventDefault();
-                let apiURL = mvHostURLCallApi + "/stg/doc/create";
-                let formData = new FormData();
-                let isFolder = $("#btnSubmit").attr("isFolder");
-                formData.append("parentId", mvParentId);
-                formData.append("isFolder", isFolder);
-                formData.append("name", mvName.val());
-                formData.append("description", mvDes.val());
-                if (isFolder === "N") {
-                    if ($("#fileField").val() === "") {
-                        alert("File attach is required!")
-                        return;
-                    }
-                    formData.append("docTypeId", mvDocType.val());
-                    formData.append("fileUpload", $("#fileField")[0].files[0]); //input có type là file
-                }
-                $.ajax({
-                    url: apiURL,
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType : false,
-                    success: function (response, textStatus, jqXHR) {
-                        if (response.status === "OK") {
-                            alert("Create successfully")
-                            window.location.reload();
-                        }
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        showErrorModal("Could not connect to the server");
-                    }
-                });
-            })
+            submitInsertOrUpdate();
         }
 
         function shareDoc() {
+            let mvAccountShares = [];
             $(document).on("click", ".btn-share", function () {
-                let apiURL = mvHostURLCallApi + '/stg/doc/share/' + parseInt($(this).attr("docId"));
+                let documentId = parseInt($(this).attr("docId"));
+                let apiURL = mvHostURLCallApi + '/stg/doc/share/' + documentId;
                 $.get(apiURL, function (response) {
                     if (response.status === "OK") {
+                        mvAccountShares = response.data;
                         let tableShare = $("#tblSysAccountShare");
                         tableShare.empty();
-                        $.each(response.data, function (index, d) {
-                            let canRead = "";
-                            let canUpdate = "";
-                            let canDelete = "";
-                            let canMove = "";
-                            let canShare = "";
-                            if (d.canRead === true) {
-                                canRead = "checked";
-                            }
-                            if (d.canUpdate === true) {
-                                canUpdate = "checked";
-                            }
-                            if (d.canDelete === true) {
-                                canDelete = "checked";
-                            }
-                            if (d.canMove === true) {
-                                canMove = "checked";
-                            }
-                            if (d.canShare === true) {
-                                canShare = "checked";
-                            }
+                        $.each(mvAccountShares, function (index, d) {
                             tableShare.append(`
                                 <tr>
                                     <td>${d.accountName}</td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${canRead}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${canUpdate}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${canDelete}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${canMove}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" ${canShare}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" id="canReadCbx_${d.accountId}" ${d.canRead ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" id="canUpdateCbx_${d.accountId}" ${d.canUpdate ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" id="canDeleteCbx_${d.accountId}" ${d.canDelete ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" id="canMoveCbx_${d.accountId}" ${d.canMove ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" id="canShareCbx_${d.accountId}" ${d.canShare ? "checked" : ""}></td>
                                 </tr>
                             `);
                         })
@@ -336,7 +300,142 @@
                 }).fail(function () {
                     showErrorModal("Could not connect to the server");
                 });
+                $("#btnSubmitShare").attr("documentId", documentId);
                 $("#modalShare").modal();
+            })
+
+            $("#btnSubmitShare").on("click", function () {
+                let documentId = parseInt($(this).attr("documentId"));
+
+                $.each(mvAccountShares, function (index, d) {
+                    mvAccountShares[index].canRead = $("[id^='canReadCbx_']").eq(index).prop("checked");
+                    mvAccountShares[index].canUpdate = $("[id^='canUpdateCbx_']").eq(index).prop("checked");
+                    mvAccountShares[index].canDelete = $("[id^='canDeleteCbx_']").eq(index).prop("checked");
+                    mvAccountShares[index].canMove = $("[id^='canMoveCbx_']").eq(index).prop("checked");
+                    mvAccountShares[index].canShare = $("[id^='canShareCbx_']").eq(index).prop("checked");
+                })
+
+                $.ajax({
+                    url: mvHostURLCallApi + "/stg/doc/share/" + documentId,
+                    type: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify(mvAccountShares),
+                    success: function(response) {
+                        if (response.status === "OK") {
+                            alert("Update successfully!");
+                            window.location.reload();
+                        }
+                    },
+                    error: function (xhr) {
+                        alert("Error: " + $.parseJSON(xhr.responseText).message);
+                    }
+                });
+            })
+        }
+
+        function updateDocument() {
+            $(document).on("click", ".btn-update", function (e) {
+                e.preventDefault();
+                let document = mvDocuments[$(this).attr("docId")];
+                if (document.isFolder === "Y") {
+                    $("#docTypeBlock").hide();
+                    $("#btnSubmit").attr("isFolder", "Y");
+                }
+                if (document.isFolder === "N") {
+                    mvDocType.empty();
+                    mvDocType.append(`<option value="${document.docTypeId}">${document.docTypeName}</option>`);
+                    loadDocTypeCategory(false, document.docTypeId);
+                    $("#docTypeBlock").show();
+                    $("#btnSubmit").attr("isFolder", "N");
+                }
+                mvName.val(document.name);
+                mvDes.val(document.description);
+                $("#fileBlock").hide();
+                $("#titleInsertOrUpdate").text("Cập nhật tài liệu");
+                $("#headerModalIU").attr("class", "modal-header bg-warning");
+                $("#btnSubmit").attr("action", "update");
+                $("#modalInsertOrUpdate").modal();
+                submitInsertOrUpdate();
+            })
+        }
+
+        function deleteDocument() {
+            $(document).on("click", ".btn-delete", function () {
+                let document = mvDocuments[$(this).attr("docId")];
+                $(this).attr("entityId", document.id);
+                $(this).attr("actionType", "delete");
+                $(this).attr("entityName", document.name);
+                showConfirmModal($(this), "Xóa tài liệu", "Bạn chắc chắn muốn xóa tài liệu: " + document.name);
+            });
+
+            $('#yesButton').on("click", function () {
+                let apiURL = mvHostURLCallApi + "/stg/doc/delete/" + parseInt($(this).attr("entityId"));
+                callApiDelete(apiURL);
+            });
+        }
+
+        function submitInsertOrUpdate() {
+            $("#formInsertOrUpdate").submit(function (e) {
+                e.preventDefault();
+                let action = $("#btnSubmit").attr("action");
+                if (action === "create") {
+                    let apiURL = mvHostURLCallApi + "/stg/doc/create";
+                    let formData = new FormData();
+                    let isFolder = $("#btnSubmit").attr("isFolder");
+                    formData.append("parentId", mvParentId);
+                    formData.append("isFolder", isFolder);
+                    formData.append("name", mvName.val());
+                    formData.append("description", mvDes.val());
+                    if (isFolder === "N") {
+                        if ($("#fileField").val() === "") {
+                            alert("File attach is required!")
+                            return;
+                        }
+                        formData.append("docTypeId", mvDocType.val());
+                        formData.append("fileUpload", $("#fileField")[0].files[0]); //input có type là file
+                    }
+                    $.ajax({
+                        url: apiURL,
+                        type: "POST",
+                        data: formData,
+                        processData: false,
+                        contentType : false,
+                        success: function (response, textStatus, jqXHR) {
+                            if (response.status === "OK") {
+                                alert("Create successfully")
+                                window.location.reload();
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            showErrorModal("Could not connect to the server");
+                        }
+                    });
+                }
+                if (action === "update") {
+                    let apiURL = mvHostURLCallApi + "/stg/doc/update/" + document.id;
+                    let formData = new FormData();
+                    let isFolder = document.isFolder;
+                    formData.append("parentId", document.parentId);
+                    formData.append("isFolder", isFolder);
+                    formData.append("name", mvName.val());
+                    formData.append("description", mvDes.val());
+                    $.ajax({
+                        url: apiURL,
+                        type: "PUT",
+                        data: formData,
+                        processData: false,
+                        contentType : false,
+                        success: function (response, textStatus, jqXHR) {
+                            if (response.status === "OK") {
+                                alert("Update successfully")
+                                window.location.reload();
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            showErrorModal("Could not connect to the server");
+                        }
+                    });
+                }
             })
         }
     </script>

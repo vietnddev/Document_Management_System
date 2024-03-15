@@ -42,10 +42,11 @@ public class CategoryController {
     public ApiResponse<List<Category>> findByType(@PathVariable("type") String categoryType,
                                                   @RequestParam(value = "parentId", required = false) Integer parentId,
                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
-                                                  @RequestParam(value = "pageNum", required = false) Integer pageNum) {
+                                                  @RequestParam(value = "pageNum", required = false) Integer pageNum,
+                                                  @RequestParam(value = "idNotIn", required = false) Integer idNotIn) {
         try {
             if (Objects.isNull(pageSize) || Objects.isNull(pageNum)) {
-                return ApiResponse.ok(categoryService.findSubCategory(CommonUtils.getCategoryType(categoryType), parentId));
+                return ApiResponse.ok(categoryService.findSubCategory(CommonUtils.getCategoryType(categoryType), parentId, idNotIn));
             }
             Page<Category> categories = categoryService.findSubCategory(CommonUtils.getCategoryType(categoryType), parentId, pageSize, pageNum - 1);
             return ApiResponse.ok(categories.getContent(), pageNum, pageSize, categories.getTotalPages(), categories.getTotalElements());

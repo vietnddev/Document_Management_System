@@ -4,6 +4,7 @@ import com.flowiee.dms.core.BaseService;
 import com.flowiee.dms.entity.DocShare;
 import com.flowiee.dms.entity.Document;
 import com.flowiee.dms.model.DocMetaModel;
+import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import org.springframework.data.domain.Page;
 
@@ -33,7 +34,7 @@ public interface DocumentService extends BaseService<Document> {
 
     String moveDoc(Integer docId, Integer destinationId);
 
-    List<DocShare> shareDoc(Integer docId, Map<Integer, List<String>> accountShares);
+    List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares);
 
     List<DocumentDTO> findSharedDocFromOthers(Integer accountId);
 }

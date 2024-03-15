@@ -2,9 +2,11 @@ package com.flowiee.dms.service.impl;
 
 import com.flowiee.dms.core.exception.AppException;
 import com.flowiee.dms.core.exception.BadRequestException;
+import com.flowiee.dms.core.exception.NotFoundException;
 import com.flowiee.dms.entity.*;
 import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.DocMetaModel;
+import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.repository.DocumentRepository;
@@ -106,7 +108,7 @@ public class DocumentServiceImpl implements DocumentService {
     public String delete(Integer documentId) {
         Document document = this.findById(documentId);
         if (document == null) {
-            throw new BadRequestException();
+            throw new BadRequestException("DocField not found!");
         }
         docShareService.deleteByDocument(documentId);
         documentRepo.deleteById(documentId);
@@ -173,8 +175,15 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DocumentDTO update(DocumentDTO documentDTO, Integer documentId) {
-        return null;
+    public DocumentDTO update(DocumentDTO dto, Integer documentId) {
+        Document document = this.findById(documentId);
+        if (document == null) {
+            throw new BadRequestException("Document not found!");
+        }
+        document.setName(dto.getName());
+        document.setAsName(CommonUtils.generateAliasName(dto.getName()));
+        document.setDescription(dto.getDescription());
+        return DocumentDTO.fromDocument(documentRepo.save(document));
     }
 
     @Override
@@ -334,25 +343,29 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Transactional
     @Override
-    public List<DocShare> shareDoc(Integer docId, Map<Integer, List<String>> accountShares) {
+    public List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares) {
         Document doc = this.findById(docId);
         if (doc == null || accountShares.isEmpty()) {
             throw new BadRequestException();
         }
         List<DocShare> docShared = new ArrayList<>();
         docShareService.deleteByDocument(docId);
-        for (Map.Entry<Integer, List<String>> entry : accountShares.entrySet()) {
-            int accountId = entry.getKey();
-            List<String> roles = entry.getValue();
-            if (roles == null) {
-                continue;
+        for (DocShareModel model : accountShares) {
+            int accountId = model.getAccountId();
+            if (model.getCanRead()) {
+                docShared.add(docShareService.save(new DocShare(docId, accountId, "R")));
             }
-            for (String role : roles) {
-                DocShare docShare = new DocShare();
-                docShare.setDocument(new Document(docId));
-                docShare.setAccount(new Account(accountId));
-                docShare.setRole(role);
-                docShared.add(docShareService.save(docShare));
+            if (model.getCanUpdate()) {
+                docShared.add(docShareService.save(new DocShare(docId, accountId, "U")));
+            }
+            if (model.getCanDelete()) {
+                docShared.add(docShareService.save(new DocShare(docId, accountId, "D")));
+            }
+            if (model.getCanMove()) {
+                docShared.add(docShareService.save(new DocShare(docId, accountId, "M")));
+            }
+            if (model.getCanShare()) {
+                docShared.add(docShareService.save(new DocShare(docId, accountId, "S")));
             }
         }
         return docShared;
