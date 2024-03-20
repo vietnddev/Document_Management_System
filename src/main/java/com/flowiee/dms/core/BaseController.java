@@ -25,7 +25,7 @@ public class BaseController {
 	@Autowired protected AccountService accountService;
 
 	protected ModelAndView baseView(ModelAndView modelAndView) {
-		modelAndView.addObject("USERNAME_LOGIN", Objects.requireNonNull(CommonUtils.getCurrentAccountUsername()));
+		modelAndView.addObject("USERNAME_LOGIN", CommonUtils.getUserPrincipal().getUsername());
 		setURLHeader(modelAndView);
 		setURLSidebar(modelAndView);
 		return modelAndView;

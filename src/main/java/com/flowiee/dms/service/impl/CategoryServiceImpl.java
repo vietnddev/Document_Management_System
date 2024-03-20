@@ -18,7 +18,7 @@ import java.util.List;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
-	private static final String MODULE = AppConstants.SYSTEM_MODULE.CATEGORY.name();
+	private static final String MODULE = com.flowiee.dms.model.MODULE.CATEGORY.name();
 	
     private final CategoryRepository categoryRepo;
     private final CategoryHistoryRepository categoryHistoryRepo;

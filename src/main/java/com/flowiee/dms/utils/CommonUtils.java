@@ -1,5 +1,9 @@
 package com.flowiee.dms.utils;
 
+import com.flowiee.dms.core.exception.AppException;
+import com.flowiee.dms.core.exception.AuthenticationException;
+import com.flowiee.dms.model.MODULE;
+import com.flowiee.dms.model.UserPrincipal;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +17,7 @@ import java.util.regex.Pattern;
 public class CommonUtils {
     public static String rootPath = "src/main/resources/static";
     public static String fileUploadPath = rootPath + "/uploads/";
-    public static String ADMINISTRATOR = "admin";
+    public static String ADMIN = "admin";
     public static Date START_APP_TIME = null;
 
     public static String getCategoryType(String key) {
@@ -35,42 +39,12 @@ public class CommonUtils {
         return extension;
     }
 
-    public static String getPathDirectory(AppConstants.SYSTEM_MODULE systemModule) {
-        try {
-            StringBuilder path = new StringBuilder(fileUploadPath);
-            switch (systemModule) {
-                case STORAGE:
-                    path.append("storage");
-                    break;
-                case CATEGORY:
-                    path.append("category");
-                    break;
-                default:
-                	path.append("system");
-                	break;
-            }
-            path.append("/" + DateUtils.getCurrentYear());
-            path.append("/" + DateUtils.getCurrentMonth());
-            path.append("/" + DateUtils.getCurrentDay());
-            File folder = new File(path.toString());
-            if (!folder.exists()) {
-                if (folder.mkdirs()) {
-                    System.out.println("mkdirs OK");
-                }
-            }
-            return path.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
-    }
-
     public static String getPathDirectory(String systemModule) {
         try {
             StringBuilder path = new StringBuilder(fileUploadPath);
-            if (AppConstants.SYSTEM_MODULE.STORAGE.name().equals(systemModule)) {
+            if (MODULE.STORAGE.name().equals(systemModule)) {
                 path.append("storage");
-            } else if (AppConstants.SYSTEM_MODULE.CATEGORY.name().equals(systemModule)) {
+            } else if (MODULE.CATEGORY.name().equals(systemModule)) {
                 path.append("category");
             }
             path.append("/" + DateUtils.getCurrentYear());
@@ -119,31 +93,11 @@ public class CommonUtils {
         return alias.substring(0, alias.lastIndexOf("-"));
     }
 
-    public static Integer getCurrentAccountId() {
+    public static UserPrincipal getUserPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            return Integer.parseInt(authentication.getName().substring(authentication.getName().indexOf("_") + 1));
+            return (UserPrincipal) authentication.getPrincipal();
         }
-        return null;
-    }
-
-    public static String getCurrentAccountUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            return authentication.getName().substring(0, authentication.getName().indexOf("_"));
-        }
-        return null;
-    }
-
-    public static String getCurrentAccountIp() {
-        WebAuthenticationDetails details = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
-            Object authDetails = authentication.getDetails();
-            if (authDetails instanceof WebAuthenticationDetails) {
-                details = (WebAuthenticationDetails) authDetails;
-            }
-        }
-        return details != null ? details.getRemoteAddress() : "unknown";
+        throw new AuthenticationException();
     }
 }

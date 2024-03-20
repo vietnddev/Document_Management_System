@@ -4,10 +4,10 @@ import com.flowiee.dms.core.exception.AppException;
 import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.SystemLog;
 import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.repository.AccountRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.SystemLogService;
-import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +39,13 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account findCurrentAccount() {
-        return this.findById(CommonUtils.getCurrentAccountId());
+        return this.findById(CommonUtils.getUserPrincipal().getId());
     }
 
     @Override
     public Account save(Account account) {
     	try {
-            if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMINISTRATOR)) {
+            if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMIN)) {
                 account.setRole("ADMIN");
             } else {
                 account.setRole("USER");
@@ -54,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
             String password = account.getPassword();
             account.setPassword(bCrypt.encode(password));
             Account accountSaved = accountRepo.save(account);
-        	SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, CommonUtils.getCurrentAccountId(), CommonUtils.getCurrentAccountIp());
+        	SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
             systemLogService.writeLog(systemLog);
             logger.info("Insert account success! username=" + account.getUsername());
             return accountSaved;
@@ -69,12 +69,12 @@ public class AccountServiceImpl implements AccountService {
     public Account update(Account account, Integer entityId) {
     	try {
             account.setId(entityId);
-            if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMINISTRATOR)) {
+            if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMIN)) {
                 account.setRole("ADMIN");
             } else {
                 account.setRole("USER");
             }
-        	SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, CommonUtils.getCurrentAccountId(), CommonUtils.getCurrentAccountIp());
+        	SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
             systemLogService.writeLog(systemLog);
             logger.info("Update account success! username=" + account.getUsername());
             return accountRepo.save(account);
@@ -92,7 +92,7 @@ public class AccountServiceImpl implements AccountService {
             account = accountRepo.findById(accountId).orElse(null);
             if (account != null) {
                 accountRepo.delete(account);
-                SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, CommonUtils.getCurrentAccountId(), CommonUtils.getCurrentAccountIp());
+                SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
                 systemLogService.writeLog(systemLog);
             }
             logger.info("Delete account success! username=" + account.getUsername());

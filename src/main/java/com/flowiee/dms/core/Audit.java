@@ -55,10 +55,10 @@ public class Audit {
             createdAt = new Date();
         }
         if (createdBy == null) {
-            createdBy = CommonUtils.getCurrentAccountId();
+            createdBy = CommonUtils.getUserPrincipal().getId();
         }
         if (lastUpdatedBy == null) {
-            lastUpdatedBy = CommonUtils.getCurrentAccountUsername();
+            lastUpdatedBy = CommonUtils.getUserPrincipal().getUsername();
         }
     }
 }

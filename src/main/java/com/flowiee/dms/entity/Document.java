@@ -106,7 +106,7 @@ public class Document extends BaseEntity implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Document [id=" + super.id + ", parentId=" + parentId + ", isFolder=" + isFolder + ", name=" + name + ", aliasName=" + asName
-				+ ", moTa=" + description + "]";
+		return "Document {id=" + super.id + ", parentId=" + parentId + ", isFolder=" + isFolder + ", name=" + name + ", aliasName=" + asName
+				+ ", moTa=" + description + "}";
 	}        
 }

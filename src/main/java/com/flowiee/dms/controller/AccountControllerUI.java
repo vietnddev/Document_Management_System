@@ -73,7 +73,7 @@ public class AccountControllerUI extends BaseController {
         accountEntity.setId(accountId);
         accountEntity.setUsername(acc.getUsername());
         accountEntity.setPassword(acc.getPassword());
-        accountEntity.setLastUpdatedBy(CommonUtils.getCurrentAccountUsername());
+        accountEntity.setLastUpdatedBy(CommonUtils.getUserPrincipal().getUsername());
         accountService.update(accountEntity, accountId);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }

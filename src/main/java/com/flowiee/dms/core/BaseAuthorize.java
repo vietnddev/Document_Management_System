@@ -23,7 +23,7 @@ public class BaseAuthorize {
     
     protected boolean isAuthorized(String action, boolean throwException) {
         if (isAuthenticated()) {
-            if (CommonUtils.ADMINISTRATOR.equals(CommonUtils.getCurrentAccountUsername())) {
+            if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername())) {
                 return true;
             }
             if (vldRole(action)) {

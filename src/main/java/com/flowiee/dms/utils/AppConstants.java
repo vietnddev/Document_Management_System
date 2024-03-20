@@ -8,6 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class AppConstants {
+    public static String DOC_RIGHT_READ = "R";
+    public static String DOC_RIGHT_UPDATE = "U";
+    public static String DOC_RIGHT_DELETE = "D";
+    public static String DOC_RIGHT_MOVE = "M";
+    public static String DOC_RIGHT_SHARE = "S";
+
     @Getter
     public enum CATEGORY {
         DOCUMENT_TYPE("document-type", "DOCUMENT_TYPE", "Loại tài liệu");
@@ -23,56 +29,5 @@ public class AppConstants {
             this.label = label;
         }
 
-    }
-
-    @Getter
-    public enum SYSTEM_MODULE {
-        STORAGE("KHO TÀI LIỆU"),
-
-        SYSTEM("HỆ THỐNG"),
-
-        CATEGORY("DANH MỤC");
-
-        private final String label;
-
-        SYSTEM_MODULE(String label) {
-            this.label = label;
-        }
-
-        public static SYSTEM_MODULE valueOfLabel(String label) {
-            for (SYSTEM_MODULE e : values()) {
-                if (e.label.equals(label)) {
-                    return e;
-                }
-            }
-            return null;
-        }
-
-        public static List<String> getAllValue() {
-            List<String> listValue = new ArrayList<>();
-            for (SYSTEM_MODULE e : values()) {
-                listValue.add(e.label);
-            }
-            return listValue;
-        }
-
-        public static LinkedHashMap<String, String> getAll() {
-            LinkedHashMap<String, String> hm = new LinkedHashMap<>();
-            for (SYSTEM_MODULE e : values()) {
-                hm.put(e.name(), e.label);
-            }
-            return hm;
-        }
-    }
-
-    @Getter
-    public enum DASHBOARD_ACTION {
-        READ_DASHBOARD("Xem dashboard");
-
-        DASHBOARD_ACTION(String label) {
-            this.label = label;
-        }
-
-        private final String label;
     }
 }

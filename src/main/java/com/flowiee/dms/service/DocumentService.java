@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface DocumentService extends BaseService<Document> {
-    Page<Document> findDocuments(Integer pageSize, Integer pageNum, Integer parentId);
+    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId);
 
     List<DocumentDTO> findFolderByParentId(Integer parentId);
 

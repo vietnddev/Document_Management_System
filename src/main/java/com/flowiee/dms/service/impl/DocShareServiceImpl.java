@@ -6,6 +6,7 @@ import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.DocShareService;
+import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +35,11 @@ public class DocShareServiceImpl implements DocShareService {
             model.setAccountId(account.getId());
             model.setAccountName(account.getFullName());
             for (DocShare docShare : docShareRepo.findByDocAndAccount(docId, account.getId())) {
-                if ("R".equals(docShare.getRole())) model.setCanRead(true);
-                if ("U".equals(docShare.getRole())) model.setCanUpdate(true);
-                if ("D".equals(docShare.getRole())) model.setCanDelete(true);
-                if ("M".equals(docShare.getRole())) model.setCanMove(true);
-                if ("S".equals(docShare.getRole())) model.setCanShare(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_READ.equals(docShare.getRole())) model.setCanRead(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_UPDATE.equals(docShare.getRole())) model.setCanUpdate(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_DELETE.equals(docShare.getRole())) model.setCanDelete(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_MOVE.equals(docShare.getRole())) model.setCanMove(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_SHARE.equals(docShare.getRole())) model.setCanShare(true);
             }
             lsModel.add(model);
         }
@@ -52,10 +53,10 @@ public class DocShareServiceImpl implements DocShareService {
 
     @Override
     public boolean isShared(int documentId) {
-        if (CommonUtils.ADMINISTRATOR.equals(CommonUtils.getCurrentAccountUsername())) {
+        if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername())) {
             return true;
         }
-        return docShareRepo.findByDocAndAccount(documentId, CommonUtils.getCurrentAccountId()) != null;
+        return docShareRepo.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId()) != null;
     }
 
     @Transactional

@@ -4,10 +4,11 @@ import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.AccountRole;
 import com.flowiee.dms.entity.SystemLog;
 import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.MODULE;
+import com.flowiee.dms.model.UserPrincipal;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.RoleService;
 import com.flowiee.dms.service.SystemLogService;
-import com.flowiee.dms.utils.AppConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,20 +32,19 @@ public class AccountDetailService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Account accountEntity = accountService.findByUsername(username);
-		UserDetails userDetails = null; // Đây là class hỗ trợ sẵn của Spring Security
-
+		UserPrincipal userPrincipal = null;
 		if (accountEntity != null) {
-			// Thiết lập role
-			List<GrantedAuthority> grantlist = new ArrayList<GrantedAuthority>();
-			GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + accountEntity.getRole());
-			grantlist.add(authority);
+			userPrincipal = new UserPrincipal(accountEntity);
 
+			List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+			GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + accountEntity.getRole());
+			grantedAuthorities.add(authority);
 			for (AccountRole rights : roleService.findByAccountId(accountEntity.getId())) {
 				GrantedAuthority rightsAction = new SimpleGrantedAuthority(rights.getAction());
-				grantlist.add(rightsAction);
+				grantedAuthorities.add(rightsAction);
 			}
+			userPrincipal.setAuthorities(grantedAuthorities);
 
-			userDetails = new org.springframework.security.core.userdetails.User(accountEntity.getUsername() + "_" + accountEntity.getId(), accountEntity.getPassword(), grantlist);
 			WebAuthenticationDetails details = null;
 			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 			if (authentication != null) {
@@ -53,11 +53,13 @@ public class AccountDetailService implements UserDetailsService {
 					details = (WebAuthenticationDetails) authDetails;
 				}
 			}
-			SystemLog systemLog = new SystemLog(AppConstants.SYSTEM_MODULE.SYSTEM.name(), ACTION.SYS_LOGIN.name(), "LOGIN", null, accountEntity.getId(), details != null ? details.getRemoteAddress() : "unknown");
+			userPrincipal.setIp(details != null ? details.getRemoteAddress() : "unknown");
+
+			SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_LOGIN.name(), "LOGIN", null, accountEntity.getId(), details != null ? details.getRemoteAddress() : "unknown");
 			systemLogService.writeLog(systemLog);
 		} else {
 			System.out.println("Login thất bại");
 		}
-		return userDetails;
+		return userPrincipal;
 	}
 }

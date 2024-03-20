@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg")
@@ -47,8 +46,8 @@ public class DocumentController extends BaseController {
             if (!super.vldModuleStorage.readDoc(true)) {
                 return null;
             }
-            Page<Document> documents = documentService.findDocuments(pageSize, pageNum - 1, parentId);
-            return ApiResponse.ok(DocumentDTO.fromDocuments(documents.getContent()), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
+            Page<DocumentDTO> documents = documentService.findDocuments(pageSize, pageNum - 1, parentId);
+            return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
             logger.error(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"), ex);
             throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"));

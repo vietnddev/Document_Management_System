@@ -29,6 +29,10 @@ public class DocumentDTO extends Document implements Serializable {
     private String sharedBy;
     @JsonFormat(pattern = "HH:mm:ss dd/MM/yyyy")
     private Date sharedAt;
+    private Boolean thisAccCanUpdate = false;
+    private Boolean thisAccCanDelete = false;
+    private Boolean thisAccCanMove = false;
+    private Boolean thisAccCanShare = false;
 
     public static DocumentDTO fromDocument(Document document) {
         DocumentDTO dto = new DocumentDTO();

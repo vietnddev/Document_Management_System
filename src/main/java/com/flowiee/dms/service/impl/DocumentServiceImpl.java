@@ -2,11 +2,11 @@ package com.flowiee.dms.service.impl;
 
 import com.flowiee.dms.core.exception.AppException;
 import com.flowiee.dms.core.exception.BadRequestException;
-import com.flowiee.dms.core.exception.NotFoundException;
 import com.flowiee.dms.entity.*;
 import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.DocShareModel;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.DocShareRepository;
 import com.flowiee.dms.repository.DocumentRepository;
@@ -18,10 +18,7 @@ import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,12 +27,11 @@ import javax.persistence.Query;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
     private static final Logger logger = LoggerFactory.getLogger(DocumentServiceImpl.class);
-    private static final String module = AppConstants.SYSTEM_MODULE.STORAGE.name();
+    private static final String module = MODULE.STORAGE.name();
 
     @Autowired private DocumentRepository documentRepo;
     @Autowired private DocDataService docDataService;
@@ -46,10 +42,22 @@ public class DocumentServiceImpl implements DocumentService {
     @Autowired private DocShareRepository docShareRepo;
 
     @Override
-    public Page<Document> findDocuments(Integer pageSize, Integer pageNum, Integer parentId) {
+    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
-        boolean isAdmin = CommonUtils.ADMINISTRATOR.equals(CommonUtils.getCurrentAccountUsername());
-        return documentRepo.findAll(parentId, isAdmin, CommonUtils.getCurrentAccountId(), pageable);
+        boolean isAdmin = CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername());
+        Page<Document> documents = documentRepo.findAll(parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), pageable);
+        List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
+        //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
+        for (DocumentDTO d : documentDTOs) {
+            List<DocShare> sharesOfDoc = docShareRepo.findByDocAndAccount(d.getId(), CommonUtils.getUserPrincipal().getId());
+            for (DocShare ds : sharesOfDoc) {
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_UPDATE.equals(ds.getRole())) d.setThisAccCanUpdate(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_DELETE.equals(ds.getRole())) d.setThisAccCanDelete(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_MOVE.equals(ds.getRole())) d.setThisAccCanMove(true);
+                if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername()) || AppConstants.DOC_RIGHT_SHARE.equals(ds.getRole())) d.setThisAccCanShare(true);
+            }
+        }
+        return new PageImpl<>(documentDTOs, pageable, documents.getTotalElements());
     }
 
     @Override
@@ -353,19 +361,19 @@ public class DocumentServiceImpl implements DocumentService {
         for (DocShareModel model : accountShares) {
             int accountId = model.getAccountId();
             if (model.getCanRead()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, "R")));
+                docShared.add(docShareService.save(new DocShare(docId, accountId, AppConstants.DOC_RIGHT_READ)));
             }
             if (model.getCanUpdate()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, "U")));
+                docShared.add(docShareService.save(new DocShare(docId, accountId, AppConstants.DOC_RIGHT_UPDATE)));
             }
             if (model.getCanDelete()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, "D")));
+                docShared.add(docShareService.save(new DocShare(docId, accountId, AppConstants.DOC_RIGHT_DELETE)));
             }
             if (model.getCanMove()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, "M")));
+                docShared.add(docShareService.save(new DocShare(docId, accountId, AppConstants.DOC_RIGHT_MOVE)));
             }
             if (model.getCanShare()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, "S")));
+                docShared.add(docShareService.save(new DocShare(docId, accountId, AppConstants.DOC_RIGHT_SHARE)));
             }
         }
         return docShared;

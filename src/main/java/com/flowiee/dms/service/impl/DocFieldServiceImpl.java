@@ -3,11 +3,11 @@ package com.flowiee.dms.service.impl;
 import com.flowiee.dms.core.exception.DataInUseException;
 import com.flowiee.dms.entity.DocField;
 import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.repository.DocFieldRepository;
 import com.flowiee.dms.service.DocDataService;
 import com.flowiee.dms.service.DocFieldService;
 import com.flowiee.dms.service.SystemLogService;
-import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.MessageUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 public class DocFieldServiceImpl implements DocFieldService {
-    private static final String module = AppConstants.SYSTEM_MODULE.STORAGE.name();
+    private static final String module = MODULE.STORAGE.name();
 
     private final DocFieldRepository docFieldRepository;
     private final DocDataService docDataService;

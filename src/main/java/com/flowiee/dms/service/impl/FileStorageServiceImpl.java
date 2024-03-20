@@ -1,13 +1,12 @@
 package com.flowiee.dms.service.impl;
 
-import com.flowiee.dms.entity.Account;
 import com.flowiee.dms.entity.Document;
 import com.flowiee.dms.entity.FileStorage;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.repository.FileStorageRepository;
 import com.flowiee.dms.service.AccountService;
 import com.flowiee.dms.service.DocumentService;
 import com.flowiee.dms.service.FileStorageService;
-import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
 import org.slf4j.Logger;
@@ -61,20 +60,20 @@ public class FileStorageServiceImpl implements FileStorageService {
     public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
         long currentTime = Instant.now(Clock.systemUTC()).toEpochMilli();
         FileStorage fileInfo = new FileStorage();
-        fileInfo.setModule(AppConstants.SYSTEM_MODULE.STORAGE.name());
+        fileInfo.setModule(MODULE.STORAGE.name());
         fileInfo.setOriginalName(fileUpload.getOriginalFilename());
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setStorageName(currentTime + "_" + fileUpload.getOriginalFilename());
         fileInfo.setFileSize(fileUpload.getSize());
         fileInfo.setExtension(CommonUtils.getExtension(fileUpload.getOriginalFilename()));
         fileInfo.setContentType(fileUpload.getContentType());
-        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE).substring(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE).indexOf("uploads")));
+        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).substring(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).indexOf("uploads")));
         fileInfo.setDocument(new Document(documentId));
         fileInfo.setAccount(accountService.findCurrentAccount());
         fileInfo.setActive(true);
         FileStorage fileSaved = fileRepository.save(fileInfo);
 
-        Path path = Paths.get(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
+        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
         fileUpload.transferTo(path);
 
         return fileSaved;
@@ -100,20 +99,20 @@ public class FileStorageServiceImpl implements FileStorageService {
         //Save file mới vào hệ thống
         long currentTime = Instant.now(Clock.systemUTC()).toEpochMilli();
         FileStorage fileInfo = new FileStorage();
-        fileInfo.setModule(AppConstants.SYSTEM_MODULE.STORAGE.name());
+        fileInfo.setModule(MODULE.STORAGE.name());
         fileInfo.setOriginalName(fileUpload.getOriginalFilename());
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setStorageName(currentTime + "_" + fileUpload.getOriginalFilename());
         fileInfo.setFileSize(fileUpload.getSize());
         fileInfo.setExtension(CommonUtils.getExtension(fileUpload.getOriginalFilename()));
         fileInfo.setContentType(fileUpload.getContentType());
-        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE).substring(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE).indexOf("uploads")));
+        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).substring(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).indexOf("uploads")));
         fileInfo.setDocument(new Document(documentId));
         fileInfo.setAccount(accountService.findCurrentAccount());
         fileInfo.setActive(true);
         fileRepository.save(fileInfo);
 
-        Path path = Paths.get(CommonUtils.getPathDirectory(AppConstants.SYSTEM_MODULE.STORAGE) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
+        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
         fileUpload.transferTo(path);
 
         return "OK";
