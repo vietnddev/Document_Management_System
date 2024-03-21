@@ -1,23 +1,22 @@
 package com.flowiee.dms.utils;
 
-import com.flowiee.dms.core.exception.AppException;
-import com.flowiee.dms.core.exception.AuthenticationException;
+import com.flowiee.dms.exception.AuthenticationException;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.UserPrincipal;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import java.io.File;
 import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class CommonUtils {
-    public static String rootPath = "src/main/resources/static";
-    public static String fileUploadPath = rootPath + "/uploads/";
-    public static String ADMIN = "admin";
+    public static final String rootPath = "src/main/resources/static";
+    public static final String fileUploadPath = rootPath + "/uploads/";
+    public static final String ADMIN = "admin";
     public static Date START_APP_TIME = null;
 
     public static String getCategoryType(String key) {
@@ -28,7 +27,16 @@ public class CommonUtils {
         return map.get(key);
     }
 
-    public static String getExtension(String fileName) {
+    public static boolean isValidCategory(String type) {
+        for (AppConstants.CATEGORY c : AppConstants.CATEGORY.values()) {
+            if (c.getKey().equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getFileExtension(String fileName) {
         String extension = "";
         if (ObjectUtils.isNotEmpty(fileName)) {
             int lastIndex = fileName.lastIndexOf('.');
@@ -47,13 +55,13 @@ public class CommonUtils {
             } else if (MODULE.CATEGORY.name().equals(systemModule)) {
                 path.append("category");
             }
-            path.append("/" + DateUtils.getCurrentYear());
-            path.append("/" + DateUtils.getCurrentMonth());
-            path.append("/" + DateUtils.getCurrentDay());
+            path.append("/").append(LocalDateTime.now().getYear());
+            path.append("/").append(LocalDateTime.now().getMonth().getValue());
+            path.append("/").append(LocalDateTime.now().getDayOfMonth());
             File folder = new File(path.toString());
             if (!folder.exists()) {
                 if (folder.mkdirs()) {
-                    System.out.println("mkdirs OK");
+                    System.out.println("mkdir OK");
                 }
             }
             return path.toString();
@@ -85,17 +93,9 @@ public class CommonUtils {
         return transformedText;
     }
 
-    public static int getIdFromAliasPath(String alias) {
-        return Integer.parseInt(alias.substring(alias.lastIndexOf("-") + 1));
-    }
-
-    public static String getAliasNameFromAliasPath(String alias) {
-        return alias.substring(0, alias.lastIndexOf("-"));
-    }
-
     public static UserPrincipal getUserPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null) {
+        if (authentication.isAuthenticated()) {
             return (UserPrincipal) authentication.getPrincipal();
         }
         throw new AuthenticationException();

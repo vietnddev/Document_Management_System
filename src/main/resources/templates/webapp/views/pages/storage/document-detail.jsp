@@ -119,6 +119,10 @@
                                                 <!--Tab metadata-->
                                                 <div class="active tab-pane" id="docData">
                                                     <form class="form-horizontal" method="GET" th:action="@{/stg/doc/update-metadata/{id}(id=${docDetail.id})}">
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-4 col-form-label">Document type</label>
+                                                            <div class="col-sm-8"><input class="form-control" type="text" disabled th:value="${docDetail.docTypeName}"/></div>
+                                                        </div>
                                                         <div class="form-group row" th:each="list : ${docMeta}">
                                                             <label class="col-sm-4 col-form-label" th:text="${list.fieldName}"></label>
                                                             <div class="col-sm-8">
@@ -143,13 +147,13 @@
                                                 </div>
                                                 <!--End Tab metadata-->
 
-                                                <!-- Tab tài liệu liên quan -->
+                                                <!-- Tab tài liệu detail-->
                                                 <div class="tab-pane" id="docDetail" style="font-size: 15px">
                                                     <div class="row mb-2">
-                                                        <div class="col-sm-8">
-                                                            <a href="#">Quyết định bổ nhiệm...</a>
-                                                        </div>
-                                                        <div class="col-sm-4">Văn bản hành chính</div>
+                                                        <div class="col-sm-6 mb-3">Upload time:</div>     <div class="col-sm-6" th:text="${docDetail.createdAt}"></div>
+                                                        <div class="col-sm-6 mb-3">Last update time:</div><div class="col-sm-6" th:text="${docDetail.lastUpdatedAt}"></div>
+                                                        <div class="col-sm-6 mb-3">Last update at:</div>  <div class="col-sm-6" th:text="${docDetail.lastUpdatedBy}"></div>
+                                                        <div class="col-sm-6">File size:</div>       <div class="col-sm-6" th:text="${docDetail.file.size} + ' KB'"></div>
                                                     </div>
                                                     <hr style="margin: 0">
                                                 </div>
@@ -191,19 +195,20 @@
             $("#fileVersionTab").on("click", function () {
                 $.get(mvHostURLCallApi + '/stg/doc/files/' + mvDocId, function (response) {
                     if (response.status === "OK") {
+                        $("#tableVersion").empty();
                         $.each(response.data, function (index, d) {
                             $("#tableVersion").append(`
                                 <tr class="align-self-center">
-                                <td>${index + 1}</td>
-                                <td>${d.uploadAt}</td>
-                                <td>${d.originalName}</td>
-                                <td>${d.isActive}</td>
-                                <td>
-                                    <button type="submit" style="border: none; background: none">
-                                        <img src="/dist/icon/restore.png">
-                                    </button>
-                                </td>
-                            </tr>
+                                    <td>${index + 1}</td>
+                                    <td>${d.uploadAt}</td>
+                                    <td>${d.originalName}</td>
+                                    <td>${d.isActive}</td>
+                                    <td>
+                                        <button type="submit" style="border: none; background: none">
+                                            <img src="/dist/icon/restore.png">
+                                        </button>
+                                    </td>
+                                </tr>
                             `);
                         });
                     }

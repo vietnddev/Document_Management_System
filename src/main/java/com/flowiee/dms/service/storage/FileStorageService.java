@@ -1,0 +1,20 @@
+package com.flowiee.dms.service.storage;
+
+import com.flowiee.dms.base.BaseService;
+import com.flowiee.dms.entity.storage.FileStorage;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+
+public interface FileStorageService extends BaseService<FileStorage> {
+    FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException;
+
+    String saveFileOfImport(MultipartFile fileImport, FileStorage fileInfo) throws IOException;
+
+    String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException;
+
+    FileStorage findFileIsActiveOfDocument(Integer documentId);
+
+    List<FileStorage> findFilesOfDocument(Integer documentId);
+}

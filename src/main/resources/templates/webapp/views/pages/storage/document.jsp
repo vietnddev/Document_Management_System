@@ -167,14 +167,17 @@
         let mvDocType = $("#docTypeField");
         let mvName = $("#nameField");
         let mvDes = $("#desField");
+        let mvAccountShares = [];
 
         $(document).ready(function () {
             init();
-            createDocument();
             loadFolderTree();
+            beforeSubmitShareRights();
             shareDoc();
+            createDocument();
             updateDocument();
             deleteDocument();
+            submitInsertOrUpdate();
         });
 
         function init() {
@@ -201,24 +204,22 @@
                     contentTable.empty();
                     $.each(data, function (index, d) {
                         mvDocuments[d.id] = d;
-                        let iconDoc = "/dist/icon/pdf.png";
-                        if (d.isFolder === "Y") {
-                            iconDoc = "/dist/icon/folder.png";
-                        }
+                        let iconDoc = d.isFolder === "Y" ? "/dist/icon/folder.png" : "/dist/icon/pdf.png";
+                        let btnUpdate = d.thisAccCanUpdate ? `<button class="btn btn-warning btn-sm btn-update" docId="${d.id}"> <i class="fa-solid fa-pencil"></i> </button>` : ``;
+                        let btnShare = d.thisAccCanShare ? `<button class="btn btn-info btn-sm btn-share" docId="${d.id}"> <i class="fa-solid fa-share"></i> </button>` : ``;
+                        let btnDelete = d.thisAccCanDelete ? `<button class="btn btn-danger btn-sm btn-delete" docId="${d.id}"> <i class="fa-solid fa-trash"></i> </button>` : ``;
                         contentTable.append(`
                             <tr>
                                 <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>
                                 <td><img src="${iconDoc}"></td>
                                 <td>${d.createdAt}</td>
-                                <td style="max-width: 300px">
-                                    <a href="/stg/doc/${d.asName}-${d.id}">${d.name}</a>
-                                </td>
+                                <td style="max-width: 300px"><a href="/stg/doc/${d.asName}-${d.id}">${d.name}</a></td>
                                 <td>${d.docTypeName}</td>
                                 <td>${d.description}</td>
                                 <td>
-                                    <button class="btn btn-warning btn-sm btn-update" docId="${d.id}"> <i class="fa-solid fa-pencil"></i> </button>
-                                    <button class="btn btn-info btn-sm btn-share" docId="${d.id}"> <i class="fa-solid fa-share"></i> </button>
-                                    <button class="btn btn-danger btn-sm btn-delete" docId="${d.id}"> <i class="fa-solid fa-trash"></i> </button>
+                                    ${btnUpdate}
+                                    ${btnShare}
+                                    ${btnDelete}
                                 </td>
                             </tr>
                         `);
@@ -258,6 +259,8 @@
                 $("#titleInsertOrUpdate").text("Thêm mới tài liệu");
                 $("#headerModalIU").attr("class", "modal-header bg-primary");
                 $("#btnSubmit").attr("action", "create");
+                $("#nameField").val("");
+                $("#desField").val("");
                 $("#modalInsertOrUpdate").modal();
             })
 
@@ -268,14 +271,59 @@
                 $("#titleInsertOrUpdate").text("Thêm mới tài liệu");
                 $("#headerModalIU").attr("class", "modal-header bg-primary");
                 $("#btnSubmit").attr("action", "create");
+                $("#nameField").val("");
+                $("#desField").val("");
                 $("#modalInsertOrUpdate").modal();
             })
+        }
 
-            submitInsertOrUpdate();
+        function beforeSubmitShareRights() {
+            $(document).on("change", "[id^='canUpdateCbx_']", function () {
+                let accId = $(this).attr("id").split("_")[1];
+                if ($(this).is(':checked')) {
+                    $(`[id^='canReadCbx_${accId}']`).prop("checked", true);
+                } else {
+                    trackChangesCbx(accId, $(this).attr("indexAcc"));
+                }
+            })
+            $(document).on("change", "[id^='canDeleteCbx_']", function () {
+                let accId = $(this).attr("id").split("_")[1];
+                if ($(this).is(':checked')) {
+                    $(`[id^='canReadCbx_${accId}']`).prop("checked", true);
+                } else {
+                    trackChangesCbx(accId, $(this).attr("indexAcc"));
+                }
+            })
+            $(document).on("change", "[id^='canMoveCbx_']", function () {
+                let accId = $(this).attr("id").split("_")[1];
+                if ($(this).is(':checked')) {
+                    $(`[id^='canReadCbx_${accId}']`).prop("checked", true);
+                } else {
+                    trackChangesCbx(accId, $(this).attr("indexAcc"));
+                }
+            })
+            $(document).on("change", "[id^='canShareCbx_']", function () {
+                let accId = $(this).attr("id").split("_")[1];
+                if ($(this).is(':checked')) {
+                    $(`[id^='canReadCbx_${accId}']`).prop("checked", true);
+                } else {
+                    trackChangesCbx(accId, $(this).attr("indexAcc"));
+                }
+            })
+        }
+
+        function trackChangesCbx(accId, indexAcc) {
+            let defaultAccCanRead = mvAccountShares[indexAcc].canRead;
+            let cbxCanUpdate = $(`[id^='canUpdateCbx_${accId}']`);
+            let cbxCanDelete = $(`[id^='canDeleteCbx_${accId}']`);
+            let cbxCanMove = $(`[id^='canMoveCbx_${accId}']`);
+            let cbxCanShare = $(`[id^='canShareCbx_${accId}']`);
+            if (!defaultAccCanRead && (!cbxCanUpdate.is(':checked') && !cbxCanDelete.is(':checked') && !cbxCanMove.is(':checked') && !cbxCanShare.is(':checked'))) {
+                $(`[id^='canReadCbx_${accId}']`).prop("checked", false);
+            }
         }
 
         function shareDoc() {
-            let mvAccountShares = [];
             $(document).on("click", ".btn-share", function () {
                 let documentId = parseInt($(this).attr("docId"));
                 let apiURL = mvHostURLCallApi + '/stg/doc/share/' + documentId;
@@ -288,11 +336,11 @@
                             tableShare.append(`
                                 <tr>
                                     <td>${d.accountName}</td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" id="canReadCbx_${d.accountId}" ${d.canRead ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" id="canUpdateCbx_${d.accountId}" ${d.canUpdate ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" id="canDeleteCbx_${d.accountId}" ${d.canDelete ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" id="canMoveCbx_${d.accountId}" ${d.canMove ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" id="canShareCbx_${d.accountId}" ${d.canShare ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canReadCbx_${d.accountId}" ${d.canRead ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canUpdateCbx_${d.accountId}" ${d.canUpdate ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canDeleteCbx_${d.accountId}" ${d.canDelete ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canMoveCbx_${d.accountId}" ${d.canMove ? "checked" : ""}></td>
+                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canShareCbx_${d.accountId}" ${d.canShare ? "checked" : ""}></td>
                                 </tr>
                             `);
                         })
@@ -306,7 +354,6 @@
 
             $("#btnSubmitShare").on("click", function () {
                 let documentId = parseInt($(this).attr("documentId"));
-
                 $.each(mvAccountShares, function (index, d) {
                     mvAccountShares[index].canRead = $("[id^='canReadCbx_']").eq(index).prop("checked");
                     mvAccountShares[index].canUpdate = $("[id^='canUpdateCbx_']").eq(index).prop("checked");
@@ -314,7 +361,6 @@
                     mvAccountShares[index].canMove = $("[id^='canMoveCbx_']").eq(index).prop("checked");
                     mvAccountShares[index].canShare = $("[id^='canShareCbx_']").eq(index).prop("checked");
                 })
-
                 $.ajax({
                     url: mvHostURLCallApi + "/stg/doc/share/" + documentId,
                     type: "PUT",
@@ -354,8 +400,8 @@
                 $("#titleInsertOrUpdate").text("Cập nhật tài liệu");
                 $("#headerModalIU").attr("class", "modal-header bg-warning");
                 $("#btnSubmit").attr("action", "update");
+                $("#btnSubmit").attr("docId", document.id);
                 $("#modalInsertOrUpdate").modal();
-                submitInsertOrUpdate();
             })
         }
 
@@ -412,10 +458,11 @@
                     });
                 }
                 if (action === "update") {
-                    let apiURL = mvHostURLCallApi + "/stg/doc/update/" + document.id;
+                    let lvDocDetail = mvDocuments[$("#btnSubmit").attr("docId")];
+                    let apiURL = mvHostURLCallApi + "/stg/doc/update/" + lvDocDetail.id;
                     let formData = new FormData();
-                    let isFolder = document.isFolder;
-                    formData.append("parentId", document.parentId);
+                    let isFolder = lvDocDetail.isFolder;
+                    formData.append("parentId", lvDocDetail.parentId);
                     formData.append("isFolder", isFolder);
                     formData.append("name", mvName.val());
                     formData.append("description", mvDes.val());
@@ -427,7 +474,7 @@
                         contentType : false,
                         success: function (response, textStatus, jqXHR) {
                             if (response.status === "OK") {
-                                alert("Update successfully")
+                                alert("Update successfully");
                                 window.location.reload();
                             }
                         },

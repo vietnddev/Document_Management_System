@@ -2,7 +2,7 @@ package com.flowiee.dms.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.flowiee.dms.entity.Document;
+import com.flowiee.dms.entity.storage.Document;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +33,9 @@ public class DocumentDTO extends Document implements Serializable {
     private Boolean thisAccCanDelete = false;
     private Boolean thisAccCanMove = false;
     private Boolean thisAccCanShare = false;
+    @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+    private Date lastUpdatedAt;
+    private String lastUpdatedBy;
 
     public static DocumentDTO fromDocument(Document document) {
         DocumentDTO dto = new DocumentDTO();
@@ -47,6 +50,8 @@ public class DocumentDTO extends Document implements Serializable {
         }
         dto.setIsFolder(document.getIsFolder());
         dto.setCreatedAt(document.getCreatedAt());
+        dto.setLastUpdatedAt(document.getLastUpdatedAt());
+        dto.setLastUpdatedBy(document.getLastUpdatedBy());
         return dto;
     }
 

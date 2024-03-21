@@ -1,6 +1,6 @@
 package com.flowiee.dms.model;
 
-import com.flowiee.dms.entity.Account;
+import com.flowiee.dms.entity.system.Account;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserPrincipal extends Account implements UserDetails {
+    private Integer id;
     private String username;
     private String password;
     private String ip;
@@ -22,7 +23,7 @@ public class UserPrincipal extends Account implements UserDetails {
     private List<GrantedAuthority> grantedAuthorities;
 
     public UserPrincipal(Account account) {
-        this.setId(account.getId());
+        this.id = account.getId();
         this.username = account.getUsername();
         this.password = account.getPassword();
         this.isAccountNonExpired = true;
