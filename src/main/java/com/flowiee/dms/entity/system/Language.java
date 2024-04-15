@@ -11,7 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "sys_languages")
+@Table(name = "languages")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

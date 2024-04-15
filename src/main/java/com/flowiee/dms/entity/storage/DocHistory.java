@@ -12,11 +12,11 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "stg_document_history")
-@Getter
-@Setter
+@Table(name = "doc_history")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DocHistory extends BaseEntity implements Serializable {
     @Serial

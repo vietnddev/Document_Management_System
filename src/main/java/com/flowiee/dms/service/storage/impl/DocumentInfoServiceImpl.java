@@ -51,10 +51,13 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
     private DocShareRepository docShareRepo;
 
     @Override
-    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId) {
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
+    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId) {
+        Pageable pageable = Pageable.unpaged();
+        if (pageSize >= 0 && pageNum >= 0) {
+            pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
+        }
         boolean isAdmin = CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername());
-        Page<Document> documents = documentRepo.findAll(parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), null, pageable);
+        Page<Document> documents = documentRepo.findAll(parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), null, listId, pageable);
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
         //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
         for (DocumentDTO d : documentDTOs) {
@@ -117,7 +120,7 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
 
     @Override
     public List<Document> findByDoctype(Integer docTypeId) {
-        return documentRepo.findAll(null, true, null, null, Pageable.unpaged()).getContent();
+        return documentRepo.findAll(null, true, null, null, null, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -166,16 +169,16 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
         List<DocumentDTO> hierarchy = new ArrayList<>();
         String strSQL = "WITH DocumentHierarchy(ID, NAME, AS_NAME, PARENT_ID, H_LEVEL) AS ( " +
                         "    SELECT ID, NAME, AS_NAME, PARENT_ID, 1 " +
-                        "    FROM STG_DOCUMENT " +
+                        "    FROM DOCUMENT " +
                         "    WHERE id = ? " +
                         "    UNION ALL " +
                         "    SELECT d.ID, d.NAME, d.AS_NAME ,d.PARENT_ID, dh.H_LEVEL + 1 " +
-                        "    FROM STG_DOCUMENT d " +
+                        "    FROM DOCUMENT d " +
                         "    INNER JOIN DocumentHierarchy dh ON dh.PARENT_ID = d.id " +
                         "), " +
                         "DocumentToFindParent(ID, NAME, AS_NAME, PARENT_ID, H_LEVEL) AS ( " +
                         "    SELECT ID, NAME, AS_NAME, PARENT_ID, NULL AS H_LEVEL " +
-                        "    FROM STG_DOCUMENT " +
+                        "    FROM DOCUMENT " +
                         "    WHERE ID = ? " +
                         ") " +
                         "SELECT ID, NAME, CONCAT(CONCAT(AS_NAME, '-'), ID) AS AS_NAME, PARENT_ID, H_LEVEL " +
@@ -214,11 +217,11 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
         List<DocumentDTO> folderTree = new ArrayList<>();
         String strSQL = "WITH DocumentHierarchy(ID, NAME, AS_NAME, PARENT_ID, IS_FOLDER, Path, HierarchyLevel) AS ( " +
                         "    SELECT ID, NAME, AS_NAME, PARENT_ID, IS_FOLDER, CAST(NAME AS VARCHAR2(4000)) AS Path, 0 AS HierarchyLevel " +
-                        "    FROM STG_DOCUMENT " +
+                        "    FROM DOCUMENT " +
                         "    WHERE PARENT_ID = 0 AND IS_FOLDER = 'Y' " +
                         "    UNION ALL " +
                         "    SELECT d.ID, d.NAME, d.AS_NAME, d.PARENT_ID, d.IS_FOLDER, dh.Path || '/' || d.NAME || '' || ' ', dh.HierarchyLevel + 1 " +
-                        "    FROM STG_DOCUMENT d " +
+                        "    FROM DOCUMENT d " +
                         "    INNER JOIN DocumentHierarchy dh ON d.PARENT_ID = dh.ID " +
                         "    WHERE d.IS_FOLDER = 'Y' " +
                         ") " +
@@ -237,20 +240,25 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
                         "       rh.NAME, " +
                         "       rh.AS_NAME, " +
                         "       rh.PARENT_ID, " +
-                        "       CASE WHEN EXISTS (SELECT 1 FROM STG_DOCUMENT sub WHERE sub.PARENT_ID = rh.ID AND sub.IS_FOLDER = 'Y') THEN 'Y' ELSE 'N' END AS Has_SubFolders, " +
+                        "       CASE WHEN EXISTS (SELECT 1 FROM DOCUMENT sub WHERE sub.PARENT_ID = rh.ID AND sub.IS_FOLDER = 'Y') THEN 'Y' ELSE 'N' END AS Has_SubFolders, " +
                         "       sf.SubFoldersId, " +
                         "       rh.HierarchyLevel, " +
                         "       rh.RowNumm, " +
                         "       RTRIM(rh.Path) as Path " +
                         "FROM RecursiveHierarchy rh " +
                         "LEFT JOIN SubFolderList sf ON rh.ID = sf.Parent_ID " +
-                        "WHERE rh.PARENT_ID = ? " +
-                        "ORDER BY rh.Path";
+                        "WHERE 1=1 ";
+        if (parentId != null) {
+            strSQL += "rh.PARENT_ID = ? ";
+        }
+        strSQL += "ORDER BY rh.Path";
         //HierarchyLevel: Thư mục ở cấp thứ mấy
         //RowNumm: Thư mục số mấy của cấp HierarchyLevel
         logger.info("Generate folder tree");
         Query query = entityManager.createNativeQuery(strSQL);
-        query.setParameter(1, parentId);
+        if (parentId != null) {
+            query.setParameter(1, parentId);
+        }
         @SuppressWarnings("unchecked")
         List<Object[]> list = query.getResultList();
         for (Object[] doc : list) {
@@ -260,6 +268,7 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
             docDTO.setAsName(String.valueOf(doc[2]));
             docDTO.setParentId(Integer.parseInt(String.valueOf(doc[3])));
             docDTO.setHasSubFolder(String.valueOf(doc[4]));
+            docDTO.setPath(String.valueOf(doc[8]));
             folderTree.add(docDTO);
         }
 

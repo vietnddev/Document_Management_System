@@ -14,7 +14,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "sys_notification")
+@Table(name = "notification")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

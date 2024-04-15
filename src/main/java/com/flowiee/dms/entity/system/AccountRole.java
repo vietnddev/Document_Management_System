@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serial;
 
 @Entity
-@Table(name = "sys_account_role")
+@Table(name = "account_role")
 @NoArgsConstructor
 @Getter
 @Setter

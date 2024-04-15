@@ -12,7 +12,7 @@ import java.io.Serializable;
 
 @Builder
 @Entity
-@Table(name = "stg_doc_share")
+@Table(name = "doc_share")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

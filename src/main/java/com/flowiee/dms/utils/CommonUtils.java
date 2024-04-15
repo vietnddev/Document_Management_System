@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 public class CommonUtils {
     public static final String rootPath = "src/main/resources/static";
     public static final String fileUploadPath = rootPath + "/uploads/";
+    public static final String templateExportExcelPath = rootPath + "/templates/excel";
     public static final String ADMIN = "admin";
     public static Date START_APP_TIME = null;
 

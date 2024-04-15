@@ -13,7 +13,7 @@ import java.util.List;
 
 @Builder
 @Entity
-@Table(name = "stg_doc_field")
+@Table(name = "doc_field")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

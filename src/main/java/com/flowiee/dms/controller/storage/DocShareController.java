@@ -5,7 +5,6 @@ import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocShareService;
-import com.flowiee.dms.service.storage.DocumentInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,11 +14,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg")
-public class DocumentShareController {
+public class DocShareController {
     @Autowired
     private DocShareService docShareService;
-    @Autowired
-    private DocumentInfoService documentInfoService;
     @Autowired
     private DocActionService docActionService;
 

@@ -12,7 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "category_history")
+@Table(name = "ctg_history")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

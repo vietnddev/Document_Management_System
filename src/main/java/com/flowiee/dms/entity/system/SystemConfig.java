@@ -12,7 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "sys_config")
+@Table(name = "config")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
