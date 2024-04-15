@@ -37,7 +37,7 @@ public class DocumentController extends BaseController {
                                                           @RequestParam("pageNum") Integer pageNum,
                                                           @RequestParam("parentId") Integer parentId) {
         try {
-            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId);
+            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null);
             return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"), ex);

@@ -17,7 +17,7 @@ import java.util.List;
 
 @Builder
 @Entity
-@Table(name = "stg_file_storage")
+@Table(name = "file_storage")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

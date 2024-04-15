@@ -36,6 +36,7 @@ public class DocumentDTO extends Document implements Serializable {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Date lastUpdatedAt;
     private String lastUpdatedBy;
+    private String path;
 
     public static DocumentDTO fromDocument(Document document) {
         DocumentDTO dto = new DocumentDTO();

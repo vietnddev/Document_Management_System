@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Builder
 @Entity
-@Table(name = "stg_document")
+@Table(name = "document")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

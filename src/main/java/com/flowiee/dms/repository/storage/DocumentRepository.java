@@ -16,11 +16,13 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "where 1=1 " +
            "and (:parentId is null or d.parentId=:parentId) " +
            "and (:isAdmin is true or (ds.account.id=:accountId and ds.role = 'R')) " +
-           "and (:docTypeId is null or d.docType.id=:docTypeId)")
+           "and (:docTypeId is null or d.docType.id=:docTypeId) " +
+           "and (:listId is null or d.id in :listId)")
     Page<Document> findAll(@Param("parentId") Integer parentId,
                            @Param("isAdmin") boolean isAdmin,
                            @Param("accountId") Integer accountId,
                            @Param("docTypeId") Integer docTypeId,
+                           @Param("listId") List<Integer> listId,
                            Pageable pageable);
 
     @Query(value = "select f.id as field_Id_0, " +

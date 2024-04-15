@@ -9,7 +9,7 @@ import java.io.Serial;
 
 @Builder
 @Entity
-@Table(name = "sys_log")
+@Table(name = "log")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
