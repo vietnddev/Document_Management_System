@@ -14,11 +14,13 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     @Query("select distinct d from Document d " +
            "left join DocShare ds on ds.document.id = d.id " +
            "where 1=1 " +
+           "and (:txtSearch is null or d.name like %:txtSearch%) " +
            "and (:parentId is null or d.parentId=:parentId) " +
            "and (:isAdmin is true or (ds.account.id=:accountId and ds.role = 'R')) " +
            "and (:docTypeId is null or d.docType.id=:docTypeId) " +
            "and (:listId is null or d.id in :listId)")
-    Page<Document> findAll(@Param("parentId") Integer parentId,
+    Page<Document> findAll(@Param("txtSearch") String txtSearch,
+                           @Param("parentId") Integer parentId,
                            @Param("isAdmin") boolean isAdmin,
                            @Param("accountId") Integer accountId,
                            @Param("docTypeId") Integer docTypeId,

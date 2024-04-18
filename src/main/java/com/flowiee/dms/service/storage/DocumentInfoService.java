@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface DocumentInfoService extends BaseService<Document> {
-    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId);
+    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String pTxtSearch);
 
     List<DocumentDTO> findFolderByParentId(Integer parentId);
 

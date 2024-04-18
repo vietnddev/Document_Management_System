@@ -43,50 +43,51 @@ function updatePaginationUI(pageNum, pageSize, totalPage, totalElements) {
     $('#paginationInfo').text("Showing " + startCount + " to " + endCount + " of " + totalElements + " entries");
 
     $('#totalPages').text("Total pages " + totalPage);
-
-    if(pageNum === 1) {
-        $('#firstPage').attr("disable", "");
-        $('#previousPage').attr("disable", "");
-    }
 }
 
-function updateTableContentWhenOnClickPagination(loadNewDataMethod) {
-    let lvPageSize = $('#selectPageSize').val();
+function updateTableContentWhenOnClickPagination(loadNewDataMethod, pageSize, pageNum, totalPage, totalElements) {
     $('#selectPageSize').on('click', function() {
         console.log($(this).val())
-        if (lvPageSize === $(this).val()) {
+        if (pageSize === $(this).val()) {
             return;
         }
-        lvPageSize = $(this).val();
+        pageSize = $(this).val();
         loadNewDataMethod($(this).val(), 1);
     });
 
     $('#firstPage').on('click', function() {
-        if (parseInt($('#paginationInfo').attr("pageNum")) === 1) {
+        if (pageNum === 1) {
             return;
         }
-        loadNewDataMethod(lvPageSize, 1);
+        loadNewDataMethod(pageSize, 1);
     });
 
     $('#previousPage').on('click', function() {
-        if (parseInt($('#paginationInfo').attr("pageNum")) === 1) {
+        if (pageNum === 1) {
             return;
         }
-        loadNewDataMethod(lvPageSize, $('#paginationInfo').attr("pageNum") - 1);
+        loadNewDataMethod(pageSize, pageNum - 1);
     });
 
     $('#nextPage').on('click', function() {
-        if ($('#paginationInfo').attr("pageNum") === $('#paginationInfo').attr("totalPage")) {
+        console.log("Next page: pageSize ", pageSize, " pageNum, ", pageNum, " ,lvTotalPage ", totalPage, " ,lvTotalElements ", totalElements)
+        if (pageNum === totalPage) {
             return;
         }
-        loadNewDataMethod(lvPageSize, parseInt($('#paginationInfo').attr("pageNum")) + 1);
+        if (totalElements <= pageSize) {
+            return;
+        }
+        loadNewDataMethod(pageSize, pageNum + 1);
     });
 
     $('#lastPage').on('click', function() {
-        if ($('#paginationInfo').attr("pageNum") === $('#paginationInfo').attr("totalPage")) {
+        if (pageNum === totalPage) {
             return;
         }
-        loadNewDataMethod(lvPageSize, $('#paginationInfo').attr("totalPage"));
+        if (totalElements <= pageSize) {
+            return;
+        }
+        loadNewDataMethod(pageSize, totalPage);
     });
 }
 
@@ -223,13 +224,4 @@ function loadFolderTree() {
         });
         $(this).attr("collapse", "Y");
     });
-}
-
-let convertDateT1 = (dateInput) => {
-    let dateObject = new Date(dateInput);
-    let year = dateObject.getFullYear();
-    let month = dateObject.getMonth() + 1; // Tháng (đánh số từ 0)
-    let day = dateObject.getDate();
-    // Format lại chuỗi ngày tháng thành 'dd/MM/yyyy'
-    return formattedDate = (day < 10 ? '0' : '') + day + '/' + (month < 10 ? '0' : '') + month + '/' + year;
 }

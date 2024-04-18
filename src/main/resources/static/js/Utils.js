@@ -16,3 +16,23 @@ $("#langOptionEn").click(function () {
     mvLang = "en";
     window.location.replace("?lang=en");
 })
+
+let getCurrentPageSize = () => {
+    return parseInt($('#selectPageSize').val());
+}
+
+let getCurrentPageNum = () => {
+    let pageNum = $('#paginationInfo').attr("pageNum");
+    if (pageNum == null) {
+        pageNum = 1;
+    }
+    return pageNum;
+}
+
+let getCurrentTotalPage = () => {
+    return $('#paginationInfo').attr("totalPage");
+}
+
+let getCurrentTotalElements = () => {
+    return $('#paginationInfo').attr("totalElements");
+}

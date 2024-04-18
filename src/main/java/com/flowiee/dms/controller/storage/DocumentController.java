@@ -35,9 +35,10 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllDocuments(@RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam("pageNum") Integer pageNum,
-                                                          @RequestParam("parentId") Integer parentId) {
+                                                          @RequestParam("parentId") Integer parentId,
+                                                          @RequestParam(value = "txtSearch", required = false) String txtSearch) {
         try {
-            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null);
+            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, txtSearch);
             return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"), ex);
