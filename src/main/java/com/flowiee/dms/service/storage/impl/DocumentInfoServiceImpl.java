@@ -51,13 +51,13 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
     private DocShareRepository docShareRepo;
 
     @Override
-    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId) {
+    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String pTxtSearch) {
         Pageable pageable = Pageable.unpaged();
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
         }
         boolean isAdmin = CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername());
-        Page<Document> documents = documentRepo.findAll(parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), null, listId, pageable);
+        Page<Document> documents = documentRepo.findAll(pTxtSearch, parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), null, listId, pageable);
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
         //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
         for (DocumentDTO d : documentDTOs) {
@@ -120,7 +120,7 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
 
     @Override
     public List<Document> findByDoctype(Integer docTypeId) {
-        return documentRepo.findAll(null, true, null, null, null, Pageable.unpaged()).getContent();
+        return documentRepo.findAll(null, null, true, null, null, null, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -249,7 +249,7 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
                         "LEFT JOIN SubFolderList sf ON rh.ID = sf.Parent_ID " +
                         "WHERE 1=1 ";
         if (parentId != null) {
-            strSQL += "rh.PARENT_ID = ? ";
+            strSQL += "AND rh.PARENT_ID = ? ";
         }
         strSQL += "ORDER BY rh.Path";
         //HierarchyLevel: Thư mục ở cấp thứ mấy

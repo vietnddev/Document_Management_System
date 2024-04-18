@@ -47,7 +47,7 @@ public class DocExportServiceImpl implements DocExportService {
 
             List<DocumentDTO> listData = documentInfoService.generateFolderTree(null);
             List<Integer> idList = listData.stream().map(DocumentDTO::getId).toList(); //.toList() from Jdk version 16
-            List<DocumentDTO> listDataFull = documentInfoService.findDocuments(-1, -1, null, idList).getContent();
+            List<DocumentDTO> listDataFull = documentInfoService.findDocuments(-1, -1, null, idList, null).getContent();
 
             for (int i = 0; i < listData.size(); i++) {
                 XSSFCellStyle cellStyle = workbook.createCellStyle();

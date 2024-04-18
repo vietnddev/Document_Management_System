@@ -168,9 +168,15 @@
         let mvName = $("#nameField");
         let mvDes = $("#desField");
         let mvAccountShares = [];
+        let mvPageSize = mvPageSizeDefault;
+        let mvPageNum = 1;
+        let mvTotalPage = 1;
+        let mvTotalElements = 1;
+        let mvPagination;
 
         $(document).ready(function () {
-            init();
+            loadDocuments(mvPageSizeDefault, 1);
+            setupSearchTool(mvSearchTool);
             loadFolderTree();
             beforeSubmitShareRights();
             shareDoc();
@@ -178,30 +184,81 @@
             updateDocument();
             deleteDocument();
             submitInsertOrUpdate();
+            search();
+            updateTableContentWhenOnClickPagination();
         });
 
-        function init() {
-            loadDocuments(mvPageSizeDefault, 1);
-            updateTableContentWhenOnClickPagination(loadDocuments);
-            setupSearchTool(mvSearchTool);
+        function updateTableContentWhenOnClickPagination() {
+            $('#selectPageSize').on('click', function() {
+                if (mvPageSize === $(this).val()) {
+                    return;
+                }
+                mvPageSize = $(this).val();
+                loadDocuments($(this).val(), 1);
+            });
+
+            $('#firstPage').on('click', function() {
+                if (mvPageNum === 1) {
+                    return;
+                }
+                loadDocuments(mvPageSize, 1);
+            });
+
+            $('#previousPage').on('click', function() {
+                if (mvPageNum === 1) {
+                    return;
+                }
+                loadDocuments(mvPageSize, mvPageNum - 1);
+            });
+
+            $('#nextPage').on('click', function() {
+                if (mvPageNum === mvTotalPage) {
+                    return;
+                }
+                if (mvTotalElements <= mvPageSize) {
+                    return;
+                }
+                loadDocuments(mvPageSize, mvPageNum + 1);
+            });
+
+            $('#lastPage').on('click', function() {
+                if (mvPageNum === mvTotalPage) {
+                    return;
+                }
+                if (mvTotalElements <= mvPageSize) {
+                    return;
+                }
+                loadDocuments(mvPageSize, mvTotalPage);
+            });
+        }
+
+        function search() {
+            $("#btnSearch").on("click", function () {
+                loadDocuments(mvPageSize, mvPageNum);
+            })
         }
 
         function loadDocuments(pageSize, pageNum) {
+            let contentTable = $('#contentTable');
+            contentTable.empty();
             let apiURL = mvHostURLCallApi + "/stg/doc/all";
             let params = {
                 pageSize: pageSize,
                 pageNum: pageNum,
-                parentId: mvParentId
+                parentId: mvParentId,
+                txtSearch: $("#txtFilter").val()
             }
             $.get(apiURL, params, function (response) {
                 if (response.status === "OK") {
                     let data = response.data;
-                    let pagination = response.pagination;
+                    mvPagination = response.pagination;
+                    mvPageNum = mvPagination.pageNum;
+                    mvPageSize = mvPagination.pageSize;
+                    mvTotalPage = mvPagination.totalPage;
+                    mvTotalElements = mvPagination.totalElements;
 
-                    updatePaginationUI(pagination.pageNum, pagination.pageSize, pagination.totalPage, pagination.totalElements);
+                    updatePaginationUI(mvPagination.pageNum, mvPagination.pageSize, mvPagination.totalPage, mvPagination.totalElements);
 
-                    let contentTable = $('#contentTable');
-                    contentTable.empty();
                     $.each(data, function (index, d) {
                         mvDocuments[d.id] = d;
                         let iconDoc = d.isFolder === "Y" ? "/dist/icon/folder.png" : "/dist/icon/pdf.png";
