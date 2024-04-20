@@ -45,7 +45,7 @@ public class AccountControllerView extends BaseController {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_ACCOUNT_DETAIL);
         List<RoleModel> roleOfAccount = roleService.findAllRoleByAccountId(accountId);
         modelAndView.addObject("listRole", roleOfAccount);
-        modelAndView.addObject("accountInfo", accountService.findById(accountId));
+        modelAndView.addObject("accountInfo", accountService.findById(accountId).get());
         return baseView(modelAndView);
     }
 

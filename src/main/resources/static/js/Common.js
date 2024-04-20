@@ -47,11 +47,10 @@ function updatePaginationUI(pageNum, pageSize, totalPage, totalElements) {
 
 function updateTableContentWhenOnClickPagination(loadNewDataMethod, pageSize, pageNum, totalPage, totalElements) {
     $('#selectPageSize').on('click', function() {
-        console.log($(this).val())
-        if (pageSize === $(this).val()) {
+        if (pageSize === parseInt($(this).val())) {
             return;
         }
-        pageSize = $(this).val();
+        pageSize = parseInt($(this).val());
         loadNewDataMethod($(this).val(), 1);
     });
 
@@ -70,7 +69,6 @@ function updateTableContentWhenOnClickPagination(loadNewDataMethod, pageSize, pa
     });
 
     $('#nextPage').on('click', function() {
-        console.log("Next page: pageSize ", pageSize, " pageNum, ", pageNum, " ,lvTotalPage ", totalPage, " ,lvTotalElements ", totalElements)
         if (pageNum === totalPage) {
             return;
         }

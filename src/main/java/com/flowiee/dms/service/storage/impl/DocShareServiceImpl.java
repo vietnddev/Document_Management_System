@@ -33,6 +33,9 @@ public class DocShareServiceImpl implements DocShareService {
     public List<DocShareModel> findDetailRolesOfDocument(Integer docId) {
         List<DocShareModel> lsModel = new ArrayList<>();
         for (Account account : accountService.findAll()) {
+            if (account.getUsername().equals(CommonUtils.ADMIN)) {
+                continue;
+            }
             DocShareModel model = new DocShareModel();
             model.setDocumentId(docId);
             model.setAccountId(account.getId());

@@ -18,3 +18,6 @@ INSERT INTO SYS_LANGUAGES(CODE, KEY, VALUE) VALUES('vi', 'pro.product.name', 'T�
 INSERT INTO SYS_LANGUAGES(CODE, KEY, VALUE) VALUES('vi', 'pro.product.list', 'Danh sách sản phẩm');
 INSERT INTO SYS_LANGUAGES(CODE, KEY, VALUE) VALUES('vi', 'pro.order.list', 'Danh sách đơn hàng');
 INSERT INTO SYS_LANGUAGES(CODE, KEY, VALUE) VALUES('vi', 'pro.order.code', 'Mã sản phẩm');
+
+INSERT INTO CATEGORY(TYPE, CODE, NAME, STATUS, IS_DEFAULT, ENDPOINT, ICON) VALUES('DOCUMENT_TYPE', 'ROOT', 'Loại tài liệu', 0, 0, '/system/category/document-type', 'fa-solid fa-file-pdf');
+INSERT INTO CATEGORY(TYPE, CODE, NAME, STATUS, IS_DEFAULT, ENDPOINT) VALUES('DOCUMENT_TYPE', 'VBHC', 'Văn bản hành chính', 0, 0, null);

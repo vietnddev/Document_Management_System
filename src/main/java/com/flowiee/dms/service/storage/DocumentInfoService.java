@@ -7,16 +7,12 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface DocumentInfoService extends BaseService<Document> {
+public interface DocumentInfoService extends BaseService<DocumentDTO> {
     Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String pTxtSearch);
 
     List<DocumentDTO> findFolderByParentId(Integer parentId);
 
     List<Document> findByDoctype(Integer docType);
-
-    DocumentDTO save(DocumentDTO documentDTO);
-
-    DocumentDTO update(DocumentDTO documentDTO, Integer documentId);
 
     List<DocumentDTO> findHierarchyOfDocument(Integer documentId, Integer parentId);
 

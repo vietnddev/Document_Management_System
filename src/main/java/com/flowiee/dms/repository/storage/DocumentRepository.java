@@ -18,11 +18,12 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "where 1=1 " +
            "and (:txtSearch is null or d.name like %:txtSearch%) " +
            "and (:parentId is null or d.parentId=:parentId) " +
-           "and (:isAdmin is true or (ds.account.id=:accountId and ds.role = 'R')) " +
+           "and (:isAdmin is true or d.createdBy=:currentAccountId or (ds.account.id=:accountId and ds.role = 'R')) " +
            "and (:docTypeId is null or d.docType.id=:docTypeId) " +
            "and (:listId is null or d.id in :listId)")
     Page<Document> findAll(@Param("txtSearch") String txtSearch,
                            @Param("parentId") Integer parentId,
+                           @Param("currentAccountId") Integer currentAccountId,
                            @Param("isAdmin") boolean isAdmin,
                            @Param("accountId") Integer accountId,
                            @Param("docTypeId") Integer docTypeId,
@@ -35,9 +36,9 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                    "       d.value as data_value_3, " +
                    "       f.type as field_type_4, " +
                    "       f.required as field_required_5 " +
-                   "from stg_doc_field f " +
-                   "left join stg_doc_data d on d.doc_field_id = f.id and d.document_id = :documentId " +
-                   "left join stg_document dc on dc.doc_type_id = f.doc_type_id and dc.id = :documentId " +
+                   "from doc_field f " +
+                   "left join doc_data d on d.doc_field_id = f.id and d.document_id = :documentId " +
+                   "left join document dc on dc.doc_type_id = f.doc_type_id and dc.id = :documentId " +
                    "where f.doc_type_id = dc.doc_type_id " +
                    "order by f.sort",
            nativeQuery = true)

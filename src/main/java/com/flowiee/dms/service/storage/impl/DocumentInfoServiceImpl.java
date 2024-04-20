@@ -10,7 +10,6 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.repository.storage.DocumentRepository;
-import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocShareService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
@@ -56,8 +55,9 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
         }
-        boolean isAdmin = CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername());
-        Page<Document> documents = documentRepo.findAll(pTxtSearch, parentId, isAdmin, CommonUtils.getUserPrincipal().getId(), null, listId, pageable);
+        Account currentAccount = CommonUtils.getUserPrincipal();
+        boolean isAdmin = CommonUtils.ADMIN.equals(currentAccount.getUsername());
+        Page<Document> documents = documentRepo.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), null, listId, pageable);
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
         //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
         for (DocumentDTO d : documentDTOs) {
@@ -82,45 +82,41 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
     }
 
     @Override
-    public Optional<Document> findById(Integer id) {
-        return documentRepo.findById(id);
+    public Optional<DocumentDTO> findById(Integer id) {
+        Optional<Document> document = documentRepo.findById(id);
+        return document.map(d -> Optional.of(DocumentDTO.fromDocument(d))).orElse(null);
     }
 
     @Override
-    public Document save(Document document) {
-        return null;
-    }
-
-    @Override
-    public Document update(Document data, Integer documentId) {
-        Optional<Document> document = this.findById(documentId);
+    public DocumentDTO update(DocumentDTO data, Integer documentId) {
+        Optional<Document> document = documentRepo.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException();
         }
         document.get().setName(data.getName());
         document.get().setDescription(data.getDescription());
         systemLogService.writeLog(MODULE.STORAGE.name(), ACTION.STG_DOC_UPDATE.name(), "Update document: docId=" + documentId, null);
-        logger.info(DocumentInfoServiceImpl.class.getName() + ": Update document docId=" + documentId);
-        return documentRepo.save(document.get());
+        logger.info("{}: Update document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
+        return DocumentDTO.fromDocument(documentRepo.save(document.get()));
     }
 
     @Transactional
     @Override
     public String delete(Integer documentId) {
-        Optional<Document> document = this.findById(documentId);
+        Optional<DocumentDTO> document = this.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException("DocField not found!");
         }
         docShareService.deleteByDocument(documentId);
         documentRepo.deleteById(documentId);
         systemLogService.writeLog(MODULE.STORAGE.name(), ACTION.STG_DOC_DELETE.name(), "Xóa tài liệu: docId=" + documentId, null);
-        logger.info(DocumentInfoServiceImpl.class.getName() + ": Delete document docId=" + documentId);
+        logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
         return MessageUtils.DELETE_SUCCESS;
     }
 
     @Override
     public List<Document> findByDoctype(Integer docTypeId) {
-        return documentRepo.findAll(null, null, true, null, null, null, Pageable.unpaged()).getContent();
+        return documentRepo.findAll(null, null, null, true, null, null, null, Pageable.unpaged()).getContent();
     }
 
     @Override
@@ -150,18 +146,6 @@ public class DocumentInfoServiceImpl implements DocumentInfoService {
         } catch (RuntimeException | IOException ex) {
             throw new AppException(String.format(MessageUtils.CREATE_ERROR_OCCURRED, "document"), ex);
         }
-    }
-
-    @Override
-    public DocumentDTO update(DocumentDTO dto, Integer documentId) {
-        Optional<Document> document = this.findById(documentId);
-        if (document.isEmpty()) {
-            throw new BadRequestException("Document not found!");
-        }
-        document.get().setName(dto.getName());
-        document.get().setAsName(CommonUtils.generateAliasName(dto.getName()));
-        document.get().setDescription(dto.getDescription());
-        return DocumentDTO.fromDocument(documentRepo.save(document.get()));
     }
 
     @Override

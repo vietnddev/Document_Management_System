@@ -49,6 +49,6 @@ public class DocHistoryServiceImpl implements DocHistoryService {
 
     @Override
     public List<DocHistory> findByDocData(Integer docDataId) {
-        return findByDocData(docDataId);
+        return docHistoryRepo.findByDocData(docDataId);
     }
 }

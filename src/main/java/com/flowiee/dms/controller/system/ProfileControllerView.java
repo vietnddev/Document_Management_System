@@ -71,5 +71,5 @@ public class ProfileControllerView extends BaseController {
 		redirectAttributes.addAttribute("message", "Sai mật khẩu hiện tại!");
 
 		return new ModelAndView("redirect:/profile");
-	}  
-}   
+	}
+}

@@ -10,6 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ import java.util.List;
 
 @Service
 public class DocExportServiceImpl implements DocExportService {
+    private static final Logger logger = LoggerFactory.getLogger(DocExportServiceImpl.class);
+
     @Autowired
     private DocumentInfoService documentInfoService;
 
@@ -33,14 +37,17 @@ public class DocExportServiceImpl implements DocExportService {
         String rootPath = CommonUtils.templateExportExcelPath;
         String templateName = "Template_E_Document.xlsx";
         String fileNameReturn = exportTime + "_ListOfDocuments.xlsx";
-            Path templateOriginal = Path.of(rootPath + "/" + templateName);
-            Path templateTarget = Path.of(rootPath + "/temp/" + exportTime + "_" + templateName);
+        Path templateOriginal = Path.of(rootPath + "/" + templateName);
+        Path templateTarget = Path.of(rootPath + "/temp/" + exportTime + "_" + templateName);
+        XSSFWorkbook workbook = null;
+        try {
             File templateToExport = Files.copy(templateOriginal, templateTarget, StandardCopyOption.REPLACE_EXISTING).toFile();
+            workbook = new XSSFWorkbook(templateToExport);
             XSSFSheet sheet = workbook.getSheetAt(0);
 
             List<DocumentDTO> listData = documentInfoService.generateFolderTree(null);
             List<Integer> idList = listData.stream().map(DocumentDTO::getId).toList(); //.toList() from Jdk version 16
-            List<DocumentDTO> listDataFull = documentInfoService.findDocuments(-1, -1, null, idList, null).getContent();
+            List<DocumentDTO> listDataFull = documentInfoService.findDocuments(-1, -1, null, null, null).getContent();
 
             for (int i = 0; i < listData.size(); i++) {
                 XSSFCellStyle cellStyle = workbook.createCellStyle();
@@ -57,6 +64,15 @@ public class DocExportServiceImpl implements DocExportService {
             return new ResponseEntity<>(ExcelUtils.build(workbook), ExcelUtils.setHeaders(fileNameReturn), HttpStatus.OK);
         } catch (IOException | InvalidFormatException ex) {
             throw new RuntimeException(ex);
+        } finally {
+            try {
+                if (workbook != null) {
+                    workbook.close();
+                }
+                Files.deleteIfExists(templateTarget);
+            } catch (IOException e) {
+                logger.error("An error when delete template temp after exported data!", e);
+            }
         }
     }
 }
