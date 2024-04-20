@@ -11,20 +11,16 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DocExportServiceImpl implements DocExportService {
@@ -37,13 +33,10 @@ public class DocExportServiceImpl implements DocExportService {
         String rootPath = CommonUtils.templateExportExcelPath;
         String templateName = "Template_E_Document.xlsx";
         String fileNameReturn = exportTime + "_ListOfDocuments.xlsx";
-        try {
             Path templateOriginal = Path.of(rootPath + "/" + templateName);
             Path templateTarget = Path.of(rootPath + "/temp/" + exportTime + "_" + templateName);
             File templateToExport = Files.copy(templateOriginal, templateTarget, StandardCopyOption.REPLACE_EXISTING).toFile();
-            XSSFWorkbook workbook = new XSSFWorkbook(templateToExport);
             XSSFSheet sheet = workbook.getSheetAt(0);
-
 
             List<DocumentDTO> listData = documentInfoService.generateFolderTree(null);
             List<Integer> idList = listData.stream().map(DocumentDTO::getId).toList(); //.toList() from Jdk version 16
@@ -61,7 +54,6 @@ public class DocExportServiceImpl implements DocExportService {
                 }
             }
             sheet.autoSizeColumn(2);
-            Files.deleteIfExists(templateTarget);
             return new ResponseEntity<>(ExcelUtils.build(workbook), ExcelUtils.setHeaders(fileNameReturn), HttpStatus.OK);
         } catch (IOException | InvalidFormatException ex) {
             throw new RuntimeException(ex);
