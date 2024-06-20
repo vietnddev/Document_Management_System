@@ -32,7 +32,7 @@
                     <div class="row">
                         <div class="col-12">
                             <!--Search tool-->
-                            <div th:replace="fragments :: searchTool('Y','Y','Y','Y','Y','Y','Y')" id="searchTool"></div>
+                            <div th:replace="fragments :: searchTool('Y')" id="searchTool"></div>
 
                             <div class="card">
                                 <div class="card-header">
@@ -153,8 +153,6 @@
 
         <div th:replace="modal_fragments :: confirm_modal"></div>
 
-        <div th:replace="footer :: footer"></div>
-
         <aside class="control-sidebar control-sidebar-dark"></aside>
 
         <div th:replace="header :: scripts"></div>
@@ -167,7 +165,7 @@
 
     <script type="text/javascript">
         let mvParentId = [[${parentId}]];
-        let mvSearchTool = ["BRAND", "PRODUCT_TYPE", "COLOR", "SIZE", "UNIT", "DISCOUNT", "PRODUCT_STATUS", "DOCUMENT_TYPE"];
+        let mvSearchTool = ["DOCUMENT_TYPE"];
         let mvDocuments = [];
         let mvDocType = $("#docTypeField");
         let mvName = $("#nameField");

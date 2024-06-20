@@ -7,12 +7,9 @@ import javax.persistence.*;
 
 import com.flowiee.dms.entity.storage.DocField;
 import com.flowiee.dms.entity.storage.Document;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -25,57 +22,55 @@ import java.util.Map;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category extends BaseEntity implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "type", length = 20, nullable = false)
-	private String type;
+	String type;
 
 	@Column(name = "code", length = 20, columnDefinition = "VARCHAR2(20) DEFAULT ''")
-	private String code;
+	String code;
 
 	@Column(name = "name", length = 50, nullable = false)
-	private String name;
+	String name;
 
 	@Column(name = "sort")
-	private Integer sort;
+	Integer sort;
 
 	@Column(name = "icon")
-	private String icon;
+	String icon;
 
 	@Column(name = "color")
-	private String color;
+	String color;
 
 	@Column(name = "parent_id")
-	private Integer parentId;
+	Integer parentId;
 
 	@Column(name = "note", length = 255)
-	private String note;
+	String note;
 
 	@Column(name = "endpoint", length = 50)
-	private String endpoint;
+	String endpoint;
 
 	@Column(name = "is_default", length = 1, nullable = false)
-	private String isDefault;
+	String isDefault;
 
 	@Column(name = "status", length = 20, nullable = false)
-	private Boolean status;
+	Boolean status;
 
 	@Transient
-	private Integer totalSubRecords;
+	Integer totalSubRecords;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "docType", fetch = FetchType.LAZY)
-	private List<Document> listDocument;
+	List<Document> listDocument;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "docType", fetch = FetchType.LAZY)
-	private List<DocField> listDocfield;
+	List<DocField> listDocfield;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-	private List<CategoryHistory> listCategoryHistory;
+	List<CategoryHistory> listCategoryHistory;
 
 	public Category(Integer id, String name) {
 		super.id = id;

@@ -1,6 +1,7 @@
 package com.flowiee.dms.repository.storage;
 
 import com.flowiee.dms.entity.storage.Document;
+import com.flowiee.dms.entity.storage.view.DocumentTreeView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,7 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "and (:parentId is null or d.parentId=:parentId) " +
            "and (:isAdmin is true or d.createdBy=:currentAccountId or (ds.account.id=:accountId and ds.role = 'R')) " +
            "and (:docTypeId is null or d.docType.id=:docTypeId) " +
+           "and (:isFolder is null or d.isFolder=:isFolder) " +
            "and (:listId is null or d.id in :listId)")
     Page<Document> findAll(@Param("txtSearch") String txtSearch,
                            @Param("parentId") Integer parentId,
@@ -27,6 +29,7 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                            @Param("isAdmin") boolean isAdmin,
                            @Param("accountId") Integer accountId,
                            @Param("docTypeId") Integer docTypeId,
+                           @Param("isFolder") String isFolder,
                            @Param("listId") List<Integer> listId,
                            Pageable pageable);
 
@@ -58,4 +61,17 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "from Document d " +
            "left join FileStorage f on f.document.id = d.id")
     List<Object[]> summaryStorage();
+
+    @Query("select d from DocumentTreeView d " +
+           "where 1=1 " +
+           "and :parentId is null or d.parentId=:parentId " +
+           "order by d.path")
+    List<DocumentTreeView> findGeneralFolderTree(@Param("parentId") Integer parentId);
+
+    @Query("select case when count(d) > 0 then true else false end " +
+           "from Document d " +
+           "where 1=1 " +
+           "and d.parentId = :docId " +
+           "and (:isFolder is null or d.isFolder = :isFolder)")
+    boolean existsSubDocument(@Param("docId") Integer docId, @Param("isFolder") String isFolder);
 }

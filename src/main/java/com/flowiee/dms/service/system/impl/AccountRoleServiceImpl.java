@@ -7,10 +7,13 @@ import com.flowiee.dms.model.role.ActionModel;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.model.role.ModuleModel;
 import com.flowiee.dms.repository.system.AccountRoleRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.MessageUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,9 +21,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AccountRoleServiceImpl implements RoleService {
-    @Autowired private AccountRoleRepository accountRoleRepo;
-    @Autowired private AccountService accountService;
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class AccountRoleServiceImpl extends BaseService implements RoleService {
+    AccountService        accountService;
+    AccountRoleRepository accountRoleRepo;
+
+    public AccountRoleServiceImpl(AccountRoleRepository accountRoleRepo, @Lazy AccountService accountService) {
+        this.accountRoleRepo = accountRoleRepo;
+        this.accountService = accountService;
+    }
 
     @Override
     public List<RoleModel> findAllRoleByAccountId(Integer accountId) {

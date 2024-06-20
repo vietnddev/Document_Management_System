@@ -26,20 +26,20 @@ function loadDocuments(pageSize, pageNum) {
                 let btnShare = d.thisAccCanShare ? `<button class="btn btn-info btn-sm btn-share" docId="${d.id}"> <i class="fa-solid fa-share"></i> </button>` : ``;
                 let btnDelete = d.thisAccCanDelete ? `<button class="btn btn-danger btn-sm btn-delete" docId="${d.id}"> <i class="fa-solid fa-trash"></i> </button>` : ``;
                 contentTable.append(`
-                            <tr>
-                                <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>
-                                <td><img src="${iconDoc}"></td>
-                                <td>${d.createdAt}</td>
-                                <td style="max-width: 300px"><a href="/stg/doc/${d.asName}-${d.id}">${d.name}</a></td>
-                                <td>${d.docTypeName}</td>
-                                <td>${d.description}</td>
-                                <td>
-                                    ${btnUpdate}
-                                    ${btnShare}
-                                    ${btnDelete}
-                                </td>
-                            </tr>
-                        `);
+                    <tr>
+                        <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>
+                        <td><img src="${iconDoc}"></td>
+                        <td>${d.createdAt}</td>
+                        <td style="max-width: 300px"><a href="/stg/doc/${d.asName}-${d.id}">${d.name}</a></td>
+                        <td>${d.docTypeName}</td>
+                        <td>${d.description}</td>
+                        <td>
+                            ${btnUpdate}
+                            ${btnShare}
+                            ${btnDelete}
+                        </td>
+                    </tr>
+                `);
             });
         }
     }).fail(function () {

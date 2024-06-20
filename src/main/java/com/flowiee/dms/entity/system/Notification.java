@@ -2,15 +2,12 @@ package com.flowiee.dms.entity.system;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.io.Serial;
 import java.io.Serializable;
 
 @Entity
@@ -20,19 +17,17 @@ import java.io.Serializable;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Notification extends BaseEntity implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-
     @Column(name = "message", nullable = false)
-    private String message;
+    String message;
 
     @Column(name = "doc_shared_id")
-    private Integer docSharedId;
+    Integer docSharedId;
 
     @Column(name = "send")
-    private String send;
+    String send;
 
     @Column(name = "receive")
-    private String receive;
+    String receive;
 }

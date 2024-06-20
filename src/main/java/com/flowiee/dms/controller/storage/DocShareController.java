@@ -6,7 +6,9 @@ import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocShareService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +16,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class DocShareController {
-    @Autowired
-    private DocShareService docShareService;
-    @Autowired
-    private DocActionService docActionService;
+    DocShareService  docShareService;
+    DocActionService docActionService;
 
     @Operation(summary = "Get detail shared role of document")
     @GetMapping("/doc/share/{id}")

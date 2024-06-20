@@ -2,12 +2,10 @@ package com.flowiee.dms.entity.system;
 
 import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.io.Serial;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.io.Serializable;
 
 @Entity
@@ -16,16 +14,14 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Language extends BaseEntity implements Serializable {
-    @Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "code")
-    private String code;
+    String code;
     
     @Column(name = "key")
-    private String key;
+    String key;
     
     @Column(name = "value")
-    private String value;
+    String value;
 }

@@ -7,9 +7,9 @@ import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.utils.CommonUtils;
 import javax.persistence.*;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
@@ -23,63 +23,61 @@ import java.util.List;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStorage extends BaseEntity implements Serializable {
-    @Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "customize_name")
-    private String customizeName;
+    String customizeName;
 
     @Column(name = "saved_name", nullable = false)
-    private String storageName;
+    String storageName;
 
     @Column(name = "original_name", nullable = false)
-    private String originalName;
+    String originalName;
 
     @Column(name = "note")
-    private String note;
+    String note;
 
     @Column(name = "extension", length = 10)
-    private String extension;
+    String extension;
 
     @Column(name = "content_type", length = 100)
-    private String contentType;
+    String contentType;
 
     @Column(name = "file_size")
-    private long fileSize;
+    long fileSize;
 
     @Column(name = "content")
-    private byte[] content;
+    byte[] content;
 
     @Column(name = "directory_path", length = 500)
-    private String directoryPath;
+    String directoryPath;
 
     @Column(name = "sort")
-    private Integer sort;
+    Integer sort;
 
     @Column(name = "status", nullable = false)
-    private boolean status;
+    boolean status;
 
     @Column(name = "module", nullable = false)
-    private String module;
+    String module;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
-    private Document document;
+    Document document;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "upload_by", nullable = false)
-    private Account account;
+    Account account;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    boolean isActive;
 
     @Transient
-    private String src;
+    String src;
 
     @JsonIgnore
     @OneToMany(mappedBy = "fileStorage", fetch = FetchType.LAZY)
-    private List<DocHistory> listDocHistory;
+    List<DocHistory> listDocHistory;
 
     public FileStorage(MultipartFile file, String pModule) {
         try {

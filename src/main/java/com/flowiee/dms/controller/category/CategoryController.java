@@ -9,6 +9,9 @@ import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,13 +23,10 @@ import java.util.Objects;
 @RestController
 @RequestMapping("${app.api.prefix}/category")
 @Tag(name = "Category API", description = "Quản lý danh mục hệ thống")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class CategoryController {
-    private final CategoryService categoryService;
-
-    @Autowired
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
+    CategoryService categoryService;
 
     @Operation(summary = "Find all category")
     @GetMapping("/all")

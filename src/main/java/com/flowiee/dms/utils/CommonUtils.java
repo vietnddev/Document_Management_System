@@ -3,6 +3,7 @@ package com.flowiee.dms.utils;
 import com.flowiee.dms.exception.AuthenticationException;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.UserPrincipal;
+import com.flowiee.dms.utils.constants.CategoryType;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,19 +18,18 @@ public class CommonUtils {
     public static final String rootPath = "src/main/resources/static";
     public static final String fileUploadPath = rootPath + "/uploads/";
     public static final String templateExportExcelPath = rootPath + "/templates/excel";
-    public static final String ADMIN = "admin";
     public static Date START_APP_TIME = null;
 
     public static String getCategoryType(String key) {
         Map<String, String> map = new HashMap<>();
-        for (AppConstants.CATEGORY c : AppConstants.CATEGORY.values()) {
+        for (CategoryType c : CategoryType.values()) {
             map.put(c.getKey(), c.getName());
         }
         return map.get(key);
     }
 
     public static boolean isValidCategory(String type) {
-        for (AppConstants.CATEGORY c : AppConstants.CATEGORY.values()) {
+        for (CategoryType c : CategoryType.values()) {
             if (c.getKey().equals(type)) {
                 return true;
             }

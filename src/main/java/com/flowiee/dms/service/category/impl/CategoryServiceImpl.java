@@ -6,10 +6,13 @@ import com.flowiee.dms.entity.category.Category;
 import com.flowiee.dms.entity.category.CategoryHistory;
 import com.flowiee.dms.repository.category.CategoryHistoryRepository;
 import com.flowiee.dms.repository.category.CategoryRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.category.CategoryService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,17 +24,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CategoryServiceImpl implements CategoryService {
-    private final CategoryRepository categoryRepo;
-    private final CategoryHistoryRepository categoryHistoryRepo;
-    private final DocumentInfoService       documentInfoService;
-
-    @Autowired
-    public CategoryServiceImpl(CategoryRepository categoryRepo, DocumentInfoService documentInfoService, CategoryHistoryRepository categoryHistoryRepo) {
-        this.categoryRepo = categoryRepo;
-        this.documentInfoService = documentInfoService;
-        this.categoryHistoryRepo = categoryHistoryRepo;
-    }
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class CategoryServiceImpl extends BaseService implements CategoryService {
+    CategoryRepository        categoryRepo;
+    DocumentInfoService       documentInfoService;
+    CategoryHistoryRepository categoryHistoryRepo;
 
     @Override
     public Optional<Category> findById(Integer entityId) {

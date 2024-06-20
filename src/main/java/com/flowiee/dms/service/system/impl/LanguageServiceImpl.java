@@ -4,7 +4,11 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.entity.system.Language;
 import com.flowiee.dms.repository.system.LanguagesRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.LanguageService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.io.FileOutputStream;
@@ -12,21 +16,19 @@ import java.io.OutputStream;
 import java.util.*;
 
 @Service
-public class LanguageServiceImpl implements LanguageService {
-	private final LanguagesRepository languagesRepo;
-	
-	public LanguageServiceImpl(LanguagesRepository languagesRepo) {
-		this.languagesRepo = languagesRepo;
-	}
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class LanguageServiceImpl extends BaseService implements LanguageService {
+	LanguagesRepository languagesRepository;
 
 	@Override
 	public Optional<Language> findById(Integer langId) {
-		return languagesRepo.findById(langId);
+		return languagesRepository.findById(langId);
 	}
 
 	@Override
 	public Map<String, String> findAllLanguageMessages(String langCode) {
-		List<Language> languageList = languagesRepo.findByCode(langCode);
+		List<Language> languageList = languagesRepository.findByCode(langCode);
         Map<String, String> languageMessages = new HashMap<>();
         for (Language language : languageList) {
             languageMessages.put(language.getKey(), language.getValue());
@@ -39,7 +41,7 @@ public class LanguageServiceImpl implements LanguageService {
 		if (langId == null || langId <= 0) {
 			throw new BadRequestException();
 		}
-		return languagesRepo.save(language);
+		return languagesRepository.save(language);
 	}
 
 	@Override

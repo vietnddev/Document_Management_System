@@ -1,10 +1,19 @@
 package com.flowiee.dms.service.system.impl;
 
+import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.entity.system.SystemLog;
+import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.repository.system.SystemLogRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.SystemLogService;
+import com.flowiee.dms.utils.ChangeLog;
 import com.flowiee.dms.utils.CommonUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.flowiee.dms.utils.constants.LogType;
+import com.flowiee.dms.utils.constants.MasterObject;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,76 +21,63 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
-public class SystemLogServiceImpl implements SystemLogService {
-    @Autowired private SystemLogRepository systemLogRepo;
-    @Autowired private EntityManager entityManager;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class SystemLogServiceImpl extends BaseService implements SystemLogService {
+    EntityManager       entityManager;
+    SystemLogRepository systemLogRepository;
 
     @Override
     public Page<SystemLog> findAll(int pageSize, int pageNum) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
-        return systemLogRepo.findAll(pageable);
-    }
-
-    @Override
-    public List<SystemLog> getAll() {
-        List<SystemLog> dataReturn = new ArrayList<>();
-        String srtSQL = "select l.id, l.module, l.action, l.noi_dung, l.noi_dung_cap_nhat, l.ip, a.username from sys_log l inner join sys_account a on a.id = l.created_by";
-        Query result = entityManager.createNativeQuery(srtSQL);
-        List<Object[]> listData = result.getResultList();
-        for (Object[] data : listData) {
-            SystemLog systemLog = new SystemLog();
-            systemLog.setId(Integer.parseInt(String.valueOf(data[0])));
-            systemLog.setModule(String.valueOf(data[1]));
-            systemLog.setAction(String.valueOf(data[2]));
-            systemLog.setContent(String.valueOf(data[3]));
-            systemLog.setContentChange(String.valueOf(data[4]));
-            systemLog.setIp(String.valueOf(data[5]));
-            systemLog.setUsername(String.valueOf(data[6]));
-            dataReturn.add(systemLog);
+        Page<SystemLog> logs = systemLogRepository.findAll(pageable);
+        for (SystemLog systemLog : logs.getContent()) {
+            if (systemLog.getAccount() != null) {
+                systemLog.setAccountName(systemLog.getAccount().getFullName());
+            }
         }
-        return dataReturn;
+        return logs;
     }
 
     @Override
-    public SystemLog writeLog(SystemLog log) {
-        return systemLogRepo.save(log);
+    public SystemLog writeLogCreate(MODULE module, ACTION function, MasterObject object, String title, String content) {
+        return this.writeLog(module, function, object, LogType.I, title, content, null);
     }
 
     @Override
-    public SystemLog writeLog(String module, String action, String content, String contentChange) {
+    public SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, ChangeLog changeLog) {
+        return this.writeLog(module, function, object, LogType.U, title, changeLog.getOldValues(), changeLog.getNewValues());
+    }
+
+    @Override
+    public SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, String content) {
+        return this.writeLog(module, function, object, LogType.U, title, content, null);
+    }
+
+    @Override
+    public SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, String content, String contentChange) {
+        return this.writeLog(module, function, object, LogType.U, title, content, contentChange);
+    }
+
+    @Override
+    public SystemLog writeLogDelete(MODULE module, ACTION function, MasterObject object, String title, String content) {
+        return this.writeLog(module, function, object, LogType.D, title, content, null);
+    }
+
+    @Override
+    public SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange) {
         SystemLog systemLog = new SystemLog();
-        systemLog.setModule(module);
-        systemLog.setAction(action);
+        systemLog.setModule(module.name());
+        systemLog.setFunction(function.name());
+        systemLog.setObject(object.name());
+        systemLog.setMode(mode.name());
+        systemLog.setTitle(title);
         systemLog.setContent(content);
         systemLog.setContentChange(contentChange);
-        systemLog.setCreatedBy(CommonUtils.getUserPrincipal().getId());
         systemLog.setIp(CommonUtils.getUserPrincipal().getIp());
-        return systemLogRepo.save(systemLog);
-    }
-
-    @Override
-    public Optional<SystemLog> findById(Integer entityId) {
-        return systemLogRepo.findById(entityId);
-    }
-
-    @Override
-    public SystemLog save(SystemLog entity) {
-        return null;
-    }
-
-    @Override
-    public SystemLog update(SystemLog entity, Integer entityId) {
-        return null;
-    }
-
-    @Override
-    public String delete(Integer entityId) {
-        return null;
+        systemLog.setAccount(new Account(CommonUtils.getUserPrincipal().getId()));
+        return systemLogRepository.save(systemLog);
     }
 }

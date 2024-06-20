@@ -4,15 +4,17 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.MODULE;
+import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,12 +28,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class FileStorageServiceImpl implements FileStorageService {
-    private static final Logger logger = LoggerFactory.getLogger(FileStorageServiceImpl.class);
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class FileStorageServiceImpl extends BaseService implements FileStorageService {
+    AccountService        accountService;
+    DocumentInfoService   documentInfoService;
+    FileStorageRepository fileRepository;
 
-    @Autowired private AccountService accountService;
-    @Autowired private FileStorageRepository fileRepository;
-    @Autowired private DocumentInfoService   documentInfoService;
+    public FileStorageServiceImpl(AccountService accountService, @Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository) {
+        this.accountService = accountService;
+        this.documentInfoService = documentInfoService;
+        this.fileRepository = fileRepository;
+    }
 
     @Override
     public Optional<FileStorage> findById(Integer fileId) {
@@ -91,7 +98,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     @Override
     public String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
-        Optional<Document> document = documentInfoService.findById(documentId);
+        Optional<DocumentDTO> document = documentInfoService.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException();
         }

@@ -3,10 +3,13 @@ package com.flowiee.dms.service.system.impl;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.repository.system.FlowieeConfigRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.service.system.LanguageService;
 import com.flowiee.dms.utils.MessageUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,15 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ConfigServiceImpl implements ConfigService {
-    private final FlowieeConfigRepository sysConfigRepo;
-    private final LanguageService languageService;
-
-    @Autowired
-    public ConfigServiceImpl(FlowieeConfigRepository sysConfigRepo, LanguageService languageService) {
-        this.sysConfigRepo = sysConfigRepo;
-        this.languageService = languageService;
-    }
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class ConfigServiceImpl extends BaseService implements ConfigService {
+    LanguageService         languageService;
+    FlowieeConfigRepository sysConfigRepo;
 
     @Override
     public Optional<SystemConfig> findById(Integer id) {

@@ -1,14 +1,17 @@
 package com.flowiee.dms.model.role;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ActionModel {
-    private String actionKey;
-    private String actionLabel;
-    private String moduleKey;
+    String actionKey;
+    String actionLabel;
+    String moduleKey;
 
     public ActionModel() {}
     

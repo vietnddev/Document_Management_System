@@ -1,10 +1,13 @@
 package com.flowiee.dms.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocShareModel {
     Integer documentId;
     Integer accountId;

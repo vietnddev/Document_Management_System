@@ -91,96 +91,24 @@ function updateTableContentWhenOnClickPagination(loadNewDataMethod, pageSize, pa
 
 //Search tool
 function setupSearchTool(keySearch) {
-    let brandFilter = $('#brandFilter');
-    let productTypeFilter = $('#productTypeFilter');
-    let colorFilter = $('#colorFilter');
-    let sizeFilter = $('#sizeFilter');
-    let unitFilter = $('#unitFilter');
-    let discountFilter = $('#discountFilter');
-    let productStatusFilter = $('#productStatusFilter');
+    let documentTypeFilter = $('#documentTypeFilter');
 
     $("#btnOpenSearchAdvance").on("click", function () {
-        brandFilter.empty();
-        brandFilter.append("<option>Chọn nhãn hiệu</option>");
-        productTypeFilter.empty();
-        productTypeFilter.append("<option>Chọn loại sản phẩm</option>");
-        colorFilter.empty();
-        colorFilter.append("<option>Chọn màu sắc</option>");
-        sizeFilter.empty();
-        sizeFilter.append("<option>Chọn kích cỡ</option>");
-        unitFilter.empty();
-        unitFilter.append("<option>Chọn đơn vị tính</option>");
-        discountFilter.empty();
-        discountFilter.append("<option>Chọn khuyến mãi</option>");
-        productStatusFilter.empty();
-        productStatusFilter.append("<option>Chọn trạng thái sản phẩm</option>");
+        documentTypeFilter.empty();
+        documentTypeFilter.append("<option>Chọn loại tài liệu</option>");
 
         $.each(keySearch, function (index, key) {
-            if (key === "BRAND") {
-                $.get(mvHostURLCallApi + '/category/brand', function (response) {
+            if (key === "DOCUMENT_TYPE") {
+                $.get(mvHostURLCallApi + '/category/document-type', function (response) {
                     if (response.status === "OK") {
                         $.each(response.data, function (index, d) {
-                            brandFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
+                            documentTypeFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
                             console.log(d)
                         });
                     }
                 }).fail(function () {
                     showErrorModal("Could not connect to the server");
                 });
-            }
-            if (key === "PRODUCT_TYPE") {
-                $.get(mvHostURLCallApi + '/category/product-type', function (response) {
-                    if (response.status === "OK") {
-                        $.each(response.data, function (index, d) {
-                            productTypeFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
-                            console.log(d)
-                        });
-                    }
-                }).fail(function () {
-                    showErrorModal("Could not connect to the server");
-                });
-            }
-            if (key === "COLOR") {
-                $.get(mvHostURLCallApi + '/category/color', function (response) {
-                    if (response.status === "OK") {
-                        $.each(response.data, function (index, d) {
-                            colorFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
-                            console.log(d)
-                        });
-                    }
-                }).fail(function () {
-                    showErrorModal("Could not connect to the server");
-                });
-            }
-            if (key === "SIZE") {
-                $.get(mvHostURLCallApi + '/category/size', function (response) {
-                    if (response.status === "OK") {
-                        $.each(response.data, function (index, d) {
-                            sizeFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
-                            console.log(d)
-                        });
-                    }
-                }).fail(function () {
-                    showErrorModal("Could not connect to the server");
-                });
-            }
-            if (key === "UNIT") {
-                $.get(mvHostURLCallApi + '/category/unit', function (response) {
-                    if (response.status === "OK") {
-                        $.each(response.data, function (index, d) {
-                            unitFilter.append('<option value=' + d.id + '>' + d.name + '</option>');
-                            console.log(d)
-                        });
-                    }
-                }).fail(function () {
-                    showErrorModal("Could not connect to the server");
-                });
-            }
-            if (key === "DISCOUNT") {
-                discountFilter.append(`<option value="Y">Đang áp dụng</option><option value="N">Không áp dụng</option>`);
-            }
-            if (key === "PRODUCT_STATUS") {
-                productStatusFilter.append(`<option value="ACTIVE">Đang kinh doanh</option><option value="INACTIVE">Không kinh doanh</option>`);
             }
         })
     })

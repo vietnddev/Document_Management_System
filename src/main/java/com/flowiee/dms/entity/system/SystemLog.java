@@ -1,11 +1,13 @@
 package com.flowiee.dms.entity.system;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
-import lombok.*;
 
-import java.io.Serial;
+import com.flowiee.dms.utils.CommonUtils;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Builder
 @Entity
@@ -15,42 +17,56 @@ import java.io.Serial;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SystemLog extends BaseEntity implements java.io.Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "module", length = 50, nullable = false)
-	private String module;
+	String module;
 
-	@Column(name = "action_type")
-	private String actionType;
+	@Column(name = "function", nullable = false)
+	String function;
 
-	@Column(name = "action", nullable = false)
-	private String action;
+	@Column(name = "title")
+	String title;
 
-	@Column(name = "content", length = 4000, nullable = false)
-	private String content;
+	@Column(name = "object")
+	String object;
+
+	@Column(name = "action_mode", nullable = false)
+	String mode;
+
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "content", length = 4000, nullable = false, columnDefinition = "CLOB")
+	String content;
 
 	@Column(name = "content_change", length = 4000)
-	private String contentChange;
+	String contentChange;
 
 	@Column(name = "ip", length = 20)
-	private String ip;
+	String ip;
+
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "account_id", nullable = false)
+	Account account;
 
 	@Transient
-	private String username;
+	String username;
 
-	public SystemLog(String module, String action, String value, String newValue, Integer createdBy, String ip) {
-		this.module = module;
-		this.action = action;
-		this.content = value;
-		this.contentChange = newValue;
-		super.createdBy = createdBy;
-		this.ip = ip;
+	@Transient
+	String accountName;
+
+	@PreUpdate
+	public void updateAudit() {
+		if (ip == null) {
+			ip = CommonUtils.getUserPrincipal().getIp();
+		} else {
+			ip = "unknown";
+		}
 	}
 
 	@Override
 	public String toString() {
-		return "SystemLog [id=" + super.id + ", module=" + module + ", action=" + action + ", content=" + content + ", contentChange=" + contentChange + ", ip=" + ip + ", username=" + username + "]";
+		return "SystemLog [id=" + super.id + ", module=" + module + ", action=" + function + ", content=" + content + ", contentChange=" + contentChange + ", ip=" + ip + ", username=" + username + "]";
 	}
 }

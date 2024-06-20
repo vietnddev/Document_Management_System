@@ -5,7 +5,7 @@ import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.DataExistsException;
-import com.flowiee.dms.exception.NotFoundException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.system.AccountService;
@@ -13,7 +13,9 @@ import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.MessageUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,9 +25,11 @@ import java.util.Optional;
 @RestController
 @RequestMapping("${app.api.prefix}/system/account")
 @Tag(name = "Account system API", description = "Quản lý tài khoản hệ thống")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class AccountController extends BaseController {
-    @Autowired private AccountService accountService;
-    @Autowired private RoleService roleService;
+    RoleService    roleService;
+    AccountService accountService;
 
     @Operation(summary = "Find all accounts")
     @GetMapping("/all")
@@ -114,7 +118,7 @@ public class AccountController extends BaseController {
     public ApiResponse<String> deleteAccount(@PathVariable("accountId") Integer accountId) {
         try {
             if (accountId <= 0 ||accountService.findById(accountId).isEmpty()) {
-                throw new NotFoundException("Account not found!");
+                throw new ResourceNotFoundException("Account not found!");
             }
             return ApiResponse.ok(accountService.delete(accountId));
         } catch (RuntimeException ex) {

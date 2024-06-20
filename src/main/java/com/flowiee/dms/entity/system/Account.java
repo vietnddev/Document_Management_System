@@ -8,8 +8,8 @@ import javax.persistence.*;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.FileStorage;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,54 +21,56 @@ import java.util.List;
 @Getter
 @Setter
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Account extends BaseEntity implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "username", nullable = false)
-	private String username;
+	String username;
 
 	@JsonIgnore
 	@Column(name = "password", nullable = false)
-	private String password;
+	String password;
 
 	@Column(name = "fullname", nullable = false)
-	private String fullName;
+	String fullName;
 
 	@Column(name = "sex", nullable = false)
-	private boolean sex;
+	boolean sex;
 
 	@Column(name = "phone_number")
-	private String phoneNumber;
+	String phoneNumber;
 
 	@Column(name = "email")
-	private String email;
+	String email;
 
 	@Column(name = "address")
-	private String diaChi;
+	String diaChi;
 
 	@Column(name = "avatar")
-	private String avatar;
+	String avatar;
 
 	@Column(name = "remark")
-	private String remark;
+	String remark;
 
 	@Column(name = "role")
-	private String role;
+	String role;
 
 	@Column(name = "status")
-	private boolean status;
+	boolean status;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-	private List<FileStorage> listFileStorage;
+	List<FileStorage> listFileStorage;
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-	private List<DocShare> listDocShare;
+	List<DocShare> listDocShare;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+	List<SystemLog> listLog;
 
 	@Transient
-	private String ip;
+	String ip;
 
 	public Account(Integer id) {
 		super.id = id;

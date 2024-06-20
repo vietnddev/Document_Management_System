@@ -1,8 +1,11 @@
 package com.flowiee.dms.model;
 
 import com.flowiee.dms.entity.system.Account;
+import com.flowiee.dms.utils.AppConstants;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -11,16 +14,17 @@ import java.util.List;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserPrincipal extends Account implements UserDetails {
-    private Integer id;
-    private String username;
-    private String password;
-    private String ip;
-    private boolean isAccountNonExpired;
-    private boolean isAccountNonLocked;
-    private boolean isCredentialsNonExpired;
-    private boolean isEnabled;
-    private List<GrantedAuthority> grantedAuthorities;
+    Integer id;
+    String username;
+    String password;
+    String ip;
+    boolean isAccountNonExpired;
+    boolean isAccountNonLocked;
+    boolean isCredentialsNonExpired;
+    boolean isEnabled;
+    List<GrantedAuthority> grantedAuthorities;
 
     public UserPrincipal(Account account) {
         this.id = account.getId();
@@ -69,5 +73,9 @@ public class UserPrincipal extends Account implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.isEnabled;
+    }
+
+    public boolean isAdmin() {
+        return AppConstants.ADMINISTRATOR.equals(this.getUsername());
     }
 }

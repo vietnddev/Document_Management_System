@@ -2,14 +2,15 @@ package com.flowiee.dms.controller.storage;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
-import com.flowiee.dms.exception.NotFoundException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.utils.MessageUtils;
-import com.flowiee.dms.service.storage.DocFieldService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,16 +20,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class DocumentController extends BaseController {
-    private final DocumentInfoService documentInfoService;
-    private final DocFieldService docFieldService;
-    private final DocActionService docActionService;
-
-    public DocumentController(DocumentInfoService documentInfoService, DocFieldService docFieldService, DocActionService docActionService) {
-        this.documentInfoService = documentInfoService;
-        this.docFieldService = docFieldService;
-        this.docActionService = docActionService;
-    }
+    DocActionService    docActionService;
+    DocumentInfoService documentInfoService;
 
     @Operation(summary = "Find all documents")
     @GetMapping("/doc/all")
@@ -38,7 +34,7 @@ public class DocumentController extends BaseController {
                                                           @RequestParam("parentId") Integer parentId,
                                                           @RequestParam(value = "txtSearch", required = false) String txtSearch) {
         try {
-            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, txtSearch);
+            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch);
             return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"), ex);
@@ -73,7 +69,7 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Integer parentId) {
         try {
-            return ApiResponse.ok(documentInfoService.findFolderByParentId(parentId));
+            return ApiResponse.ok(documentInfoService.findFoldersByParent(parentId));
         } catch (RuntimeException ex) {
             throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "folders"), ex);
         }
@@ -91,16 +87,6 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
         return ApiResponse.ok(documentInfoService.delete(docId));
-    }
-
-    @Operation(summary = "Delete field")
-    @DeleteMapping("/doc/doc-field/delete/{id}")
-    @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDocField(@PathVariable("id") Integer docFiledId) {
-        if (docFieldService.findById(docFiledId).isEmpty()) {
-            throw new NotFoundException("DocField not found!");
-        }
-        return ApiResponse.ok(docFieldService.delete(docFiledId));
     }
 
     @Operation(summary = "Copy document")

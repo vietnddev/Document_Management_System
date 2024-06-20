@@ -7,6 +7,9 @@ import com.flowiee.dms.service.system.SystemLogService;
 import com.flowiee.dms.utils.MessageUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,9 +23,10 @@ import java.util.List;
 @RestController
 @RequestMapping("${app.api.prefix}/sys")
 @Tag(name = "Log", description = "Quản lý nhật ký hệ thống")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class LogController {
-    @Autowired
-    private SystemLogService logService;
+    SystemLogService logService;
 
     @Operation(summary = "Find all log")
     @GetMapping("/log/all")

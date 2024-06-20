@@ -1,17 +1,25 @@
 package com.flowiee.dms.service.system;
 
-import com.flowiee.dms.base.BaseService;
 import com.flowiee.dms.entity.system.SystemLog;
+import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.MODULE;
+import com.flowiee.dms.utils.ChangeLog;
+import com.flowiee.dms.utils.constants.LogType;
+import com.flowiee.dms.utils.constants.MasterObject;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
-
-public interface SystemLogService extends BaseService<SystemLog> {
+public interface SystemLogService {
     Page<SystemLog> findAll(int pageSize, int pageNum);
 
-    List<SystemLog> getAll();
+    SystemLog writeLogCreate(MODULE module, ACTION function, MasterObject object, String title, String content);
 
-    SystemLog writeLog(SystemLog log);
+    SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, ChangeLog changeLog);
 
-    SystemLog writeLog(String module, String action, String content, String contentChange);
+    SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, String content);
+
+    SystemLog writeLogUpdate(MODULE module, ACTION function, MasterObject object, String title, String content, String contentChange);
+
+    SystemLog writeLogDelete(MODULE module, ACTION function, MasterObject object, String title, String content);
+
+    SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange);
 }

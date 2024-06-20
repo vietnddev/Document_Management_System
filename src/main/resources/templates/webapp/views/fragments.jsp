@@ -33,7 +33,7 @@
             </nav>
         </div>
 
-        <div th:fragment="searchTool(brandCTG, productTypeCTG, colorCTG, sizeCTG, unitCTG, isDiscount, productStatus)" th:remove="tag">
+        <div th:fragment="searchTool(documentType)" th:remove="tag">
             <div class="row col-10 input-group mb-2">
                 <input class="form-control col-8 mr-1" id="txtFilter"/>
                 <a class="btn btn-outline-secondary col-2 mr-1" data-toggle="collapse" href="#collapseExample" id="btnOpenSearchAdvance"
@@ -41,13 +41,7 @@
                 <button class="btn btn-info form-control col-2" id="btnSearch"><i class="fa-solid fa-magnifying-glass mr-2"></i>Tìm kiếm</button>
             </div>
             <div class="row col-12 collapse w-100 mt-2 mb-2" id="collapseExample">
-                <select class="form-control custom-select col mr-1" id="brandFilter"         th:if="${brandCTG == 'Y'}"></select>
-                <select class="form-control custom-select col mr-1" id="productTypeFilter"   th:if="${productTypeCTG == 'Y'}"></select>
-                <select class="form-control custom-select col mr-1" id="colorFilter"         th:if="${colorCTG == 'Y'}"></select>
-                <select class="form-control custom-select col mr-1" id="sizeFilter"          th:if="${sizeCTG == 'Y'}"></select>
-                <select class="form-control custom-select col mr-1" id="unitFilter"          th:if="${unitCTG == 'Y'}"></select>
-                <select class="form-control custom-select col mr-1" id="discountFilter"      th:if="${isDiscountCTG == 'Y'}"></select>
-                <select class="form-control custom-select col"      id="productStatusFilter" th:if="${productStatus == 'Y'}"></select>
+                <select class="form-control custom-select col mr-1" id="documentTypeFilter" th:if="${documentType == 'Y'}"></select>
             </div>
         </div>
 
@@ -56,7 +50,7 @@
                 <div class="col-12">
                     <ol class="breadcrumb p-0" style="background-color: transparent; margin-bottom: 10px">
                         <li class="breadcrumb-item border-bottom" th:each="b, iterStat : ${docBreadcrumb}">
-                            <a th:if="${iterStat.first}" href="/storage/document">
+                            <a th:if="${iterStat.first}" href="/stg/doc">
                                 <i class="text-primary fa-solid fa-house"></i>
                             </a>
                             <a th:if="${iterStat.last}" class="text-secondary" th:text="${b.name}"></a>

@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 import com.flowiee.dms.entity.category.Category;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -19,45 +19,43 @@ import java.util.List;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocField extends BaseEntity implements Serializable {
-    @Serial
-	private static final long serialVersionUID = 1L;
-
     @Column(name = "type", nullable = false)
-    private String type;
+    String type;
 
     @Column(name = "name", nullable = false)
-    private String name;
+    String name;
 
     @Column(name = "min_length", nullable = false)
-    private Integer minLength;
+    Integer minLength;
 
     @Column(name = "max_length", nullable = false)
-    private Integer maxLength;
+    Integer maxLength;
 
     @Column(name = "min_number", nullable = false)
-    private Integer minNumber;
+    Integer minNumber;
 
     @Column(name = "max_number", nullable = false)
-    private Integer maxNumber;
+    Integer maxNumber;
 
     @Column(name = "required", nullable = false)
-    private Boolean required;
+    Boolean required;
 
     @Column(name = "sort")
-    private Integer sort;
+    Integer sort;
 
     @Column(name = "status", nullable = false)
-    private Boolean status;
+    Boolean status;
 
     @JsonIgnoreProperties("listDocField")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_type_id", nullable = false)
-    private Category docType;
+    Category docType;
 
     @JsonIgnoreProperties("docField")
     @OneToMany(mappedBy = "docField", fetch = FetchType.LAZY)
-    private List<DocData> listDocData;
+    List<DocData> listDocData;
 
     public DocField(Integer id) {
     	super.id = id;

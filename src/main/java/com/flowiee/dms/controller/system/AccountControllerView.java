@@ -4,14 +4,16 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.DataExistsException;
-import com.flowiee.dms.exception.NotFoundException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.role.ActionModel;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.PagesUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -23,9 +25,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/sys/tai-khoan")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class AccountControllerView extends BaseController {
-    @Autowired private AccountService accountService;
-    @Autowired private RoleService     roleService;
+    RoleService    roleService;
+    AccountService accountService;
 
     @GetMapping
     @PreAuthorize("@vldModuleSystem.readAccount(true)")
@@ -40,7 +44,7 @@ public class AccountControllerView extends BaseController {
     @PreAuthorize("@vldModuleSystem.readAccount(true)")
     public ModelAndView findDetailAccountById(@PathVariable("id") Integer accountId) {
         if (accountId <= 0 || accountService.findById(accountId).isEmpty()) {
-            throw new NotFoundException("Account not found!");
+            throw new ResourceNotFoundException("Account not found!");
         }
         ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_ACCOUNT_DETAIL);
         List<RoleModel> roleOfAccount = roleService.findAllRoleByAccountId(accountId);
@@ -68,7 +72,7 @@ public class AccountControllerView extends BaseController {
                                @PathVariable("id") Integer accountId,
                                HttpServletRequest request) {
         if (accountId <= 0 || accountService.findById(accountId).isEmpty()) {
-            throw new NotFoundException("Account not found!");
+            throw new ResourceNotFoundException("Account not found!");
         }
         Optional<Account> accOptional = accountService.findById(accountId);
         if (accOptional.isEmpty()) {
@@ -88,7 +92,7 @@ public class AccountControllerView extends BaseController {
     public ModelAndView deleteAccount(@PathVariable("id") Integer accountId) {
         Optional<Account> accountOptional = accountService.findById(accountId);
         if (accountId <= 0 || accountOptional.isEmpty()) {
-            throw new NotFoundException("Account not found!");
+            throw new ResourceNotFoundException("Account not found!");
         }
         Account account = accountOptional.get();
         account.setStatus(false);
@@ -100,7 +104,7 @@ public class AccountControllerView extends BaseController {
     @PreAuthorize("@vldModuleSystem.updateAccount(true)")
     public ModelAndView updatePermission(@PathVariable("id") Integer accountId, HttpServletRequest request) {
         if (accountId <= 0 || accountService.findById(accountId).isEmpty()) {
-            throw new NotFoundException("Account not found!");
+            throw new ResourceNotFoundException("Account not found!");
         }
         roleService.deleteAllRole(accountId);
         List<ActionModel> listAction = roleService.findAllAction();

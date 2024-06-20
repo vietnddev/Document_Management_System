@@ -2,40 +2,39 @@ package com.flowiee.dms.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.flowiee.dms.entity.storage.FileStorage;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
 
-import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileDTO implements Serializable{
-    @Serial
-    private static final long serialVersionUID = 1L;
-
-    private Integer id;
-    private Integer documentId;
-    private Integer sort;
-    private String name;
-    private String storageName;
-    private String originalName;
-    private String extension;
-    private String contentType;
-    private String module;
-    private String note;
-    private String uploadBy;
-    private String src;
-    private Boolean isActive;
-    private Boolean status;
-    private long size;
-    private byte[] content;
+    Integer id;
+    Integer documentId;
+    Integer sort;
+    String name;
+    String storageName;
+    String originalName;
+    String extension;
+    String contentType;
+    String module;
+    String note;
+    String uploadBy;
+    String src;
+    Boolean isActive;
+    Boolean status;
+    long size;
+    byte[] content;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
-    private Date uploadAt;
+    LocalDateTime uploadAt;
 
     public static FileDTO fromFileStorage(FileStorage fileStorage) {
         FileDTO dto = new FileDTO();

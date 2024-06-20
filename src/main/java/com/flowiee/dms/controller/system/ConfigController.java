@@ -2,13 +2,15 @@ package com.flowiee.dms.controller.system;
 
 import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.exception.AppException;
-import com.flowiee.dms.exception.NotFoundException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.utils.MessageUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +19,10 @@ import java.util.List;
 @RestController
 @RequestMapping("${app.api.prefix}/sys")
 @Tag(name = "Config", description = "Quản lý cấu hình hệ thống")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class ConfigController {
-    @Autowired
-    private ConfigService configService;
+    ConfigService configService;
 
     @Operation(summary = "Find all configs")
     @GetMapping("/config/all")
@@ -38,7 +41,7 @@ public class ConfigController {
     public ApiResponse<SystemConfig> updateConfig(@RequestBody SystemConfig config, @PathVariable("id") Integer configId) {
         try {
             if (configId <= 0 || configService.findById(configId).isEmpty()) {
-                throw new NotFoundException("Config not found!");
+                throw new ResourceNotFoundException("Config not found!");
             }
             return ApiResponse.ok(configService.update(config, configId));
         } catch (RuntimeException ex) {

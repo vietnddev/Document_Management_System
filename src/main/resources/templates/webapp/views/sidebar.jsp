@@ -22,38 +22,10 @@
                     <nav class="mt-2">
                         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                             <li class="nav-header">
-                                <strong>QUẢN LÝ BÁN HÀNG</strong></li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_PRODUCT}}" class="nav-link"><i class="fa-solid fa-shirt nav-icon mr-2"></i><p>Sản phẩm</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_PRODUCT_ORDER}}" class="nav-link"><i class="fa-solid fa-cart-shopping nav-icon mr-2"></i><p>Đơn hàng</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{/don-hang/ban-hang}" class="nav-link"><i class="fa-solid fa-file-invoice-dollar mr-2"></i><p>Bán hàng</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{/san-pham/voucher}" class="nav-link"><i class="fa-solid fa-gifts mr-2"></i><p>Voucher</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_PRODUCT_CUSTOMER}}" class="nav-link"><i class="fa-solid fa-user-tag mr-2"></i><p>Khách hàng</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_PRODUCT_SUPPLIER}}" class="nav-link"><i class="fa-solid fa-user-tag mr-2"></i><p>Nhà cung cấp</p></a>
-                            </li>
-
-                            <li class="nav-header">
-                                <hr class="mt-0 mb-3" style="border-color: darkgrey">
                                 <strong>KHO</strong>
                             </li>
                             <li class="nav-item">
-                                <a th:href="@{${URL_STORAGE_TICKET_IMPORT}}" class="nav-link"><i class="fa-solid fa-cloud-arrow-up fa-rotate-90 mr-2"></i><p>Nhập hàng</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_STORAGE_TICKET_EXPORT}}" class="nav-link"><i class="fa-solid fa-cloud-arrow-up fa-rotate-270 mr-2"></i><p>Xuất hàng</p></a>
-                            </li>
-                            <li class="nav-item">
-                                <a th:href="@{${URL_STORAGE_MATERIAL}}" class="nav-link"><i class="fa-solid fa-scroll nav-icon mr-2"></i><p>Nguyên vật liệu</p></a>
+                                <a th:href="@{${URL_STORAGE_TICKET_IMPORT}}" class="nav-link"><i class="fa-solid fa-cloud-arrow-up fa-rotate-90 mr-2"></i><p>Danh sách tài liệu</p></a>
                             </li>
 
                             <li class="nav-header">

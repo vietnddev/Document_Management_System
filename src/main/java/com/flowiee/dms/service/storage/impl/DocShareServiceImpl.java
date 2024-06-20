@@ -4,12 +4,16 @@ import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.repository.storage.DocShareRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
-import com.flowiee.dms.service.storage.DocShareService;
+import com.flowiee.dms.service.storage.DocShareService;;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.flowiee.dms.utils.constants.DocRight;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,34 +22,34 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DocShareServiceImpl implements DocShareService {
-    @Autowired
-    private DocShareRepository docShareRepo;
-    @Autowired
-    private AccountService accountService;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class DocShareServiceImpl extends BaseService implements DocShareService {
+    AccountService     accountService;
+    DocShareRepository docShareRepository;
 
     @Override
     public List<DocShare> findAll() {
-        return docShareRepo.findAll();
+        return docShareRepository.findAll();
     }
 
     @Override
     public List<DocShareModel> findDetailRolesOfDocument(Integer docId) {
         List<DocShareModel> lsModel = new ArrayList<>();
         for (Account account : accountService.findAll()) {
-            if (account.getUsername().equals(CommonUtils.ADMIN)) {
+            if (account.getUsername().equals(AppConstants.ADMINISTRATOR)) {
                 continue;
             }
             DocShareModel model = new DocShareModel();
             model.setDocumentId(docId);
             model.setAccountId(account.getId());
             model.setAccountName(account.getFullName());
-            for (DocShare docShare : docShareRepo.findByDocAndAccount(docId, account.getId())) {
-                if (CommonUtils.ADMIN.equals(account.getUsername()) || AppConstants.DOC_RIGHT_READ.equals(docShare.getRole())) model.setCanRead(true);
-                if (CommonUtils.ADMIN.equals(account.getUsername()) || AppConstants.DOC_RIGHT_UPDATE.equals(docShare.getRole())) model.setCanUpdate(true);
-                if (CommonUtils.ADMIN.equals(account.getUsername()) || AppConstants.DOC_RIGHT_DELETE.equals(docShare.getRole())) model.setCanDelete(true);
-                if (CommonUtils.ADMIN.equals(account.getUsername()) || AppConstants.DOC_RIGHT_MOVE.equals(docShare.getRole())) model.setCanMove(true);
-                if (CommonUtils.ADMIN.equals(account.getUsername()) || AppConstants.DOC_RIGHT_SHARE.equals(docShare.getRole())) model.setCanShare(true);
+            for (DocShare docShare : docShareRepository.findByDocAndAccount(docId, account.getId())) {
+                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.READ.getValue().equals(docShare.getRole())) model.setCanRead(true);
+                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.UPDATE.getValue().equals(docShare.getRole())) model.setCanUpdate(true);
+                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.DELETE.getValue().equals(docShare.getRole())) model.setCanDelete(true);
+                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.MOVE.getValue().equals(docShare.getRole())) model.setCanMove(true);
+                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.SHARE.getValue().equals(docShare.getRole())) model.setCanShare(true);
             }
             lsModel.add(model);
         }
@@ -54,43 +58,43 @@ public class DocShareServiceImpl implements DocShareService {
 
     @Override
     public Optional<DocShare> findById(Integer id) {
-        return docShareRepo.findById(id);
+        return docShareRepository.findById(id);
     }
 
     @Override
     public boolean isShared(int documentId) {
-        if (CommonUtils.ADMIN.equals(CommonUtils.getUserPrincipal().getUsername())) {
+        if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
             return true;
         }
-        return docShareRepo.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId()) != null;
+        return docShareRepository.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId()) != null;
     }
 
     @Transactional
     @Override
     public void deleteByAccount(Integer accountId) {
-        docShareRepo.deleteAllByAccount(accountId);
+        docShareRepository.deleteAllByAccount(accountId);
     }
 
     @Transactional
     @Override
     public void deleteByDocument(Integer documentId) {
-        docShareRepo.deleteAllByDocument(documentId);
+        docShareRepository.deleteAllByDocument(documentId);
     }
 
     @Override
     public DocShare save(DocShare entity) {
-        return docShareRepo.save(entity);
+        return docShareRepository.save(entity);
     }
 
     @Override
     public DocShare update(DocShare entity, Integer entityId) {
         entity.setId(entityId);
-        return docShareRepo.save(entity);
+        return docShareRepository.save(entity);
     }
 
     @Override
     public String delete(Integer entityId) {
-        docShareRepo.deleteById(entityId);
+        docShareRepository.deleteById(entityId);
         return MessageUtils.DELETE_SUCCESS;
     }
 }

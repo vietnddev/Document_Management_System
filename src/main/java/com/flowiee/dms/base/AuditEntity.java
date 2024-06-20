@@ -14,7 +14,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class AuditEntity {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "created_at", updatable = false, columnDefinition = "timestamp default current_timestamp")
     @CreatedDate
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "created_by", updatable = false)
     @CreatedBy
@@ -32,7 +32,7 @@ public class AuditEntity {
     @JsonIgnore
     @Column(name = "last_updated_at", columnDefinition = "timestamp default current_timestamp")
     @LastModifiedDate
-    private Date lastUpdatedAt;
+    private LocalDateTime lastUpdatedAt;
 
     @JsonIgnore
     @Column(name = "last_updated_by")
@@ -41,7 +41,7 @@ public class AuditEntity {
 
     @JsonIgnore
     @Column(name = "deleted_at")
-    private Date deletedAt;
+    private LocalDateTime deletedAt;
 
     @JsonIgnore
     @Column(name = "deleted_by")
@@ -50,9 +50,9 @@ public class AuditEntity {
     @PreUpdate
     @PrePersist
     public void updateAudit() {
-        lastUpdatedAt = new Date();
+        lastUpdatedAt = LocalDateTime.now();
         if (createdAt == null) {
-            createdAt = new Date();
+            createdAt = LocalDateTime.now();
         }
         if (createdBy == null) {
             createdBy = CommonUtils.getUserPrincipal().getId();

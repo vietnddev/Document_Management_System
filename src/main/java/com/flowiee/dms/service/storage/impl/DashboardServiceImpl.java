@@ -2,14 +2,18 @@ package com.flowiee.dms.service.storage.impl;
 
 import com.flowiee.dms.model.DashboardModel;
 import com.flowiee.dms.repository.storage.DocumentRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DashboardService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DashboardServiceImpl implements DashboardService {
-    @Autowired
-    private DocumentRepository documentRepository;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class DashboardServiceImpl extends BaseService implements DashboardService {
+    DocumentRepository documentRepository;
 
     @Override
     public DashboardModel loadDashboard() {

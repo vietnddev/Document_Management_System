@@ -57,11 +57,6 @@
                                         <i class="fa-solid fa-arrow-right-arrow-left mr-1"></i>
                                         Di chuyển
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-warning" style="width: 115px"
-                                            data-toggle="modal" data-target="#modelShare">
-                                        <i class="fa-solid fa-user-gear mr-1"></i>
-                                        Phân quyền
-                                    </button>
 
                                     <!--==-- POPUP --==-->
                                     <!--CHANGE FILE-->
@@ -175,8 +170,6 @@
                 </div>
             </div>
         </div>
-
-        <div th:replace="footer :: footer"></div>
 
         <aside class="control-sidebar control-sidebar-dark"></aside>
 

@@ -2,8 +2,12 @@ package com.flowiee.dms.service.storage.impl;
 
 import com.flowiee.dms.entity.storage.DocData;
 import com.flowiee.dms.repository.storage.DocDataRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.utils.MessageUtils;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,9 +16,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DocDataServiceImpl implements DocDataService {
-    @Autowired
-    private DocDataRepository docDataRepository;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class DocDataServiceImpl extends BaseService implements DocDataService {
+    DocDataRepository docDataRepository;
 
     public List<DocData> findAll() {
         return docDataRepository.findAll();

@@ -1,20 +1,23 @@
 package com.flowiee.dms.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @NoArgsConstructor
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocMetaModel {
-	private Integer fieldId;
-	private String fieldName;
-    private Integer dataId;
-    private String dataValue;
-    private String fieldType;
-    private Boolean fieldRequired;
-	private Integer docId;
+	Integer fieldId;
+	String fieldName;
+    Integer dataId;
+    String dataValue;
+    String fieldType;
+    Boolean fieldRequired;
+	Integer docId;
 
 	public DocMetaModel(Integer fieldId, String fieldName, Integer dataId, String dataValue, String fieldType, Boolean fieldRequired, Integer docId) {
 		this.fieldId = fieldId;

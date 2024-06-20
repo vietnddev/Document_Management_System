@@ -2,10 +2,12 @@ package com.flowiee.dms.controller.system;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.SystemConfig;
-import com.flowiee.dms.exception.NotFoundException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.utils.PagesUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +15,10 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/sys")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class SystemControllerView extends BaseController {
-    @Autowired private ConfigService configService;
+    ConfigService configService;
 
     @GetMapping("/notification")
     public ModelAndView getAllNotification() {
@@ -39,7 +43,7 @@ public class SystemControllerView extends BaseController {
     @PreAuthorize("@vldModuleSystem.setupConfig(true)")
     public ModelAndView update(@ModelAttribute("config") SystemConfig config, @PathVariable("id") Integer configId) {
         if (configId <= 0 || configService.findById(configId).isEmpty()) {
-            throw new NotFoundException("Config not found!");
+            throw new ResourceNotFoundException("Config not found!");
         }
         configService.update(config, configId);
         return new ModelAndView("redirect:/he-thong/config");

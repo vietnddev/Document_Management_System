@@ -3,12 +3,10 @@ package com.flowiee.dms.entity.system;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.io.Serial;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.io.Serializable;
 
 @Entity
@@ -18,21 +16,19 @@ import java.io.Serializable;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SystemConfig extends BaseEntity implements Serializable {
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Column(name = "code", nullable = false)
-	private String code;
+	String code;
 
 	@Column(name = "name", nullable = false)
-	private String name;
+	String name;
 
 	@Column(name = "value", length = 1000)
-	private String value;
+	String value;
 
 	@Column(name = "sort")
-	private Integer sort;
+	Integer sort;
 	
 	public SystemConfig(Integer id, String key, String name, String value, Integer sort) {
 		super.id = id;

@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 import com.flowiee.dms.entity.system.Account;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 @Builder
@@ -18,20 +18,18 @@ import java.io.Serializable;
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocShare extends BaseEntity implements Serializable {
-    @Serial
-	private static final long serialVersionUID = 1L;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id", nullable = false)
-    private Document document;
+    Document document;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+    Account account;
 
     @Column(name = "role", nullable = false)
-    private String role;
+    String role;
 
     public DocShare(Integer documentId, Integer accountId, String role) {
         this.document = new Document(documentId);

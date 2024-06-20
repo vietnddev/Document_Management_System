@@ -10,12 +10,18 @@ import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.UserPrincipal;
 import com.flowiee.dms.repository.system.AccountRepository;
+import com.flowiee.dms.repository.system.SystemLogRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
-import com.flowiee.dms.service.system.SystemLogService;
+import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.MessageUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.flowiee.dms.utils.constants.LogType;
+import com.flowiee.dms.utils.constants.MasterObject;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,10 +39,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService, AccountService {
-	@Autowired private AccountRepository accountRepo;
-	@Autowired private SystemLogService systemLogService;
-	@Autowired private RoleService roleService;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl extends BaseService implements UserDetailsService, AccountService {
+	RoleService         roleService;
+	SystemLogRepository systemLogRepo;
+	AccountRepository   accountRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -63,11 +71,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 				}
 			}
 			userPrincipal.setIp(details != null ? details.getRemoteAddress() : "unknown");
+			userPrincipal.setCreatedBy(account.getId());
+			userPrincipal.setLastUpdatedBy(account.getUsername());
 
-			SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_LOGIN.name(), "LOGIN", null, account.getId(), details != null ? details.getRemoteAddress() : "unknown");
+			SystemLog systemLog = SystemLog.builder().module(MODULE.SYSTEM.name()).function(ACTION.SYS_LOGIN.name()).object(MasterObject.Account.name()).mode(LogType.LI.name()).content(account.getUsername()).title("Login").ip(userPrincipal.getIp()).account(account).build();
 			systemLog.setCreatedBy(account.getId());
-			systemLog.setLastUpdatedBy(account.getUsername());
-			systemLogService.writeLog(systemLog);
+			systemLogRepo.save(systemLog);
 		} else {
 			throw new AuthenticationException("Login fail! Account not found by username=" + username);
 		}
@@ -76,13 +85,13 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 
 	@Override
 	public Optional<Account> findById(Integer accountId) {
-		return accountRepo.findById(accountId);
+		return accountRepository.findById(accountId);
 	}
 
 	@Override
 	public Account save(Account account) {
 		try {
-			if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMIN)) {
+			if (account.getRole() != null && account.getRole().equals(AppConstants.ADMINISTRATOR)) {
 				account.setRole("ADMIN");
 			} else {
 				account.setRole("USER");
@@ -90,9 +99,9 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 			BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder();
 			String password = account.getPassword();
 			account.setPassword(bCrypt.encode(password));
-			Account accountSaved = accountRepo.save(account);
-			SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
-			systemLogService.writeLog(systemLog);
+			Account accountSaved = accountRepository.save(account);
+			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+			//systemLogService.writeLog(systemLog);
 			logger.info("Insert account success! username=" + account.getUsername());
 			return accountSaved;
 		} catch (RuntimeException ex) {
@@ -105,15 +114,15 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 	public Account update(Account account, Integer entityId) {
 		try {
 			account.setId(entityId);
-			if (account.getRole() != null && account.getRole().equals(CommonUtils.ADMIN)) {
+			if (account.getRole() != null && account.getRole().equals(AppConstants.ADMINISTRATOR)) {
 				account.setRole("ADMIN");
 			} else {
 				account.setRole("USER");
 			}
-			SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
-			systemLogService.writeLog(systemLog);
+			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+			//systemLogService.writeLog(systemLog);
 			logger.info("Update account success! username=" + account.getUsername());
-			return accountRepo.save(account);
+			return accountRepository.save(account);
 		} catch (RuntimeException ex) {
 			throw new AppException("Update account fail! username=" + account.getUsername(), ex);
 		}
@@ -124,11 +133,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 	public String delete(Integer accountId) {
 		Account account = null;
 		try {
-			account = accountRepo.findById(accountId).orElse(null);
+			account = accountRepository.findById(accountId).orElse(null);
 			if (account != null) {
-				accountRepo.delete(account);
-				SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
-				systemLogService.writeLog(systemLog);
+				accountRepository.delete(account);
+				//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+				//systemLogService.writeLog(systemLog);
 			}
 			logger.info("Delete account success! id=" + accountId);
 			return MessageUtils.DELETE_SUCCESS;
@@ -139,12 +148,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, AccountServic
 
 	@Override
 	public List<Account> findAll() {
-		return accountRepo.findAll();
+		return accountRepository.findAll();
 	}
 
 	@Override
 	public Account findByUsername(String username) {
-		return accountRepo.findByUsername(username);
+		return accountRepository.findByUsername(username);
 	}
 
 	@Override

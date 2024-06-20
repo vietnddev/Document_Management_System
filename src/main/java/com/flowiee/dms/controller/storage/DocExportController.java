@@ -1,8 +1,14 @@
 package com.flowiee.dms.controller.storage;
 
-import com.flowiee.dms.service.storage.DocExportService;
+import com.flowiee.dms.model.EximModel;
+import com.flowiee.dms.service.ExportService;
+import com.flowiee.dms.utils.constants.TemplateExport;
 import io.swagger.v3.oas.annotations.Operation;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,15 +18,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("${app.api.prefix}/stg/doc")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class DocExportController {
-    @Autowired
-    private DocExportService docExportService;
+    @Qualifier("documentExportService")
+    ExportService exportService;
 
     @Operation(summary = "Export data")
     @GetMapping("/export/excel")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ResponseEntity<?> exportToExcel(@RequestParam(value = "parentId", required = false) Integer pParentId,
-                                        @RequestParam(value = "exportAll", required = false) Boolean pExportAll) {
-        return docExportService.exportToExcel(pParentId, pExportAll);
+    public ResponseEntity<InputStreamResource> exportToExcel(@RequestParam(value = "parentId", required = false) Integer pParentId,
+                                                             @RequestParam(value = "exportAll", required = false) Boolean pExportAll) {
+        EximModel model = exportService.exportToExcel(TemplateExport.EX_LIST_OF_DOCUMENTS, null, false);
+        return ResponseEntity.ok().headers(model.getHttpHeaders()).body(model.getContent());
     }
 }

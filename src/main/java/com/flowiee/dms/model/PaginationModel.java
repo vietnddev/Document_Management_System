@@ -1,15 +1,18 @@
 package com.flowiee.dms.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaginationModel {
-    private int pageNum;
-    private int pageSize;
-    private int totalPage;
-    private long totalElements;
+    int pageNum;
+    int pageSize;
+    int totalPage;
+    long totalElements;
 
     public PaginationModel(int pageNum, int pageSize, int totalPage, long totalElements) {
         this.pageNum = pageNum;

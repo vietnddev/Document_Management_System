@@ -4,33 +4,32 @@ import com.flowiee.dms.entity.storage.DocData;
 import com.flowiee.dms.entity.storage.DocField;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.exception.AppException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.repository.storage.DocumentRepository;
+import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocMetadataService;
-import com.flowiee.dms.service.system.SystemLogService;
 import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.MasterObject;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class DocMetadataServiceImpl implements DocMetadataService {
-    private static final Logger logger = LoggerFactory.getLogger(DocMetadataServiceImpl.class);
-
-    @Autowired
-    private DocumentRepository documentRepository;
-    @Autowired
-    private DocDataService docDataService;
-    @Autowired
-    private SystemLogService systemLogService;
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class DocMetadataServiceImpl extends BaseService implements DocMetadataService {
+    DocDataService     docDataService;
+    DocumentRepository documentRepository;
 
     @Override
     public List<DocMetaModel> findMetadata(Integer documentId) {
@@ -57,6 +56,11 @@ public class DocMetadataServiceImpl implements DocMetadataService {
 
     @Override
     public String updateMetadata(List<DocMetaModel> metaDTOs, Integer documentId) {
+        Optional<Document> document = documentRepository.findById(documentId);
+        if (document.isEmpty()) {
+            throw new ResourceNotFoundException("Document not found!");
+        }
+
         for (DocMetaModel metaDTO : metaDTOs) {
             DocData docData = docDataService.findByFieldIdAndDocId(metaDTO.getFieldId(), documentId);
             if (docData != null) {
@@ -69,8 +73,10 @@ public class DocMetadataServiceImpl implements DocMetadataService {
                 docDataService.save(docData);
             }
         }
-        systemLogService.writeLog(MODULE.STORAGE.name(), ACTION.STG_DOC_UPDATE.name(), "Update metadata: docId=" + documentId, null);
+
+        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document, "-", "-");
         logger.info(DocumentInfoServiceImpl.class.getName() + ": Update metadata docId=" + documentId);
+
         return MessageUtils.UPDATE_SUCCESS;
     }
 }

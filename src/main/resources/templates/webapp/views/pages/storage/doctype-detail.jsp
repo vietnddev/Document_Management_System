@@ -232,7 +232,7 @@
             });
 
             $('#yesButton').on("click", function () {
-                let apiURL = mvHostURLCallApi + "/stg/doc/doc-field/delete/" + parseInt($(this).attr("entityId"));
+                let apiURL = mvHostURL + "/stg/doc/doc-field/delete/" + parseInt($(this).attr("entityId"));
                 callApiDelete(apiURL);
             });
         }

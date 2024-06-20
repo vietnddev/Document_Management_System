@@ -1,37 +1,34 @@
 package com.flowiee.dms.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 
-import java.io.Serial;
 import java.io.Serializable;
 
 @JsonPropertyOrder({"success", "status", "message", "cause", "pagination", "data"})
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApiResponse<T> implements Serializable {
-    @JsonIgnore
-    @Serial
-    private static final long serialVersionUID = 7702134516418120340L;
-
     @JsonProperty("success")
-    private Boolean success;
+    Boolean success;
 
     @JsonProperty("status")
-    private HttpStatus status;
+    HttpStatus status;
 
     @JsonProperty("message")
-    private String message;
+    String message;
 
     @JsonProperty("cause")
-    private String cause;
+    String cause;
 
     @JsonProperty("data")
-    private T data;
+    T data;
 
     @JsonProperty("pagination")
-    private PaginationModel pagination;
+    PaginationModel pagination;
 
     public ApiResponse(Boolean success, HttpStatus status, String message, String cause, T data, PaginationModel pagination) {
         this.success = success;
