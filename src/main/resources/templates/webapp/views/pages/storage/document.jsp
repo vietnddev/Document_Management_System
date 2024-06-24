@@ -164,6 +164,28 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Modal confirm clone document -->
+                                <div class="modal fade" id="modalCloneDoc">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <strong class="modal-title">Sao chép tài liệu</strong>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="form-group">
+                                                    <p for="nameField">Vui lòng nhập tên mới!</p>
+                                                    <input class="form-control" type="text" placeholder="Tên tài liệu" id="docCloneNameField" maxlength="200"/>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer justify-content-end">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                                                <button type="button" class="btn btn-primary" id="btnConfirmCloneDoc">Lưu</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,6 +203,7 @@
         <script type="text/javascript" th:src="@{/js/document/CreateUpdateDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/DeleteDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/ShareDocument.js}"></script>
+        <script type="text/javascript" th:src="@{/js/document/CloneDocument.js}"></script>
     </div>
 
     <script type="text/javascript">
@@ -207,6 +230,7 @@
             updateDocument();
             submitInsertOrUpdate();
             deleteDocument();
+            cloneDocument();
             search();
             //updateTableContentWhenOnClickPagination(loadDocuments, mvPageSize, mvPageNum, mvTotalPage, mvTotalElements);
             updateTableContentWhenOnClickPagination();
