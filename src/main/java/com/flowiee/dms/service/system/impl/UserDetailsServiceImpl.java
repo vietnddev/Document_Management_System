@@ -60,6 +60,11 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 				GrantedAuthority rightsAction = new SimpleGrantedAuthority(rights.getAction());
 				grantedAuthorities.add(rightsAction);
 			}
+			if (account.getGroupAccount() != null) {
+				for (AccountRole right : roleService.findByGroupId(account.getGroupAccount().getId())) {
+					grantedAuthorities.add(new SimpleGrantedAuthority(right.getAction()));
+				}
+			}
 			userPrincipal.setAuthorities(grantedAuthorities);
 
 			WebAuthenticationDetails details = null;

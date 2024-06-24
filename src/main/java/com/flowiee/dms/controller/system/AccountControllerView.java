@@ -2,12 +2,12 @@ package com.flowiee.dms.controller.system;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Account;
-import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.DataExistsException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.role.ActionModel;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.system.AccountService;
+import com.flowiee.dms.service.system.GroupAccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.PagesUtils;
@@ -28,8 +28,9 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AccountControllerView extends BaseController {
-    RoleService    roleService;
-    AccountService accountService;
+    RoleService         roleService;
+    AccountService      accountService;
+    GroupAccountService groupAccountService;
 
     @GetMapping
     @PreAuthorize("@vldModuleSystem.readAccount(true)")
@@ -37,6 +38,7 @@ public class AccountControllerView extends BaseController {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_ACCOUNT);
         modelAndView.addObject("account", new Account());
         modelAndView.addObject("listAccount", accountService.findAll());
+        modelAndView.addObject("groupAccount", groupAccountService.findAll());
         return baseView(modelAndView);
     }
 
@@ -50,6 +52,7 @@ public class AccountControllerView extends BaseController {
         List<RoleModel> roleOfAccount = roleService.findAllRoleByAccountId(accountId);
         modelAndView.addObject("listRole", roleOfAccount);
         modelAndView.addObject("accountInfo", accountService.findById(accountId).get());
+        modelAndView.addObject("groupAccount", groupAccountService.findAll());
         return baseView(modelAndView);
     }
 
@@ -63,7 +66,7 @@ public class AccountControllerView extends BaseController {
         String password = account.getPassword();
         account.setPassword(bCrypt.encode(password));
         accountService.save(account);
-        return new ModelAndView("redirect:/sys/tai-khoan");
+        return baseView(new ModelAndView("redirect:/sys/tai-khoan"));
     }
 
     @PostMapping(value = "/update/{id}")
@@ -71,12 +74,9 @@ public class AccountControllerView extends BaseController {
     public ModelAndView update(@ModelAttribute("account") Account accountEntity,
                                @PathVariable("id") Integer accountId,
                                HttpServletRequest request) {
-        if (accountId <= 0 || accountService.findById(accountId).isEmpty()) {
-            throw new ResourceNotFoundException("Account not found!");
-        }
         Optional<Account> accOptional = accountService.findById(accountId);
         if (accOptional.isEmpty()) {
-            throw new BadRequestException();
+            throw new ResourceNotFoundException("Account not found!");
         }
         Account account = accOptional.get();
         accountEntity.setId(accountId);
@@ -84,7 +84,7 @@ public class AccountControllerView extends BaseController {
         accountEntity.setPassword(account.getPassword());
         accountEntity.setLastUpdatedBy(CommonUtils.getUserPrincipal().getUsername());
         accountService.update(accountEntity, accountId);
-        return new ModelAndView("redirect:" + request.getHeader("referer"));
+        return baseView(new ModelAndView("redirect:" + request.getHeader("referer")));
     }
 
     @PostMapping(value = "/delete/{id}")
@@ -97,7 +97,7 @@ public class AccountControllerView extends BaseController {
         Account account = accountOptional.get();
         account.setStatus(false);
         accountService.save(account);
-        return new ModelAndView("redirect:/sys/tai-khoan");
+        return baseView(new ModelAndView("redirect:/sys/tai-khoan"));
     }
 
     @PostMapping("/update-permission/{id}")
@@ -106,7 +106,7 @@ public class AccountControllerView extends BaseController {
         if (accountId <= 0 || accountService.findById(accountId).isEmpty()) {
             throw new ResourceNotFoundException("Account not found!");
         }
-        roleService.deleteAllRole(accountId);
+        roleService.deleteAllRole(null, accountId);
         List<ActionModel> listAction = roleService.findAllAction();
         for (ActionModel sysAction : listAction) {
             String clientActionKey = request.getParameter(sysAction.getActionKey());
@@ -117,6 +117,6 @@ public class AccountControllerView extends BaseController {
                 }
             }
         }
-        return new ModelAndView("redirect:/sys/tai-khoan/" + accountId);
+        return baseView(new ModelAndView("redirect:/sys/tai-khoan/" + accountId));
     }
 }

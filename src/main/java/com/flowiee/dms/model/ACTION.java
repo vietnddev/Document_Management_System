@@ -37,7 +37,11 @@ public enum ACTION {
     SYS_ACCOUNT_UPDATE("Cập nhật tài khoản", "SYSTEM"),
     SYS_ACCOUNT_DELETE("Xóa tài khoản", "SYSTEM"),
     SYS_ACCOUNT_RESET_PASSWORD("Reset mật khẩu tài khoản", "SYSTEM"),
-    SYS_ACCOUNT_SHARE_ROLE("Phân quyền tài khoản", "SYSTEM");
+    SYS_ACCOUNT_SHARE_ROLE("Phân quyền tài khoản", "SYSTEM"),
+    SYS_GR_ACC_R("View list of account groups", "SYSTEM"),
+    SYS_GR_ACC_C("Create account group", "SYSTEM"),
+    SYS_GR_ACC_U("Update account group", "SYSTEM"),
+    SYS_GR_ACC_D("Delete account group", "SYSTEM");
 
     private final String label;
     private final String module;

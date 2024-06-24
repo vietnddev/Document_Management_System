@@ -123,6 +123,16 @@
                                                                     <textarea class="form-control" name="diaChi" th:text="${accountInfo.diaChi}"></textarea>
                                                                 </div>
                                                             </div>
+                                                            <div class="col-12">
+                                                                <div class="form-group">
+                                                                    <label>Nhóm người dùng</label>
+                                                                    <select class="custom-select" name="groupAccount">
+                                                                        <option th:if="${accountInfo.groupAccount != null}" th:value="${accountInfo.groupAccount.id}" th:text="${accountInfo.groupAccount.groupName}" selected></option>
+                                                                        <option th:if="${accountInfo.groupAccount == null}" value="" selected>-</option>
+                                                                        <option th:each="gr : ${groupAccount}" th:value="${gr.id}" th:text="${gr.groupName}"></option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="row">
                                                             <button class="btn btn-sm btn-info w-25" type="submit" style="margin: 0 auto">Save info</button>

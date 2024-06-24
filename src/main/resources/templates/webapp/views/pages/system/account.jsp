@@ -48,7 +48,11 @@
                                                 <div class="row">
                                                     <div class="col-7">
                                                         <h2 class="lead"><b th:text="${list.fullName}"></b></h2>
-                                                        <p class="text-muted text-sm"><b>About: </b> Software Engineer </p>
+                                                        <p class="text-muted text-sm">
+                                                            <b>Position:</b>
+                                                            <span th:if="${list.groupAccount != null}" th:text="${list.groupAccount.groupName}"></span>
+                                                            <span th:if="${list.groupAccount == null}"> </span>
+                                                        </p>
                                                         <ul class="ml-4 mb-0 fa-ul text-muted">
                                                             <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span><span th:text="'Address: ' + ${list.diaChi}"></span></li>
                                                             <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span><span th:text="'Phone: ' + ${list.phoneNumber}"></span></li>
@@ -220,6 +224,15 @@
                                                         <div class="form-group">
                                                             <label>Email</label>
                                                             <input type="email" class="form-control" placeholder="Email" name="email">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Nhóm người dùng</label>
+                                                            <select class="custom-select" name="groupAccount">
+                                                                <option th:each="gr : ${groupAccount}"
+                                                                        th:value="${gr.id}"
+                                                                        th:text="${gr.groupName}">
+                                                                </option>
+                                                            </select>
                                                         </div>
                                                         <div class="form-group">
                                                             <label>Trạng thái</label>

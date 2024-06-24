@@ -22,9 +22,9 @@ function loadDocuments(pageSize, pageNum) {
             $.each(data, function (index, d) {
                 mvDocuments[d.id] = d;
                 let iconDoc = d.isFolder === "Y" ? "/dist/icon/folder.png" : "/dist/icon/pdf.png";
-                let btnUpdate = d.thisAccCanUpdate ? `<button class="btn btn-warning btn-sm btn-update" docId="${d.id}"> <i class="fa-solid fa-pencil"></i> </button>` : ``;
-                let btnShare = d.thisAccCanShare ? `<button class="btn btn-info btn-sm btn-share" docId="${d.id}"> <i class="fa-solid fa-share"></i> </button>` : ``;
-                let btnDelete = d.thisAccCanDelete ? `<button class="btn btn-danger btn-sm btn-delete" docId="${d.id}"> <i class="fa-solid fa-trash"></i> </button>` : ``;
+                let btnUpdate = d.thisAccCanUpdate ? `<button class="btn btn-warning btn-sm btn-update" docId="${d.id}" title="Cập nhật"> <i class="fa-solid fa-pencil"></i> </button>` : ``;
+                let btnShare = d.thisAccCanShare ? `<button class="btn btn-info btn-sm btn-share" docId="${d.id}" title="Chia sẽ"> <i class="fa-solid fa-share"></i> </button>` : ``;
+                let btnDelete = d.thisAccCanDelete ? `<button class="btn btn-danger btn-sm btn-delete" docId="${d.id}" title="Xóa"> <i class="fa-solid fa-trash"></i> </button>` : ``;
                 contentTable.append(`
                     <tr>
                         <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>

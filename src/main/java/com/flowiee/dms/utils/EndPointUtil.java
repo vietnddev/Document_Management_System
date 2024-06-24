@@ -11,6 +11,7 @@ public class EndPointUtil {
     public static final String SYS_CONFIG = "/sys/config";
     public static final String SYS_LOG = "/sys/log";
     public static final String SYS_ACCOUNT = "/sys/tai-khoan";
+    public static final String URL_SYS_GR_ACCOUNT = "/sys/group-account";
 
     public static final String STORAGE = "/stg";
     public static final String STORAGE_DOCUMENT = STORAGE + "/doc";

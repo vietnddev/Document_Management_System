@@ -47,11 +47,6 @@
                                         <i class="fa-solid fa-arrows-rotate mr-1"></i>
                                         Thay file
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-success" style="width: 110px"
-                                            data-toggle="modal" data-target="#modalCopy">
-                                        <i class="fa-solid fa-copy mr-1"></i>
-                                        Sao chép
-                                    </button>
                                     <button type="button" class="btn btn-sm btn-info" style="width: 110px"
                                             data-toggle="modal" data-target="#modalMove">
                                         <i class="fa-solid fa-arrow-right-arrow-left mr-1"></i>

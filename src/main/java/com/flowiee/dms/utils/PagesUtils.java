@@ -7,6 +7,8 @@ public class PagesUtils {
     public static final String SYS_LOGIN = "/login";
     public static final String SYS_ACCOUNT = mdlSYS + "/account";
     public static final String SYS_ACCOUNT_DETAIL = mdlSYS + "/account-detail";
+    public static final String SYS_GR_ACC = mdlSYS + "/group-account";
+    public static final String SYS_GR_ACC_DETAIL = mdlSYS + "/group-account-detail";
     public static final String SYS_LOG = mdlSYS + "/log";
     public static final String SYS_CONFIG = mdlSYS + "/config";
     public static final String SYS_NOTIFICATION = mdlSYS + "/notification";

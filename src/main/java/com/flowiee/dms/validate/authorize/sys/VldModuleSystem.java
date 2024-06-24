@@ -40,4 +40,24 @@ public class VldModuleSystem extends BaseAuthorize implements IVldModuleSystem {
     public boolean setupConfig(boolean throwException) {
         return super.isAuthorized("CONFIG", throwException);
     }
+
+    @Override
+    public boolean readGroupAccount(boolean throwException) {
+        return super.isAuthorized(ACTION.SYS_GR_ACC_R.name(), throwException);
+    }
+
+    @Override
+    public boolean insertGroupAccount(boolean throwException) {
+        return super.isAuthorized(ACTION.SYS_GR_ACC_C.name(), throwException);
+    }
+
+    @Override
+    public boolean updateGroupAccount(boolean throwException) {
+        return super.isAuthorized(ACTION.SYS_GR_ACC_U.name(), throwException);
+    }
+
+    @Override
+    public boolean deleteGroupAccount(boolean throwException) {
+        return super.isAuthorized(ACTION.SYS_GR_ACC_D.name(), throwException);
+    }
 }
