@@ -57,7 +57,11 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileStorage findFileIsActiveOfDocument(Integer documentId) {
-        return fileRepository.findFileOfDocument(documentId, true).get(0);
+        List<FileStorage> listFiles = fileRepository.findFileOfDocument(documentId, true);
+        if (listFiles != null && !listFiles.isEmpty()) {
+            return listFiles.get(0);
+        }
+        return null;
     }
 
     @Override

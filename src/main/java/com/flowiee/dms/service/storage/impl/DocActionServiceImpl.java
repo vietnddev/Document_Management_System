@@ -30,7 +30,6 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocActionServiceImpl extends BaseService implements DocActionService {
-    RoleService         roleService;
     DocDataService      docDataService;
     DocShareService     docShareService;
     DocumentRepository  documentRepository;
@@ -40,18 +39,21 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     public DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy) {
         Optional<DocumentDTO> doc = documentInfoService.findById(docId);
         if (doc.isEmpty()) {
-            throw new BadRequestException();
+            throw new BadRequestException("Document to copy not found!");
         }
         //Copy doc
-        Document document = new Document();
-        document.setName(nameCopy);
-        document.setAsName(CommonUtils.generateAliasName(nameCopy));
+        doc.get().setId(null);
+        doc.get().setName(nameCopy);
+        doc.get().setAsName(CommonUtils.generateAliasName(nameCopy));
         Document docCopied = documentInfoService.save(doc.get());
         //Copy metadata
         for (DocData docData : docDataService.findByDocument(docId)) {
-            docData.setId(0);
-            docData.setDocument(docCopied);
-            docDataService.save(docData);
+            DocData docDataNew = DocData.builder()
+                    .docField(docData.getDocField())
+                    .document(docCopied)
+                    .value(docData.getValue())
+                    .build();
+            docDataService.save(docDataNew);
         }
         return DocumentDTO.fromDocument(docCopied);
     }

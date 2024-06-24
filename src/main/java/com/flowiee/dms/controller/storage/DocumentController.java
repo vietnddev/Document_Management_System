@@ -90,7 +90,7 @@ public class DocumentController extends BaseController {
     }
 
     @Operation(summary = "Copy document")
-    @GetMapping("/doc/copy/{id}")
+    @PostMapping("/doc/copy/{id}")
     @PreAuthorize("@vldModuleStorage.copyDoc(true)")
     public ApiResponse<DocumentDTO> copyDoc(@PathVariable("id") Integer docId, @RequestParam("nameCopy") String nameCopy) {
         return ApiResponse.ok(docActionService.copyDoc(docId, null, nameCopy));

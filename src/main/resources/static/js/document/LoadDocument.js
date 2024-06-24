@@ -34,6 +34,7 @@ function loadDocuments(pageSize, pageNum) {
                         <td>${d.docTypeName}</td>
                         <td>${d.description}</td>
                         <td>
+                            <button class="btn btn-secondary btn-sm btn-copy" docId="${d.id}"> <i class="fa-solid fa-copy"></i> </button>
                             ${btnUpdate}
                             ${btnShare}
                             ${btnDelete}
