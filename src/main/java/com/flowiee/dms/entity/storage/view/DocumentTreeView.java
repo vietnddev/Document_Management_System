@@ -29,6 +29,9 @@ public class DocumentTreeView extends BaseEntity {
     @Column(name = "Has_SubFolders")
     String hasSubFolders;
 
+    @Column(name = "Has_SubFiles")
+    String hasSubFiles;
+
     @Column(name = "SubFoldersId")
     String subFoldersId;
 
@@ -42,9 +45,10 @@ public class DocumentTreeView extends BaseEntity {
     public static DocumentDTO toDocDTO(DocumentTreeView docTreeView) {
         DocumentDTO docDTO = new DocumentDTO();
         docDTO.setId(docTreeView.getId());
+        docDTO.setParentId(docTreeView.getParentId());
         docDTO.setName(docTreeView.getName());
         docDTO.setAsName(docTreeView.getAsName());
-        docDTO.setParentId(docTreeView.getParentId());
+        docDTO.setIsFolder(docTreeView.getIsFolder());
         docDTO.setHasSubFolder(docTreeView.getHasSubFolders());
         docDTO.setPath(docTreeView.getPath());
         docDTO.setCreatedAt(docTreeView.getCreatedAt());

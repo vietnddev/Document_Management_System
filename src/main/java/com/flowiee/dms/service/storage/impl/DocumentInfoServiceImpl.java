@@ -1,6 +1,5 @@
 package com.flowiee.dms.service.storage.impl;
 
-import com.flowiee.dms.entity.storage.view.DocumentTreeView;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
@@ -205,50 +204,6 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
             hierarchy.add(docDTO);
         }
         return hierarchy;
-    }
-
-    /**
-    * HierarchyLevel: Thư mục ở cấp thứ mấy
-    * RowNumm: Thư mục số mấy của cấp HierarchyLevel
-    * */
-    @Override
-    public List<DocumentDTO> getDocumentWithTreeForm(Integer parentId) {
-        logger.info("Generate folder tree");
-        List<DocumentDTO> folderTree = new ArrayList<>();
-
-        List<DocumentTreeView> documentTreeViews = documentRepository.findGeneralFolderTree(parentId);
-
-        for (DocumentTreeView docTreeView : documentTreeViews) {
-            folderTree.add(DocumentTreeView.toDocDTO(docTreeView));
-        }
-
-        for (int i = 0; i < folderTree.size(); i++) {
-            if (folderTree.get(i).getHasSubFolder().equals("Y")) {
-                List<Integer> subFolderIds = new ArrayList<>();
-                if (documentTreeViews.get(i).getSubFoldersId() != null) {
-                    for (String subId : documentTreeViews.get(i).getSubFoldersId().split("\\|")) {
-                        subFolderIds.add(Integer.parseInt(subId));
-                    }
-                }
-                folderTree.get(i).setSubFolders(this.findSubFolders(folderTree, subFolderIds));
-            }
-        }
-
-        return folderTree;
-    }
-
-    private List<DocumentDTO> findSubFolders(List<DocumentDTO> lsFolders, List<Integer> subFolderId) {
-        List<DocumentDTO> listSubFolders = new ArrayList<>();
-        for (DocumentDTO dto : lsFolders) {
-            if (listSubFolders.size() == subFolderId.size()) {
-                break;
-            }
-            if (subFolderId.contains(dto.getId())) {
-                listSubFolders.add(dto);
-                //System.out.println("Sub " + dto.getName());
-            }
-        }
-        return listSubFolders;
     }
 
     @Override

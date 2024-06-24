@@ -43,6 +43,7 @@
                                         <div class="col-4 text-right">
                                             <button type="button" class="btn btn-primary" id="btnInsertFile">Thêm mới tài liệu</button>
                                             <button type="button" class="btn btn-warning" id="btnInsertFolder">Thêm mới thư mục</button>
+                                            <button type="button" class="btn btn-info"    data-target="#modalExportData" data-toggle="modal">Xuất dữ liệu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -144,6 +145,25 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Modal confirm export data -->
+                                <div class="modal fade" id="modalExportData">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <strong class="modal-title">Xuất dữ liệu</strong>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Bạn muốn xuất dữ liệu kho?
+                                            </div>
+                                            <div class="modal-footer justify-content-end">
+                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                                                <button type="button" class="btn btn-primary" id="btnConfirmExportData">Lưu</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -190,6 +210,7 @@
             search();
             //updateTableContentWhenOnClickPagination(loadDocuments, mvPageSize, mvPageNum, mvTotalPage, mvTotalElements);
             updateTableContentWhenOnClickPagination();
+            exportData();
         });
 
         function updateTableContentWhenOnClickPagination() {
@@ -259,6 +280,13 @@
             }).fail(function () {
                 showErrorModal("Could not connect to the server");
             });
+        }
+
+        function exportData() {
+            $("#btnConfirmExportData").on("click", function () {
+                let apiURL = mvHostURLCallApi + "/stg/doc/export/excel";
+                callApiExportData(apiURL);
+            })
         }
     </script>
 </body>

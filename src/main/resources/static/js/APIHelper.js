@@ -1,17 +1,3 @@
-/*
-async function callApiDelete(apiURL) {
-    let response = await fetch(apiURL, {
-        method: 'DELETE'
-    });
-    if (response.ok && (await response.text() === 'OK')) {
-        alert('Delete success!')
-        window.location.reload()
-    } else {
-        alert('Delete fail!')
-    }
-}
-*/
-
 function callApiDelete(apiURL, redirectTo) {
     $.ajax({
         url: apiURL,
@@ -28,6 +14,47 @@ function callApiDelete(apiURL, redirectTo) {
         error: function(xhr, status, error) {
             // Xử lý lỗi nếu có
             alert(status + ': ' + JSON.stringify(xhr.responseJSON));
+        }
+    });
+}
+
+function callApiExportData(apiURL) {
+    $.ajax({
+        url: apiURL,
+        method: 'GET',
+        xhrFields: {
+            responseType: 'blob'
+        },
+        success: function(data, status, xhr) {
+            // Get the filename from the Content-Disposition header
+            var filename = "";
+            var disposition = xhr.getResponseHeader('Content-Disposition');
+            if (disposition && disposition.indexOf('attachment') !== -1) {
+                var filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                var matches = filenameRegex.exec(disposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+            }
+
+            // Create a URL for the blob
+            var url = window.URL.createObjectURL(data);
+
+            // Create a link element, set the URL and trigger a click to download the file
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up
+            setTimeout(function() {
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }, 0);
+        },
+        error: function(xhr, status, error) {
+            console.error("An error occurred while exporting data: " + error);
         }
     });
 }
