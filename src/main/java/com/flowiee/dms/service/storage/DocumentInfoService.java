@@ -16,8 +16,6 @@ public interface DocumentInfoService extends BaseCurdService<DocumentDTO> {
 
     List<DocumentDTO> findHierarchyOfDocument(Integer documentId, Integer parentId);
 
-    List<DocumentDTO> getDocumentWithTreeForm(Integer parentId);
-
     List<DocumentDTO> findSharedDocFromOthers(Integer accountId);
 
     List<DocumentDTO> findVersions(Integer documentId);

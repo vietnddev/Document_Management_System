@@ -1,5 +1,9 @@
 package com.flowiee.dms.service.storage;
 
-public class FolderTreeService {
-    
+import com.flowiee.dms.model.dto.DocumentDTO;
+
+import java.util.List;
+
+public interface FolderTreeService {
+    List<DocumentDTO> getDocumentWithTreeForm(Integer docParentId, boolean isOnlyFolder);
 }
