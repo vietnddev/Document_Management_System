@@ -14,4 +14,12 @@ public interface IVldModuleSystem {
     boolean readLog(boolean throwException);
 
     boolean setupConfig(boolean throwException);
+
+    boolean readGroupAccount(boolean throwException);
+
+    boolean insertGroupAccount(boolean throwException);
+
+    boolean updateGroupAccount(boolean throwException);
+
+    boolean deleteGroupAccount(boolean throwException);
 }

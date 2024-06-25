@@ -27,14 +27,17 @@ public class AccountRole extends BaseEntity implements java.io.Serializable {
 	@NotNull
 	String action;
 
-	@Column(name = "account_id", nullable = false)
-	@NotNull
+	@Column(name = "account_id")
 	Integer accountId;
 
-	public AccountRole(String module, String action, Integer accountId) {
+	@Column(name = "group_id")
+	Integer groupId;
+
+	public AccountRole(String module, String action, Integer accountId, Integer groupId) {
 		this.module = module;
 		this.action = action;
 		this.accountId = accountId;
+		this.groupId = groupId;
 	}
 
 	@Override

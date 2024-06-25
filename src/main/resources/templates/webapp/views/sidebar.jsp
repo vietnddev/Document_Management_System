@@ -25,7 +25,7 @@
                                 <strong>KHO</strong>
                             </li>
                             <li class="nav-item">
-                                <a th:href="@{${URL_STORAGE_TICKET_IMPORT}}" class="nav-link"><i class="fa-solid fa-cloud-arrow-up fa-rotate-90 mr-2"></i><p>Danh sách tài liệu</p></a>
+                                <a th:href="@{${URL_STORAGE_DOCUMENT}}" class="nav-link"><i class="fa-solid fa-cloud-arrow-up fa-rotate-90 mr-2"></i><p>Danh sách tài liệu</p></a>
                             </li>
 
                             <li class="nav-header">
@@ -36,10 +36,23 @@
                                 <a th:href="@{${URL_SYSTEM_CONFIG}}" class="nav-link"><i class="fa-solid fa-gear nav-icon mr-2"></i><p>Cấu hình</p></a>
                             </li>
                             <li class="nav-item">
-                                <a th:href="@{${URL_SYSTEM_ACCOUNT}}" class="nav-link"><i class="fa-solid fa-users nav-icon mr-2"></i><p>Tài khoản hệ thống</p></a>
+                                <a th:href="@{${URL_SYSTEM_LOG}}" class="nav-link"><i class="fa-solid fa-clock nav-icon mr-2"></i><p>Nhật ký hệ thống</p></a>
                             </li>
                             <li class="nav-item">
-                                <a th:href="@{${URL_SYSTEM_LOG}}" class="nav-link"><i class="fa-solid fa-clock nav-icon mr-2"></i><p>Nhật ký hệ thống</p></a>
+                                <a href="#" class="nav-link">
+                                    <i class="fa-solid fa-users nav-icon mr-2"></i>
+                                    <p>Tài khoản hệ thống<i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    <li class="nav-item">
+                                        <a th:href="@{${URL_SYS_ACCOUNT}}" class="nav-link"><i class="nav-icon mr-3"></i>
+                                            <p>Danh sách người dùng</p></a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a th:href="@{${URL_SYS_GR_ACCOUNT}}" class="nav-link"><i class="nav-icon mr-3"></i>
+                                            <p>Nhóm người dùng</p></a>
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </nav>

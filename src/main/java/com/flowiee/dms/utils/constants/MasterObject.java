@@ -9,6 +9,7 @@ public enum MasterObject {
     FileStorage,
     Account,
     AccountRole,
+    GroupAccount,
     Language,
     Notification,
     SystemConfig,

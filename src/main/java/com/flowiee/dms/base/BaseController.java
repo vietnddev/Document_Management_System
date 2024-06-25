@@ -33,6 +33,7 @@ public class BaseController {
 		modelAndView.addObject("URL_STORAGE_DOCUMENT", EndPointUtil.STORAGE_DOCUMENT);
 		modelAndView.addObject("URL_SYSTEM_CONFIG", EndPointUtil.SYS_CONFIG);
 		modelAndView.addObject("URL_SYSTEM_LOG", EndPointUtil.SYS_LOG);
-		modelAndView.addObject("URL_SYSTEM_ACCOUNT", EndPointUtil.SYS_ACCOUNT);
+		modelAndView.addObject("URL_SYS_ACCOUNT", EndPointUtil.SYS_ACCOUNT);
+		modelAndView.addObject("URL_SYS_GR_ACCOUNT", EndPointUtil.URL_SYS_GR_ACCOUNT);
 	}
 }

@@ -54,6 +54,11 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "role")
 	String role;
 
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "group_account")
+	GroupAccount groupAccount;
+
 	@Column(name = "status")
 	boolean status;
 

@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleModel {
     Integer accountId;
+    Integer groupId;
     ModuleModel module;
     ActionModel action;
     Boolean isAuthor;
