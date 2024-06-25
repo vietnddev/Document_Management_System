@@ -175,7 +175,7 @@
         let mvDocId = [[${documentId}]];
 
         $(document).ready(function () {
-            loadFolderTree();
+            loadFolderTreeOnSideBar();
             loadFileVersion();
         });
 

@@ -10,6 +10,56 @@
         .table td, th {
             vertical-align: middle;
         }
+        /* Remove default bullets */
+        ul, #myUL {
+            list-style-type: none;
+        }
+
+        /* Remove margins and padding from the parent ul */
+        #myUL {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Style the caret/arrow */
+        .caret {
+            cursor: pointer;
+            user-select: none; /* Prevent text selection */
+        }
+
+        /* Create the caret/arrow with a unicode, and style it */
+        .caret::before {
+            content: "\25B6";
+            color: black;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+        .caret-down::before {
+            transform: rotate(90deg);
+        }
+
+        /* Hide the nested list */
+        .nested {
+            display: none;
+        }
+
+        /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+        .active {
+            display: block;
+        }
+
+        .highlight-txt {
+            color: blue;
+            font-weight: bold;
+        }
+        .highlight-bg {
+            background: aliceblue;
+        }
+        .caret-name {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -68,124 +118,19 @@
                                 </div>
 
                                 <!-- Modal insert and update -->
-                                <div class="modal fade" id="modalInsertOrUpdate">
-                                    <div class="modal-dialog modal-lg">
-                                        <form id="formInsertOrUpdate" enctype="multipart/form-data">
-                                            <div class="modal-content">
-                                                <div id="headerModalIU">
-                                                    <strong class="modal-title" id="titleInsertOrUpdate"></strong>
-                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="row">
-                                                        <div class="col-12">
-                                                            <div class="form-group" id="docTypeBlock">
-                                                                <label for="docTypeField">Loại tài liệu</label>
-                                                                <select class="custom-select" id="docTypeField"></select>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="nameField">Tên</label>
-                                                                <input class="form-control" type="text" placeholder="Tên loại tài liệu" id="nameField" maxlength="200"/>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="desField">Mô tả</label>
-                                                                <textarea class="form-control" rows="5" placeholder="Mô tả" id="desField"></textarea>
-                                                            </div>
-                                                            <div class="form-group" id="fileBlock">
-                                                                <label for="fileField">File</label>
-                                                                <input class="form-control" type="file" id="fileField"/>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer justify-content-end">
-                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                                    <button type="submit" class="btn btn-primary" id="btnSubmit">Lưu</button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalInsertAndUpdateFragment"></div>
 
                                 <!-- Modal share role -->
-                                <div class="modal fade" id="modalShare">
-                                    <div class="modal-dialog modal-lg">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-info">
-                                                <strong class="modal-title">Phân quyền tài liệu</strong>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="card mb-0">
-                                                    <div class="card-body table-responsive p-0">
-                                                        <table class="table table-hover text-nowrap">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Account name</th>
-                                                                    <th class="text-center">Read</th>
-                                                                    <th class="text-center">Update</th>
-                                                                    <th class="text-center">Delete</th>
-                                                                    <th class="text-center">Move</th>
-                                                                    <th class="text-center">Share</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody id="tblSysAccountShare"></tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer justify-content-end">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                                <button type="submit" class="btn btn-primary" id="btnSubmitShare">Lưu</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalShareFragment"></div>
 
                                 <!-- Modal confirm export data -->
-                                <div class="modal fade" id="modalExportData">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-info">
-                                                <strong class="modal-title">Xuất dữ liệu</strong>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                Bạn muốn xuất dữ liệu kho?
-                                            </div>
-                                            <div class="modal-footer justify-content-end">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                                <button type="button" class="btn btn-primary" id="btnConfirmExportData">Lưu</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalExportDataFragment"></div>
 
                                 <!-- Modal confirm clone document -->
-                                <div class="modal fade" id="modalCloneDoc">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-secondary">
-                                                <strong class="modal-title">Sao chép tài liệu</strong>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="form-group">
-                                                    <p for="nameField">Vui lòng nhập tên mới!</p>
-                                                    <input class="form-control" type="text" placeholder="Tên tài liệu" id="docCloneNameField" maxlength="200"/>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer justify-content-end">
-                                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                                <button type="button" class="btn btn-primary" id="btnConfirmCloneDoc">Lưu</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalCloneDocFragment"></div>
+
+                                <!-- Modal confirm clone document -->
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalMoveDocFragment"></div>
                             </div>
                         </div>
                     </div>
@@ -204,6 +149,7 @@
         <script type="text/javascript" th:src="@{/js/document/DeleteDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/ShareDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/CloneDocument.js}"></script>
+        <script type="text/javascript" th:src="@{/js/document/MoveDocument.js}"></script>
     </div>
 
     <script type="text/javascript">
@@ -223,7 +169,8 @@
         $(document).ready(function () {
             loadDocuments(mvPageSizeDefault, 1);
             setupSearchTool(mvSearchTool);
-            loadFolderTree();
+            loadFolderTreeOnSideBar();
+            loadFolderTreeOnMoveModal();
             beforeSubmitShareRights();
             shareDoc();
             createDocument();
@@ -231,6 +178,7 @@
             submitInsertOrUpdate();
             deleteDocument();
             cloneDocument();
+            moveDocument();
             search();
             //updateTableContentWhenOnClickPagination(loadDocuments, mvPageSize, mvPageNum, mvTotalPage, mvTotalElements);
             updateTableContentWhenOnClickPagination();
