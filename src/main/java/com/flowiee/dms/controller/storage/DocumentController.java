@@ -5,8 +5,8 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
-import com.flowiee.dms.utils.MessageUtils;
 import com.flowiee.dms.service.storage.DocumentInfoService;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class DocumentController extends BaseController {
             Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch);
             return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "documents"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "documents"), ex);
         }
     }
 
@@ -60,7 +60,7 @@ public class DocumentController extends BaseController {
             document.setFileUpload(fileUpload);
             return ApiResponse.ok(documentInfoService.save(document));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.CREATE_ERROR_OCCURRED, "document"), ex);
+            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
         }
     }
 
@@ -71,7 +71,7 @@ public class DocumentController extends BaseController {
         try {
             return ApiResponse.ok(documentInfoService.findFoldersByParent(parentId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "folders"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "folders"), ex);
         }
     }
 

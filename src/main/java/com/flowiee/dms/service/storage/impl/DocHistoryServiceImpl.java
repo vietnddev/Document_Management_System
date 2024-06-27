@@ -4,7 +4,7 @@ import com.flowiee.dms.entity.storage.DocHistory;
 import com.flowiee.dms.repository.storage.DocHistoryRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocHistoryService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,7 +43,7 @@ public class DocHistoryServiceImpl extends BaseService implements DocHistoryServ
     @Override
     public String delete(Integer docHistoryId) {
         docHistoryRepo.deleteById(docHistoryId);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override

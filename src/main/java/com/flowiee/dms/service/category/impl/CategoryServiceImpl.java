@@ -9,7 +9,8 @@ import com.flowiee.dms.repository.category.CategoryRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.category.CategoryService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
-import com.flowiee.dms.utils.*;
+import com.flowiee.dms.utils.constants.ErrorCode;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -72,11 +73,11 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             throw new BadRequestException("Category not found!");
         }
         if (!documentInfoService.findByDoctype(category.get().getId()).isEmpty()) {
-            throw new DataInUseException(MessageUtils.ERROR_DATA_LOCKED);
+            throw new DataInUseException(ErrorCode.DATA_LOCKED_ERROR.getDescription());
         }
         categoryHistoryRepo.deleteAllByCategory(entityId);
         categoryRepo.deleteById(entityId);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override

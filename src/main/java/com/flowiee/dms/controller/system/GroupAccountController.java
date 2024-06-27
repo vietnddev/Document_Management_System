@@ -8,8 +8,6 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.role.RoleModel;
-import com.flowiee.dms.service.system.GroupAccountService;
-import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,7 +38,7 @@ public class GroupAccountController extends BaseController {
             Page<GroupAccount> groupAccounts = groupAccountService.findAll(pageSize, pageNum - 1);
             return ApiResponse.ok(groupAccounts.getContent(), pageNum, pageSize, groupAccounts.getTotalPages(), groupAccounts.getTotalElements());
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(ErrorCode.SEARCH_ERROR_OCCURRED.getDescription(), "group account"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "group account"), ex);
         }
     }
 
@@ -65,7 +63,7 @@ public class GroupAccountController extends BaseController {
             }
             return ApiResponse.ok(groupAccountService.save(groupAccount));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(ErrorCode.UPDATE_ERROR_OCCURRED.getDescription(), "group account"), ex);
+            throw new AppException(String.format(ErrorCode.UPDATE_ERROR.getDescription(), "group account"), ex);
         }
     }
 
@@ -90,7 +88,7 @@ public class GroupAccountController extends BaseController {
         try {
             return ApiResponse.ok(roleService.findAllRoleByGroupId(groupId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(ErrorCode.SEARCH_ERROR_OCCURRED.getDescription(), "rights of group account"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "rights of group account"), ex);
         }
     }
 
@@ -104,7 +102,7 @@ public class GroupAccountController extends BaseController {
             }
             return ApiResponse.ok(roleService.updateRightsOfGroup(rights, groupId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(ErrorCode.UPDATE_ERROR_OCCURRED.getDescription(), "group account"), ex);
+            throw new AppException(String.format(ErrorCode.UPDATE_ERROR.getDescription(), "group account"), ex);
         }
     }
 }

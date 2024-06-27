@@ -5,7 +5,7 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.service.system.ConfigService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -31,7 +31,7 @@ public class ConfigController {
         try {
             return ApiResponse.ok(configService.findAll());
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "configs"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "configs"), ex);
         }
     }
 
@@ -45,7 +45,7 @@ public class ConfigController {
             }
             return ApiResponse.ok(configService.update(config, configId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.UPDATE_ERROR_OCCURRED, config), ex);
+            throw new AppException(String.format(ErrorCode.UPDATE_ERROR.getDescription(), config), ex);
         }
     }
 }

@@ -10,7 +10,7 @@ import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -38,7 +38,7 @@ public class AccountController extends BaseController {
         try {
             return ApiResponse.ok(accountService.findAll());
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "account"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "account"), ex);
         }
     }
 
@@ -46,15 +46,11 @@ public class AccountController extends BaseController {
     @GetMapping("/{accountId}")
     @PreAuthorize("@vldModuleSystem.readAccount(true)")
     public ApiResponse<Account> findDetailAccount(@PathVariable("accountId") Integer accountId) {
-        try {
-            Optional<Account> account = accountService.findById(accountId);
-            if (account.isPresent()) {
-                return ApiResponse.ok(account.get());
-            }
-            throw new BadRequestException();
-        } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "account"), ex);
+        Optional<Account> account = accountService.findById(accountId);
+        if (account.isEmpty()) {
+            throw new ResourceNotFoundException("Account not found!");
         }
+        return ApiResponse.ok(account.get());
     }
 
     @Operation(summary = "Create account")
@@ -70,7 +66,7 @@ public class AccountController extends BaseController {
             }
             return ApiResponse.ok(accountService.save(account));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.UPDATE_ERROR_OCCURRED, "account"), ex);
+            throw new AppException(String.format(ErrorCode.UPDATE_ERROR.getDescription(), "account"), ex);
         }
     }
 
@@ -84,7 +80,7 @@ public class AccountController extends BaseController {
             }
             return ApiResponse.ok(accountService.update(account, accountId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.UPDATE_ERROR_OCCURRED, "account"), ex);
+            throw new AppException(String.format(ErrorCode.UPDATE_ERROR.getDescription(), "account"), ex);
         }
     }
 
@@ -122,7 +118,7 @@ public class AccountController extends BaseController {
             }
             return ApiResponse.ok(accountService.delete(accountId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.DELETE_ERROR_OCCURRED, "account"), ex);
+            throw new AppException(String.format(ErrorCode.DELETE_ERROR.getDescription(), "account"), ex);
         }
     }
 
@@ -133,7 +129,7 @@ public class AccountController extends BaseController {
         try {
             return ApiResponse.ok(roleService.findAllRoleByAccountId(accountId));
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "role"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "role"), ex);
         }
     }
 }

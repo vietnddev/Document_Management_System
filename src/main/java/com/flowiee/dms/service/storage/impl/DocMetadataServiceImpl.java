@@ -12,8 +12,9 @@ import com.flowiee.dms.repository.storage.DocumentRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocMetadataService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MasterObject;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,7 +50,7 @@ public class DocMetadataServiceImpl extends BaseService implements DocMetadataSe
                 }
             }
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "metadata of document"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "metadata of document"), ex);
         }
         return listReturn;
     }
@@ -77,6 +78,6 @@ public class DocMetadataServiceImpl extends BaseService implements DocMetadataSe
         systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document, "-", "-");
         logger.info(DocumentInfoServiceImpl.class.getName() + ": Update metadata docId=" + documentId);
 
-        return MessageUtils.UPDATE_SUCCESS;
+        return MessageCode.UPDATE_SUCCESS.getDescription();
     }
 }

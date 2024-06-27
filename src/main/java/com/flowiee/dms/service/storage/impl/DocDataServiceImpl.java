@@ -4,11 +4,10 @@ import com.flowiee.dms.entity.storage.DocData;
 import com.flowiee.dms.repository.storage.DocDataRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocDataService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,7 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
 
     public String delete(Integer id) {
         docDataRepository.deleteById(id);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override
@@ -63,6 +62,6 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
     @Override
     public String update(String value, Integer docDataId) {
         docDataRepository.updateMetaData(value, docDataId);
-        return MessageUtils.UPDATE_SUCCESS;
+        return MessageCode.UPDATE_SUCCESS.getDescription();
     }
 }

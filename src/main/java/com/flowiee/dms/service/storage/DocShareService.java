@@ -11,7 +11,7 @@ public interface DocShareService extends BaseCurdService<DocShare> {
 
     List<DocShareModel> findDetailRolesOfDocument(Integer documentId);
 
-    boolean isShared(int documentId);
+    boolean isShared(int documentId, String role);
 
     void deleteByAccount(Integer accountId);
 

@@ -16,9 +16,9 @@ import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.MessageUtils;
 import com.flowiee.dms.utils.constants.LogType;
 import com.flowiee.dms.utils.constants.MasterObject;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -145,7 +145,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 				//systemLogService.writeLog(systemLog);
 			}
 			logger.info("Delete account success! id=" + accountId);
-			return MessageUtils.DELETE_SUCCESS;
+			return MessageCode.DELETE_SUCCESS.getDescription();
 		} catch (RuntimeException ex) {
 			throw new AppException("Delete account fail! id=" + accountId, ex);
 		}

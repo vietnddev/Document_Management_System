@@ -12,6 +12,7 @@ import com.flowiee.dms.service.category.CategoryService;
 import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.utils.*;
 import com.flowiee.dms.utils.constants.CategoryType;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -73,8 +74,8 @@ public class DocumentControllerView extends BaseController {
         if (documentOptional.isEmpty() || !(aliasName + "-" + documentId).equals(documentOptional.get().getAsName() + "-" + documentOptional.get().getId())) {
             throw new ResourceNotFoundException("Document not found!");
         }
-        if (!docShareService.isShared(documentId)) {
-            throw new ForbiddenException(MessageUtils.ERROR_FORBIDDEN);
+        if (!docShareService.isShared(documentId, null)) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         DocumentDTO document = documentOptional.get();
         try {
@@ -97,7 +98,7 @@ public class DocumentControllerView extends BaseController {
             }
             return baseView(modelAndView);
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "subDocs/ docDetail"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "subDocs/ docDetail"), ex);
         }
     }
 

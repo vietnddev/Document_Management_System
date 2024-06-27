@@ -7,11 +7,11 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
 import com.flowiee.dms.service.BaseService;
-import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Lazy;
@@ -22,20 +22,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileStorageServiceImpl extends BaseService implements FileStorageService {
-    AccountService        accountService;
     DocumentInfoService   documentInfoService;
     FileStorageRepository fileRepository;
 
-    public FileStorageServiceImpl(AccountService accountService, @Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository) {
-        this.accountService = accountService;
+    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository) {
         this.documentInfoService = documentInfoService;
         this.fileRepository = fileRepository;
     }
@@ -71,21 +67,13 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
-        long currentTime = Instant.now(Clock.systemUTC()).toEpochMilli();
-        FileStorage fileInfo = new FileStorage();
-        fileInfo.setModule(MODULE.STORAGE.name());
-        fileInfo.setOriginalName(fileUpload.getOriginalFilename());
+        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE.name());
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
-        fileInfo.setStorageName(currentTime + "_" + fileUpload.getOriginalFilename());
-        fileInfo.setFileSize(fileUpload.getSize());
-        fileInfo.setExtension(CommonUtils.getFileExtension(fileUpload.getOriginalFilename()));
-        fileInfo.setContentType(fileUpload.getContentType());
-        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).substring(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).indexOf("uploads")));
         fileInfo.setDocument(new Document(documentId));
-        fileInfo.setAccount(accountService.findCurrentAccount());
         fileInfo.setActive(true);
         FileStorage fileSaved = fileRepository.save(fileInfo);
 
+        String currentTime = fileSaved.getStorageName().split("_")[0];
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
         fileUpload.transferTo(path);
 
@@ -113,21 +101,13 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
             fileRepository.save(docFile);
         }
         //Save file mới vào hệ thống
-        long currentTime = Instant.now(Clock.systemUTC()).toEpochMilli();
-        FileStorage fileInfo = new FileStorage();
-        fileInfo.setModule(MODULE.STORAGE.name());
-        fileInfo.setOriginalName(fileUpload.getOriginalFilename());
+        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE.name());
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
-        fileInfo.setStorageName(currentTime + "_" + fileUpload.getOriginalFilename());
-        fileInfo.setFileSize(fileUpload.getSize());
-        fileInfo.setExtension(CommonUtils.getFileExtension(fileUpload.getOriginalFilename()));
-        fileInfo.setContentType(fileUpload.getContentType());
-        fileInfo.setDirectoryPath(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).substring(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).indexOf("uploads")));
         fileInfo.setDocument(new Document(documentId));
-        fileInfo.setAccount(accountService.findCurrentAccount());
         fileInfo.setActive(true);
-        fileRepository.save(fileInfo);
+        FileStorage fileSaved = fileRepository.save(fileInfo);
 
+        String currentTime = fileSaved.getStorageName().split("_")[0];
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
         fileUpload.transferTo(path);
 
@@ -140,8 +120,8 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         fileRepository.deleteById(fileId);
         File file = new File(CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName());
         if (file.exists() && file.delete()) {
-            return MessageUtils.DELETE_SUCCESS;
+            return MessageCode.DELETE_SUCCESS.getDescription();
         }
-        return String.format(MessageUtils.DELETE_ERROR_OCCURRED, "file");
+        return String.format(ErrorCode.DELETE_ERROR.getDescription(), "file");
     }
 }

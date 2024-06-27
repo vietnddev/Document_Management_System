@@ -6,7 +6,7 @@ import com.flowiee.dms.repository.system.FlowieeConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.service.system.LanguageService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -49,7 +49,7 @@ public class ConfigServiceImpl extends BaseService implements ConfigService {
     public String delete(Integer id) {
         try {
             sysConfigRepo.deleteById(id);
-            return MessageUtils.DELETE_SUCCESS;
+            return MessageCode.DELETE_SUCCESS.getDescription();
         } catch (RuntimeException ex) {
             throw new AppException(ex);
         }

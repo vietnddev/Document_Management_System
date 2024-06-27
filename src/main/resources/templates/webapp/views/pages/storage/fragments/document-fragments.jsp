@@ -140,34 +140,6 @@
                                 </li>
                             </th:block>
                         </ul>
-
-                        <hr>
-
-                        <ul id="myUL_">
-                            <li>
-                                <span class="caret">Beverages</span>
-                                <ul class="nested">
-                                    <li>Water</li>
-                                    <li>Coffee</li>
-                                    <li>
-                                        <span class="caret">Tea</span>
-                                        <ul class="nested">
-                                            <li>Black Tea</li>
-                                            <li>White Tea</li>
-                                            <li>
-                                                <span class="caret">Green Tea</span>
-                                                <ul class="nested">
-                                                    <li>Sencha</li>
-                                                    <li>Gyokuro</li>
-                                                    <li>Matcha</li>
-                                                    <li>Pi Lo Chun</li>
-                                                </ul>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </li>
-                        </ul>
                     </div>
                     <div class="modal-footer justify-content-end">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
