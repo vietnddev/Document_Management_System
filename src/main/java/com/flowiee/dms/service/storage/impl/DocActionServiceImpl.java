@@ -61,7 +61,15 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     @Override
     public String moveDoc(Integer docId, Integer destinationId) {
-        documentRepository.updateParentId(destinationId, docId);
+        Optional<Document> docToMove = documentRepository.findById(docId);
+        if (docToMove.isEmpty()) {
+            throw new ResourceNotFoundException("Document to move not found!");
+        }
+        if (documentInfoService.findById(destinationId).isEmpty()) {
+            throw new ResourceNotFoundException("Document move to found!");
+        }
+        docToMove.get().setParentId(destinationId);
+        documentRepository.save(docToMove.get());
         return "Move successfully!";
     }
 

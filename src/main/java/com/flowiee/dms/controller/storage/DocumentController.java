@@ -97,7 +97,7 @@ public class DocumentController extends BaseController {
     }
 
     @Operation(summary = "Move document")
-    @GetMapping("/doc/move/{id}")
+    @PutMapping("/doc/move/{id}")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
     public ApiResponse<String> moveDoc(@PathVariable("id") Integer docId, @RequestParam("destinationId") Integer destinationId) {
         return ApiResponse.ok(docActionService.moveDoc(docId, destinationId));

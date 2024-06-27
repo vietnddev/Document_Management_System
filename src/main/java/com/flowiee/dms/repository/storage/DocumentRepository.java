@@ -47,10 +47,6 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            nativeQuery = true)
     List<Object[]> findMetadata(@Param("documentId") Integer documentId);
 
-    @Modifying
-    @Query("update Document d set d.parentId=:parentId where d.id=:docId")
-    void updateParentId(@Param("parentId") Integer parentId, @Param("docId") Integer docId);
-
     @Query("from Document d where d.id in (select ds.document.id from DocShare ds where ds.account.id=:accountId) order by d.isFolder, d.createdAt")
     List<Document> findWasSharedDoc(@Param("accountId") Integer accountId);
 

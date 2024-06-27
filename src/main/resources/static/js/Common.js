@@ -114,7 +114,7 @@ function setupSearchTool(keySearch) {
     })
 }
 
-function loadFolderTree() {
+function loadFolderTreeOnSideBar() {
     // Bắt sự kiện click cho các button có class bắt đầu bằng "nav-link folder-"
     $(document).on('click', 'a[class^="nav-link folder-"]', function() {
         if ($(this).attr("hasSubFolder") === "N") {
