@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import com.flowiee.dms.entity.system.Account;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.utils.CommonUtils;
 import javax.persistence.*;
 import lombok.*;
@@ -79,14 +80,14 @@ public class FileStorage extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "fileStorage", fetch = FetchType.LAZY)
     List<DocHistory> listDocHistory;
 
-    public FileStorage(MultipartFile file, String pModule) {
-        this.module = pModule;
-        this.originalName = file.getOriginalFilename();
-        this.storageName = Instant.now(Clock.systemUTC()).toEpochMilli() + "_" + file.getOriginalFilename();
-        this.fileSize = file.getSize();
+    public FileStorage(MultipartFile file, MODULE pModule) {
+        this.module = pModule.name();
         this.extension = CommonUtils.getFileExtension(file.getOriginalFilename());
+        this.originalName = file.getOriginalFilename();
+        this.storageName = CommonUtils.generateUniqueString() + "." + this.extension;
+        this.fileSize = file.getSize();
         this.contentType = file.getContentType();
-        this.directoryPath = CommonUtils.getPathDirectory(pModule).substring(CommonUtils.getPathDirectory(pModule).indexOf("uploads"));
+        this.directoryPath = CommonUtils.getPathDirectory(pModule.name()).substring(CommonUtils.getPathDirectory(pModule.name()).indexOf("uploads"));
         this.account = CommonUtils.getUserPrincipal().toAccountEntity();
         this.isActive = false;
     }

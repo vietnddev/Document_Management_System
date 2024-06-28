@@ -43,21 +43,22 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileStorage save(FileStorage entity) {
-        return null;
+        return fileRepository.save(entity);
     }
 
     @Override
     public FileStorage update(FileStorage entity, Integer entityId) {
-        return null;
+        entity.setId(entityId);
+        return fileRepository.save(entity);
     }
 
     @Override
-    public FileStorage findFileIsActiveOfDocument(Integer documentId) {
+    public Optional<FileStorage> findFileIsActiveOfDocument(Integer documentId) {
         List<FileStorage> listFiles = fileRepository.findFileOfDocument(documentId, true);
         if (listFiles != null && !listFiles.isEmpty()) {
-            return listFiles.get(0);
+            return Optional.of(listFiles.get(0));
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -67,14 +68,13 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
-        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE.name());
+        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE);
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setDocument(new Document(documentId));
         fileInfo.setActive(true);
-        FileStorage fileSaved = fileRepository.save(fileInfo);
+        FileStorage fileSaved = this.save(fileInfo);
 
-        String currentTime = fileSaved.getStorageName().split("_")[0];
-        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
+        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
 
         return fileSaved;
@@ -98,17 +98,16 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         List<FileStorage> listDocFile = document.get().getListDocFile();
         for (FileStorage docFile : listDocFile) {
             docFile.setActive(false);
-            fileRepository.save(docFile);
+            this.update(docFile, docFile.getId());
         }
         //Save file mới vào hệ thống
-        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE.name());
+        FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE);
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setDocument(new Document(documentId));
         fileInfo.setActive(true);
-        FileStorage fileSaved = fileRepository.save(fileInfo);
+        FileStorage fileSaved = this.save(fileInfo);
 
-        String currentTime = fileSaved.getStorageName().split("_")[0];
-        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + currentTime + "_" + fileUpload.getOriginalFilename());
+        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
 
         return "OK";
