@@ -4,13 +4,12 @@ import com.flowiee.dms.entity.system.SystemLog;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.service.system.SystemLogService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +35,7 @@ public class LogController {
             Page<SystemLog> logPage = logService.findAll(pageSize, pageNum - 1);
             return ApiResponse.ok(logPage.getContent(), pageNum, pageSize, logPage.getTotalPages(), logPage.getTotalElements());
         } catch (RuntimeException ex) {
-            throw new AppException(String.format(MessageUtils.SEARCH_ERROR_OCCURRED, "system log"), ex);
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "system log"), ex);
         }
     }
 }

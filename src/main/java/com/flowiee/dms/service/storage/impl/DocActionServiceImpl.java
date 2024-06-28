@@ -13,9 +13,9 @@ import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocShareService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
-import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.constants.DocRight;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,6 +40,9 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         Optional<DocumentDTO> doc = documentInfoService.findById(docId);
         if (doc.isEmpty()) {
             throw new BadRequestException("Document to copy not found!");
+        }
+        if (!docShareService.isShared(docId, DocRight.CREATE.getValue())) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         //Copy doc
         doc.get().setId(null);
@@ -68,6 +71,9 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         if (documentInfoService.findById(destinationId).isEmpty()) {
             throw new ResourceNotFoundException("Document move to found!");
         }
+        if (!docShareService.isShared(docId, DocRight.MOVE.getValue())) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
+        }
         docToMove.get().setParentId(destinationId);
         documentRepository.save(docToMove.get());
         return "Move successfully!";
@@ -79,6 +85,9 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         Optional<DocumentDTO> doc = documentInfoService.findById(docId);
         if (doc.isEmpty() || accountShares.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!");
+        }
+        if (!docShareService.isShared(docId, DocRight.SHARE.getValue())) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         List<DocShare> docShared = new ArrayList<>();
         docShareService.deleteByDocument(docId);

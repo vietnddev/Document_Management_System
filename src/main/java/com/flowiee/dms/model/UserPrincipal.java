@@ -78,4 +78,8 @@ public class UserPrincipal extends Account implements UserDetails {
     public boolean isAdmin() {
         return AppConstants.ADMINISTRATOR.equals(this.getUsername());
     }
+
+    public Account toAccountEntity() {
+        return new Account(this.id);
+    }
 }

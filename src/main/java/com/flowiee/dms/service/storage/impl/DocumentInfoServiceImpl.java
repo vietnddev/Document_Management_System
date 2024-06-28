@@ -4,10 +4,10 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.system.Account;
+import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.MODULE;
-import com.flowiee.dms.model.UserPrincipal;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.repository.storage.DocumentRepository;
@@ -18,9 +18,10 @@ import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.ChangeLog;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.MessageUtils;
 import com.flowiee.dms.utils.constants.DocRight;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MasterObject;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -58,7 +59,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
         //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
         for (DocumentDTO d : documentDTOs) {
-            List<DocShare> sharesOfDoc = docShareRepository.findByDocAndAccount(d.getId(), CommonUtils.getUserPrincipal().getId());
+            List<DocShare> sharesOfDoc = docShareRepository.findByDocAndAccount(d.getId(), CommonUtils.getUserPrincipal().getId(), null);
             for (DocShare ds : sharesOfDoc) {
                 if (DocRight.UPDATE.getValue().equals(ds.getRole())) d.setThisAccCanUpdate(true);
                 if (DocRight.DELETE.getValue().equals(ds.getRole())) d.setThisAccCanDelete(true);
@@ -97,6 +98,9 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!");
         }
+        if (!docShareService.isShared(documentId, DocRight.UPDATE.getValue())) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
+        }
         Document documentBefore = ObjectUtils.clone(document.get());
 
         document.get().setName(data.getName());
@@ -117,11 +121,14 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!");
         }
+        if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
+            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
+        }
         docShareService.deleteByDocument(documentId);
         documentRepository.deleteById(documentId);
         systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", document.get().getName());
         logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override
@@ -154,7 +161,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
             logger.info("{}: Thêm mới tài liệu {}", DocumentInfoServiceImpl.class.getName(), DocumentDTO.fromDocument(documentSaved));
             return DocumentDTO.fromDocument(documentSaved);
         } catch (RuntimeException | IOException ex) {
-            throw new AppException(String.format(MessageUtils.CREATE_ERROR_OCCURRED, "document"), ex);
+            throw new AppException(String.format(MessageCode.CREATE_SUCCESS.getDescription(), "document"), ex);
         }
     }
 

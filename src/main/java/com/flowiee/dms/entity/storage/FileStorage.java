@@ -80,26 +80,20 @@ public class FileStorage extends BaseEntity implements Serializable {
     List<DocHistory> listDocHistory;
 
     public FileStorage(MultipartFile file, String pModule) {
-        try {
-            this.module = pModule;
-            this.originalName = file.getOriginalFilename();
-            this.storageName = Instant.now(Clock.systemUTC()).toEpochMilli() + "_" + file.getOriginalFilename();
-            this.fileSize = file.getSize();
-            this.extension = CommonUtils.getFileExtension(file.getOriginalFilename());
-            this.contentType = file.getContentType();
-            this.directoryPath = CommonUtils.getPathDirectory(pModule).substring(CommonUtils.getPathDirectory(pModule).indexOf("uploads"));
-            this.isActive = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.module = pModule;
+        this.originalName = file.getOriginalFilename();
+        this.storageName = Instant.now(Clock.systemUTC()).toEpochMilli() + "_" + file.getOriginalFilename();
+        this.fileSize = file.getSize();
+        this.extension = CommonUtils.getFileExtension(file.getOriginalFilename());
+        this.contentType = file.getContentType();
+        this.directoryPath = CommonUtils.getPathDirectory(pModule).substring(CommonUtils.getPathDirectory(pModule).indexOf("uploads"));
+        this.account = CommonUtils.getUserPrincipal().toAccountEntity();
+        this.isActive = false;
     }
 
 	@Override
 	public String toString() {
-		return "FileStorage [id=" + super.id + ", customizeName=" + customizeName + ", storageName=" + storageName
-				+ ", originalName=" + originalName + ", ghiChu=" + note + ", extension=" + extension + ", contentType="
-				+ contentType + ", fileSize=" + fileSize + ", directoryPath=" + directoryPath + ", sort=" + sort
-                + ", status=" + status + ", module=" + module + ", document=" + document + ", account=" + account
-                + ", isActive=" + isActive + "]";
+		return "FileStorage [id=" + super.id + ", customizeName=" + customizeName + ", storageName=" + storageName +
+                ", originalName=" + originalName + ", status=" + status + ", module=" + module + ", isActive=" + isActive + "]";
 	}        
 }

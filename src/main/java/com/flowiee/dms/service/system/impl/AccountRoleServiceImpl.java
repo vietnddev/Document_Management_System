@@ -12,7 +12,7 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.GroupAccountService;
 import com.flowiee.dms.service.system.RoleService;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
@@ -89,7 +89,7 @@ public class AccountRoleServiceImpl extends BaseService implements RoleService {
     @Override
     public String updatePermission(String moduleKey, String actionKey, Integer accountId) {
         accountRoleRepository.save(new AccountRole(moduleKey, actionKey, accountId, null));
-        return MessageUtils.UPDATE_SUCCESS;
+        return MessageCode.UPDATE_SUCCESS.getDescription();
     }
 
     @Override
@@ -103,7 +103,7 @@ public class AccountRoleServiceImpl extends BaseService implements RoleService {
             throw new IllegalArgumentException("groupId and accountId cannot be null");
         }
         accountRoleRepository.deleteByAccountId(accountId);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override

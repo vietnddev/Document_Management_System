@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum DocRight {
     READ("R", "Xem"),
+    CREATE("C", "Tạo mới"),
     UPDATE("U", "Cập nhật"),
     DELETE("D", "Xóa"),
     MOVE("M", "Di chuyển"),

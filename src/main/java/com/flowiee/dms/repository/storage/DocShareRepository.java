@@ -11,8 +11,12 @@ import java.util.List;
 
 @Repository
 public interface DocShareRepository extends JpaRepository<DocShare, Integer> {
-    @Query("from DocShare d where d.document.id=:documentId and d.account.id=:accountId")
-    List<DocShare> findByDocAndAccount(@Param("documentId") Integer documentId, @Param("accountId") Integer accountId);
+    @Query("from DocShare d " +
+           "where 1=1 " +
+           "and d.document.id=:documentId " +
+           "and d.account.id=:accountId " +
+           "and (:role is null or d.role = :role)")
+    List<DocShare> findByDocAndAccount(@Param("documentId") Integer documentId, @Param("accountId") Integer accountId, @Param("role") String role);
 
     @Query("from DocShare d where d.document.id=:documentId")
     List<DocShare> findByDocument(@Param("documentId") Integer documentId);

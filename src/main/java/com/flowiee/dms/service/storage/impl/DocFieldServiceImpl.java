@@ -10,8 +10,9 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocFieldService;
 import com.flowiee.dms.utils.ChangeLog;
-import com.flowiee.dms.utils.MessageUtils;
+import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MasterObject;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -78,11 +79,11 @@ public class DocFieldServiceImpl extends BaseService implements DocFieldService 
             throw new ResourceNotFoundException("DocField not found!");
         }
         if (!docDataService.findByDocField(id).isEmpty()) {
-            throw new DataInUseException(MessageUtils.ERROR_DATA_LOCKED);
+            throw new DataInUseException(ErrorCode.DATA_LOCKED_ERROR.getDescription());
         }
         docFieldRepository.deleteById(id);
         systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DOCTYPE_CONFIG, MasterObject.DocField, "Xóa DocField", docField.get().getName());
         logger.info(DocumentInfoServiceImpl.class.getName() + ": Xóa DocField id=" + id);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 }

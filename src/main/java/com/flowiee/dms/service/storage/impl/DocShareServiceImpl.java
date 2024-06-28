@@ -9,11 +9,12 @@ import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.storage.DocShareService;;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.MessageUtils;
 import com.flowiee.dms.utils.constants.DocRight;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,7 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
             model.setDocumentId(docId);
             model.setAccountId(account.getId());
             model.setAccountName(account.getFullName());
-            for (DocShare docShare : docShareRepository.findByDocAndAccount(docId, account.getId())) {
+            for (DocShare docShare : docShareRepository.findByDocAndAccount(docId, account.getId(), null)) {
                 if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.READ.getValue().equals(docShare.getRole())) model.setCanRead(true);
                 if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.UPDATE.getValue().equals(docShare.getRole())) model.setCanUpdate(true);
                 if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.DELETE.getValue().equals(docShare.getRole())) model.setCanDelete(true);
@@ -62,11 +63,15 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     }
 
     @Override
-    public boolean isShared(int documentId) {
+    public boolean isShared(int documentId, String role) {
         if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
             return true;
         }
-        return docShareRepository.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId()) != null;
+        List<DocShare> docShares = docShareRepository.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId(), role);
+        if (ObjectUtils.isNotEmpty(docShares)) {
+            return true;
+        }
+        return false;
     }
 
     @Transactional
@@ -95,6 +100,6 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     @Override
     public String delete(Integer entityId) {
         docShareRepository.deleteById(entityId);
-        return MessageUtils.DELETE_SUCCESS;
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 }
