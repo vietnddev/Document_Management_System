@@ -1,5 +1,6 @@
 package com.flowiee.dms.service.storage.impl;
 
+import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
@@ -7,6 +8,7 @@ import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.ACTION;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
@@ -22,6 +24,7 @@ import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MasterObject;
 import com.flowiee.dms.utils.constants.MessageCode;
+import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -124,8 +129,31 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
+        List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
         docShareService.deleteByDocument(documentId);
         documentRepository.deleteById(documentId);
+
+        //Delete file on drive
+        for (FileStorage fileStorage : fileStorages) {
+            String fileExtension = fileStorage.getExtension();
+            String filePathStr = CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName();
+            String filePathTempStr = "";
+            if (FileExtension.DOC.key().equals(fileExtension)
+                    || FileExtension.DOCX.key().equals(fileExtension)
+                    || FileExtension.XLS.key().equals(fileExtension)
+                    || FileExtension.XLSX.key().equals(fileExtension)) {
+                filePathTempStr = filePathStr.replace("." + fileExtension, ".pdf");
+            }
+            try {
+                Files.deleteIfExists(Paths.get(filePathStr));
+                if (!filePathTempStr.equals("")) {
+                    Files.deleteIfExists(Paths.get(filePathTempStr));
+                }
+            } catch (IOException ex) {
+                throw new AppException(ex);
+            }
+        }
+
         systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", document.get().getName());
         logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
         return MessageCode.DELETE_SUCCESS.getDescription();
@@ -160,8 +188,8 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
             systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, "Thêm mới tài liệu", documentSaved.getName());
             logger.info("{}: Thêm mới tài liệu {}", DocumentInfoServiceImpl.class.getName(), DocumentDTO.fromDocument(documentSaved));
             return DocumentDTO.fromDocument(documentSaved);
-        } catch (RuntimeException | IOException ex) {
-            throw new AppException(String.format(MessageCode.CREATE_SUCCESS.getDescription(), "document"), ex);
+        } catch (RuntimeException | IOException | DocumentException ex) {
+            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
         }
     }
 

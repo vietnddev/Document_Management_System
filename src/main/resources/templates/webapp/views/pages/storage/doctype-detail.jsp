@@ -43,19 +43,19 @@
                                 <div class="card-body align-items-center p-0">
                                     <table class="table table-bordered table-striped align-items-center">
                                         <thead class="align-self-center">
-                                        <tr class="align-self-center">
-                                            <th>Id</th>
-                                            <th>Tên field</th>
-                                            <th>Kiểu nhập</th>
-                                            <th>Min length</th>
-                                            <th>Max length</th>
-                                            <th>Min number</th>
-                                            <th>Max number</th>
-                                            <th>Bắt buộc</th>
-                                            <th>Sắp xếp</th>
-                                            <th>Trạng thái</th>
-                                            <th>Thao tác</th>
-                                        </tr>
+                                            <tr class="align-self-center">
+                                                <th>Id</th>
+                                                <th>Tên field</th>
+                                                <th>Kiểu nhập</th>
+                                                <th>Min length</th>
+                                                <th>Max length</th>
+                                                <th>Min number</th>
+                                                <th>Max number</th>
+                                                <th>Bắt buộc</th>
+                                                <th>Sắp xếp</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
                                             <tr th:each="list : ${docFields}">

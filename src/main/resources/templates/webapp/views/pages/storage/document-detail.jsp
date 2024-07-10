@@ -11,11 +11,8 @@
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <!-- Navbar (header) -->
         <div th:replace="header :: header"></div>
-        <!-- /.navbar (header)-->
 
-        <!-- Folder tree -->
         <div th:replace="fragments :: folderTree"></div>
 
         <!-- Content Wrapper. Contains page content -->
@@ -121,37 +118,8 @@
                     </div>
                 </div>
             </div>
-
-            <!--CHANGE FILE-->
-            <div class="modal fade" id="modalChangeFile">
-                <div class="modal-dialog">
-                    <div class="modal-content text-left">
-                        <form th:action="@{/stg/doc/change-file/{id}(id=${docDetail.id})}"
-                              enctype="multipart/form-data" method="post">
-                            <div class="modal-header">
-                                <strong class="modal-title">Thay file đính kèm</strong>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="form-group w-100">
-                                        <label>Chọn file mới</label>
-                                        <input class="form-control" type="file" name="file" required>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer justify-content-end">
-                                <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
-                                <button type="submit" class="btn btn-primary">Lưu</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!--END CHANGE FILE-->
-
+            <!-- Modal change file of document -->
+            <div th:replace="pages/storage/fragments/document-fragments :: modalChangeFile"></div>
         </div>
 
         <aside class="control-sidebar control-sidebar-dark"></aside>

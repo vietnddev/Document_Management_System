@@ -7,6 +7,7 @@ import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.DocShareModel;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocumentRepository;
@@ -16,6 +17,7 @@ import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
+import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,7 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -95,8 +96,16 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .customizeName(newNameFile)
                         .document(docCopied)
                         .build();
-                fileStorageService.save(fileCloneInfo);
-            } catch (IOException e) {
+                FileStorage fileClonedInfo = fileStorageService.save(fileCloneInfo);
+
+                if (FileExtension.DOC.key().equals(fileUploaded.get().getExtension()) ||
+                        FileExtension.DOCX.key().equals(fileUploaded.get().getExtension()) ||
+                        FileExtension.XLS.key().equals(fileUploaded.get().getExtension()) ||
+                        FileExtension.XLSX.key().equals(fileUploaded.get().getExtension()))
+                {
+                    FileUtils.cloneFileToPdf(fileCloned, fileClonedInfo.getExtension());
+                }
+            } catch (IOException | DocumentException e) {
                 logger.error("File to clone does not exist!", e);
             }
         }

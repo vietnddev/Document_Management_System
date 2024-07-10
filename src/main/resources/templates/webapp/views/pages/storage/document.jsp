@@ -6,70 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kho tài liệu</title>
     <th:block th:replace="header :: stylesheets"></th:block>
-    <style rel="stylesheet">
-        .table td, th {
-            vertical-align: middle;
-        }
-        /* Remove default bullets */
-        ul, #myUL {
-            list-style-type: none;
-        }
-
-        /* Remove margins and padding from the parent ul */
-        #myUL {
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Style the caret/arrow */
-        .caret {
-            cursor: pointer;
-            user-select: none; /* Prevent text selection */
-        }
-
-        /* Create the caret/arrow with a unicode, and style it */
-        .caret::before {
-            content: "\25B6";
-            color: black;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        /* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-        .caret-down::before {
-            transform: rotate(90deg);
-        }
-
-        /* Hide the nested list */
-        .nested {
-            display: none;
-        }
-
-        /* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
-        .active {
-            display: block;
-        }
-
-        .highlight-txt {
-            color: blue;
-            font-weight: bold;
-        }
-        .highlight-bg {
-            background: aliceblue;
-        }
-        .caret-name {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/Document.css}">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <!-- Navbar (header) -->
         <div th:replace="header :: header"></div>
-        <!-- /.navbar (header)-->
-
-        <!-- Folder tree -->
+        
         <div th:replace="fragments :: folderTree"></div>
 
         <!-- Content Wrapper. Contains page content -->

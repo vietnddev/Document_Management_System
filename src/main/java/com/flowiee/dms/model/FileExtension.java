@@ -1,9 +1,6 @@
 package com.flowiee.dms.model;
 
-import lombok.Getter;
-
-@Getter
-public enum FILE_EXTENSION {
+public enum FileExtension {
     PNG("png"),
     JPG("jpg"),
     JPEG("jpeg"),
@@ -15,9 +12,13 @@ public enum FILE_EXTENSION {
     DOC("doc"),
     DOCX("docx");
 
-    private final String label;
+    private final String key;
 
-    FILE_EXTENSION(String label) {
-        this.label = label;
+    FileExtension(String key) {
+        this.key = key;
+    }
+
+    public String key() {
+        return this.name().toLowerCase();
     }
 }

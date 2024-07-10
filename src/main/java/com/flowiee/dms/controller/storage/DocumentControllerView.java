@@ -7,6 +7,7 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.ForbiddenException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.DocMetaModel;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.service.category.CategoryService;
@@ -14,6 +15,7 @@ import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.utils.*;
 import com.flowiee.dms.utils.constants.CategoryType;
 import com.flowiee.dms.utils.constants.ErrorCode;
+import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -93,7 +95,15 @@ public class DocumentControllerView extends BaseController {
 
                 Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(document.getId());
                 if (fileStorage.isPresent()) {
-                    docDTO.setFile(FileDTO.fromFileStorage(fileStorage.get()));
+                    FileDTO fileDTO = FileDTO.fromFileStorage(fileStorage.get());
+                    if (FileExtension.DOC.key().equals(fileDTO.getExtension()) ||
+                        FileExtension.DOCX.key().equals(fileDTO.getExtension()) ||
+                        FileExtension.XLS.key().equals(fileDTO.getExtension()) ||
+                        FileExtension.XLSX.key().equals(fileDTO.getExtension()))
+                    {
+                        fileDTO.setSrc(fileDTO.getSrc().replace("." + fileDTO.getExtension(), ".pdf"));
+                    }
+                    docDTO.setFile(fileDTO);
                 } else {
                     docDTO.setFile(new FileDTO());
                 }
@@ -114,7 +124,7 @@ public class DocumentControllerView extends BaseController {
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
     public ModelAndView changeFile(@RequestParam("file") MultipartFile file,
                                    @PathVariable("id") Integer documentId,
-                                   HttpServletRequest request) throws IOException {
+                                   HttpServletRequest request) throws IOException, DocumentException {
         if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
