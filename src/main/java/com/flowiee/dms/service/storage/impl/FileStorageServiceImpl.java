@@ -2,7 +2,9 @@ package com.flowiee.dms.service.storage.impl;
 
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
+import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
@@ -10,8 +12,10 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
+import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Lazy;
@@ -67,7 +71,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
+    public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
         FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE);
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setDocument(new Document(documentId));
@@ -76,6 +80,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
+        cloneFileToPdf(path.toFile(), fileSaved.getExtension());
 
         return fileSaved;
     }
@@ -89,7 +94,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException {
+    public String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
         Optional<DocumentDTO> document = documentInfoService.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException();
@@ -109,18 +114,33 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
+        cloneFileToPdf(path.toFile(), fileSaved.getExtension());
 
         return "OK";
     }
 
     @Override
     public String delete(Integer fileId) {
-        FileStorage fileStorage = fileRepository.findById(fileId).orElse(null);
-        fileRepository.deleteById(fileId);
-        File file = new File(CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName());
-        if (file.exists() && file.delete()) {
-            return MessageCode.DELETE_SUCCESS.getDescription();
+        Optional<FileStorage> fileStorage = fileRepository.findById(fileId);
+        if (fileStorage.isEmpty()) {
+            throw new AppException(ErrorCode.DELETE_ERROR.getDescription());
         }
-        return String.format(ErrorCode.DELETE_ERROR.getDescription(), "file");
+        fileRepository.deleteById(fileId);
+        return MessageCode.DELETE_SUCCESS.getDescription();
+    }
+
+    private void cloneFileToPdf(File file, String extension) throws DocumentException, IOException {
+        if (FileExtension.DOC.key().equals(extension)) {
+            FileUtils.convertDocToPdf(file);
+        }
+        if (FileExtension.DOCX.key().equals(extension)) {
+            FileUtils.convertDocxToPdf(file);
+        }
+        if (FileExtension.XLS.key().equals(extension)) {
+            FileUtils.convertXlsToPdf(file);
+        }
+        if (FileExtension.XLSX.key().equals(extension)) {
+            FileUtils.convertXlsxToPdf(file);
+        }
     }
 }
