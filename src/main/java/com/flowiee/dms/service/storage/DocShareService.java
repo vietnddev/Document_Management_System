@@ -16,4 +16,6 @@ public interface DocShareService extends BaseCurdService<DocShare> {
     void deleteByAccount(Integer accountId);
 
     void deleteByDocument(Integer documentId);
+
+    void deleteAllByDocument(Integer documentId);
 }

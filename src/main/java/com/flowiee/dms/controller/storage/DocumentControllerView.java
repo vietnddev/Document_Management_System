@@ -64,7 +64,7 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewRootDocuments() {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.STG_DOCUMENT);
         modelAndView.addObject("parentId", 0);
-        modelAndView.addObject("folderTree", documentInfoService.findFoldersByParent(0));
+        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false));
         return baseView(modelAndView);
     }
 
@@ -84,7 +84,7 @@ public class DocumentControllerView extends BaseController {
         try {
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.addObject("docBreadcrumb", documentInfoService.findHierarchyOfDocument(document.getId(), document.getParentId()));
-            modelAndView.addObject("folderTree", documentInfoService.findFoldersByParent(0));
+            modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false));
             modelAndView.addObject("documentParentName", document.getName());
             if (document.getIsFolder().equals("Y")) {
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT);

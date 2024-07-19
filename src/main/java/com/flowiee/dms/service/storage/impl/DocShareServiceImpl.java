@@ -3,8 +3,10 @@ package com.flowiee.dms.service.storage.impl;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.model.DocShareModel;
+import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.service.BaseService;
+import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.storage.DocShareService;;
 import com.flowiee.dms.utils.AppConstants;
@@ -14,7 +16,10 @@ import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +31,12 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocShareServiceImpl extends BaseService implements DocShareService {
-    AccountService     accountService;
-    DocShareRepository docShareRepository;
+    AccountService      accountService;
+    DocShareRepository  docShareRepository;
+    @NonFinal
+    @Lazy
+    @Autowired
+    DocumentInfoService documentInfoService;
 
     @Override
     public List<DocShare> findAll() {
@@ -84,6 +93,16 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     @Override
     public void deleteByDocument(Integer documentId) {
         docShareRepository.deleteAllByDocument(documentId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteAllByDocument(Integer documentId) {
+        docShareRepository.deleteAllByDocument(documentId);
+        List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true);
+        for (DocumentDTO dto : allSubDocs) {
+            docShareRepository.deleteAllByDocument(dto.getId());
+        }
     }
 
     @Override

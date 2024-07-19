@@ -29,6 +29,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,12 +83,35 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public List<DocumentDTO> findFoldersByParent(Integer parentId) {
-        List<DocumentDTO> docDTOs = this.findDocuments(-1, -1, parentId, null, "Y", null).getContent();
-        for (DocumentDTO docDTO : docDTOs) {
-            boolean existsSubDocument = documentRepository.existsSubDocument(docDTO.getId(), docDTO.getIsFolder());
-            docDTO.setHasSubFolder(existsSubDocument ? "Y" : "N");
+    public List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean pIsFolder, boolean fullLevel) {
+        String lvIsFolder = null;
+        if (pIsFolder != null) {
+            lvIsFolder = pIsFolder.booleanValue() ? "Y" : "N";
         }
+        List<DocumentDTO> docDTOs = new ArrayList<>();
+        if (!fullLevel) {
+            docDTOs = this.findDocuments(-1, -1, parentId, null, lvIsFolder, null).getContent();
+        } else {
+            List<DocumentDTO> subFolderTemps = new ArrayList<>();
+            for (DocumentDTO dto : this.findDocuments(-1, -1, parentId, null, lvIsFolder, null).getContent()) {
+                if (dto.getIsFolder().equals("Y")) {
+                    subFolderTemps.add(dto);
+                }
+                docDTOs.add(dto);
+            }
+            for (DocumentDTO tmpFolder : subFolderTemps) {
+                docDTOs.addAll(this.findSubDocByParentId(tmpFolder.getId(), null, true));
+            }
+        }
+        for (DocumentDTO docDTO : docDTOs) {
+            if (docDTO.getIsFolder().equals("N")) {
+                docDTO.setHasSubFolder("N");
+            } else {
+                boolean existsSubDocument = documentRepository.existsSubDocument(docDTO.getId());
+                docDTO.setHasSubFolder(existsSubDocument ? "Y" : "N");
+            }
+        }
+
         return docDTOs;
     }
 

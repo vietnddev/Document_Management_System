@@ -1,15 +1,15 @@
 package com.flowiee.dms.entity.system;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
+@Builder
 @Entity
 @Table(name = "notification")
 @NoArgsConstructor
@@ -19,15 +19,17 @@ import java.io.Serializable;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Notification extends BaseEntity implements Serializable {
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    Account receiver;
+
     @Column(name = "message", nullable = false)
     String message;
 
     @Column(name = "doc_shared_id")
     Integer docSharedId;
 
-    @Column(name = "send")
-    String send;
-
-    @Column(name = "receive")
-    String receive;
+    @Column(name = "is_read", nullable = false)
+    boolean isRead;
 }

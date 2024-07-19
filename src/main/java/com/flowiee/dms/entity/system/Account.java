@@ -71,6 +71,10 @@ public class Account extends BaseEntity implements Serializable {
 	List<DocShare> listDocShare;
 
 	@JsonIgnore
+	@OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+	List<Notification> listNotify;
+
+	@JsonIgnore
 	@OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
 	List<SystemLog> listLog;
 

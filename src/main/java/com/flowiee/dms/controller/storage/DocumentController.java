@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -74,7 +72,8 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Integer parentId) {
         try {
-            return ApiResponse.ok(documentInfoService.findFoldersByParent(parentId));
+            List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false);
+            return ApiResponse.ok(documentInfoService.findSubDocByParentId(parentId, null, true), 1, 100, 100, documentDTOs.size());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "folders"), ex);
         }

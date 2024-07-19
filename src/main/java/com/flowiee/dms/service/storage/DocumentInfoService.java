@@ -10,7 +10,7 @@ import java.util.List;
 public interface DocumentInfoService extends BaseCurdService<DocumentDTO> {
     Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch);
 
-    List<DocumentDTO> findFoldersByParent(Integer parentId);
+    List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean isFolder, boolean fullLevel);
 
     List<Document> findByDoctype(Integer docType);
 

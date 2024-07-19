@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.system.Notification;
 import com.flowiee.dms.repository.system.NotificationRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.NotificationService;
+import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,8 +25,9 @@ public class NotificationServiceImpl extends BaseService implements Notification
     }
 
     @Override
-    public Notification save(Notification entity) {
-        return notificationRepository.save(entity);
+    public Notification save(Notification notify) {
+        notify.setRead(false);
+        return notificationRepository.save(notify);
     }
 
     @Override
@@ -34,8 +36,9 @@ public class NotificationServiceImpl extends BaseService implements Notification
     }
 
     @Override
-    public String delete(Integer entityId) {
-        return null;
+    public String delete(Integer notifyId) {
+        notificationRepository.deleteById(notifyId);
+        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override

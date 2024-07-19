@@ -68,7 +68,6 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
     @Query("select case when count(d) > 0 then true else false end " +
            "from Document d " +
            "where 1=1 " +
-           "and d.parentId = :docId " +
-           "and (:isFolder is null or d.isFolder = :isFolder)")
-    boolean existsSubDocument(@Param("docId") Integer docId, @Param("isFolder") String isFolder);
+           "and d.parentId = :docId")
+    boolean existsSubDocument(@Param("docId") Integer docId);
 }

@@ -32,7 +32,11 @@ public class DocShareController {
     @Operation(summary = "Share document")
     @PutMapping("/doc/share/{id}")
     @PreAuthorize("@vldModuleStorage.shareDoc(true)")
-    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId, @RequestBody List<DocShareModel> accountShares) {
-        return ApiResponse.ok(docActionService.shareDoc(docId, accountShares));
+    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId,
+                                                @RequestBody List<DocShareModel> accountShares,
+                                                @RequestParam(value = "applyForSubFolder", required = false) Boolean applyForSubFolder) {
+        if (!applyForSubFolder.booleanValue())
+            applyForSubFolder = false;
+        return ApiResponse.ok(docActionService.shareDoc(docId, accountShares, applyForSubFolder));
     }
 }

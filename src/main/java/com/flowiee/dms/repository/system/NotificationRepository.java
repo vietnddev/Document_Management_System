@@ -9,6 +9,6 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
-    @Query("from Notification n where n.receive=:accountId")
+    @Query("from Notification n where n.receiver=:accountId")
     List<Notification> findByTo();
 }

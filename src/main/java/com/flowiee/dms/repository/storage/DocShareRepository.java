@@ -22,10 +22,10 @@ public interface DocShareRepository extends JpaRepository<DocShare, Integer> {
     List<DocShare> findByDocument(@Param("documentId") Integer documentId);
 
     @Modifying
-    @Query("delete DocShare d where d.account.id=:accountId")
+    @Query("delete from DocShare d where d.account.id=:accountId")
     void deleteAllByAccount(@Param("accountId") Integer accountId);
 
     @Modifying
-    @Query("delete DocShare d where d.document.id=:documentId")
+    @Query("delete from DocShare d where d.document.id=:documentId")
     void deleteAllByDocument(@Param("documentId") Integer documentId);
 }

@@ -4,6 +4,8 @@ import com.flowiee.dms.entity.storage.DocData;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
+import com.flowiee.dms.entity.system.Account;
+import com.flowiee.dms.entity.system.Notification;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.DocShareModel;
@@ -13,6 +15,8 @@ import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocumentRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.*;
+import com.flowiee.dms.service.system.AccountService;
+import com.flowiee.dms.service.system.NotificationService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.DocRight;
@@ -44,11 +48,13 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocActionServiceImpl extends BaseService implements DocActionService {
+    AccountService      accountService;
     DocDataService      docDataService;
     DocShareService     docShareService;
     FileStorageService  fileStorageService;
     DocumentRepository  documentRepository;
     DocumentInfoService documentInfoService;
+    NotificationService notificationService;
 
     @Transactional
     @Override
@@ -133,34 +139,36 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares) {
-        Optional<DocumentDTO> doc = documentInfoService.findById(docId);
+    public List<DocShare> shareDoc(Integer pDocId, List<DocShareModel> accountShares, boolean applyForSubFolder) {
+        Optional<DocumentDTO> doc = documentInfoService.findById(pDocId);
         if (doc.isEmpty() || accountShares.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", false);
         }
-        if (!docShareService.isShared(docId, DocRight.SHARE.getValue())) {
+        if (!docShareService.isShared(doc.get().getId(), DocRight.SHARE.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
+        docShareService.deleteAllByDocument(doc.get().getId());
         List<DocShare> docShared = new ArrayList<>();
-        docShareService.deleteByDocument(docId);
-        for (DocShareModel model : accountShares) {
-            int accountId = model.getAccountId();
-            if (model.getCanRead()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
-
+        for (DocShareModel model : accountShares) {//1 model -> 1 account use document
+            Optional<Account> accountOpt = accountService.findById(CommonUtils.getUserPrincipal().getId());
+            if (accountOpt.isEmpty()) {
+                continue;
             }
-            if (model.getCanUpdate()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE.getValue())));
+            //Share rights to this document and all sub-docs of them
+            doShare(doc.get().getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(), model.getCanDelete(), model.getCanMove(), model.getCanShare());
+            if (applyForSubFolder) {
+                if (doc.get().getIsFolder().equals("Y")) {
+                    List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(doc.get().getId(), null, true);
+                    for (DocumentDTO dto : subDocs) {
+                        doShare(dto.getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(),model.getCanDelete(), model.getCanMove(), model.getCanShare());
+                    }
+                }
             }
-            if (model.getCanDelete()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE.getValue())));
-            }
-            if (model.getCanMove()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE.getValue())));
-            }
-            if (model.getCanShare()) {
-                docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
-            }
+            //Notify
+            notificationService.save(Notification.builder()
+                    .receiver(accountOpt.get())
+                    .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), doc.get().getName()))
+                    .build());
         }
         return docShared;
     }
@@ -188,5 +196,25 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileOpt.get().getStorageName());
 
         return ResponseEntity.ok().headers(httpHeaders).body(new InputStreamResource(new FileInputStream(file)));
+    }
+
+    private List<DocShare> doShare(int docId, int accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
+        List<DocShare> docShared = new ArrayList<>();
+        if (canRead) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
+        }
+        if (canUpdate) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE.getValue())));
+        }
+        if (canDelete) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE.getValue())));
+        }
+        if (canMove) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE.getValue())));
+        }
+        if (canShare) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
+        }
+        return docShared;
     }
 }

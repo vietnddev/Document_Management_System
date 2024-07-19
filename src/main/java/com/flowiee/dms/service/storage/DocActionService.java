@@ -14,7 +14,7 @@ public interface DocActionService {
 
     String moveDoc(Integer docId, Integer destinationId);
 
-    List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares);
+    List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
 
     ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws FileNotFoundException;
 }
