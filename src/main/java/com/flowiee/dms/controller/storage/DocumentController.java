@@ -2,10 +2,13 @@ package com.flowiee.dms.controller.storage;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
+import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
+import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
@@ -54,6 +57,15 @@ public class DocumentController extends BaseController {
                                                  @RequestParam(value = "isFolder") String isFolder,
                                                  @RequestParam(value = "parentId") Integer parentId) {
         try {
+            if ("N".equals(isFolder)) {
+                if (fileUpload.isEmpty()) {
+                    throw new BadRequestException("File attach does not exists!");
+                } else {
+                    String fileExtension = FileUtils.getFileExtension(fileUpload.getOriginalFilename());
+                    if (!FileUtils.isAllowUpload(fileExtension))
+                        throw new BadRequestException(String.format("File có định dạng .%s chưa được hỗ trợ!", fileExtension));
+                }
+            }
             DocumentDTO document = new DocumentDTO();
             document.setParentId(parentId);
             document.setName(name);

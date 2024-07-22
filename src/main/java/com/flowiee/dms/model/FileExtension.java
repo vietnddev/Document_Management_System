@@ -1,21 +1,26 @@
 package com.flowiee.dms.model;
 
+import lombok.Getter;
+
+@Getter
 public enum FileExtension {
-    PNG("png"),
-    JPG("jpg"),
-    JPEG("jpeg"),
-    PDF("pdf"),
-    XLS("xls"),
-    XLSX("xlsx"),
-    PPT("ppt"),
-    PPTX("pptx"),
-    DOC("doc"),
-    DOCX("docx");
+    PNG("png", true),
+    JPG("jpg", true),
+    JPEG("jpeg", true),
+    PDF("pdf", true),
+    XLS("xls", true),
+    XLSX("xlsx", true),
+    PPT("ppt", true),
+    PPTX("pptx", true),
+    DOC("doc", true),
+    DOCX("docx", true);
 
     private final String key;
+    private final boolean isAllowUpload;
 
-    FileExtension(String key) {
+    FileExtension(String key, boolean isAllowUpload) {
         this.key = key;
+        this.isAllowUpload = isAllowUpload;
     }
 
     public String key() {

@@ -84,8 +84,8 @@ function submitInsertOrUpdate() {
                         window.location.reload();
                     }
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    showErrorModal("Could not connect to the server");
+                error: function (xhr, status, error) {
+                    alert(status + ': ' + JSON.stringify(xhr.responseJSON.message));
                 }
             });
         }

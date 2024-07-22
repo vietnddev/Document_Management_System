@@ -82,6 +82,17 @@ public class FileUtils {
         return extension;
     }
 
+    public static boolean isAllowUpload(String fileExtension) {
+        if (ObjectUtils.isNotEmpty(fileExtension)) {
+            for (FileExtension ext : FileExtension.values()) {
+                if (ext.key().equalsIgnoreCase(fileExtension) && ext.isAllowUpload()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static File getFileUploaded(FileStorage fileModel) {
         Path path = Paths.get(rootPath + "/" + fileModel.getDirectoryPath() + "/" + fileModel.getStorageName());
         return new File(path.toUri());
