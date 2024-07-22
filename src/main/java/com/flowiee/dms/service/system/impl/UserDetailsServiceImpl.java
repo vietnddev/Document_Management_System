@@ -49,7 +49,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Account account = this.findByUsername(username);
-		UserPrincipal userPrincipal = null;
+		UserPrincipal userPrincipal;
 		if (account != null) {
 			userPrincipal = new UserPrincipal(account);
 
@@ -79,7 +79,16 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 			userPrincipal.setCreatedBy(account.getId());
 			userPrincipal.setLastUpdatedBy(account.getUsername());
 
-			SystemLog systemLog = SystemLog.builder().module(MODULE.SYSTEM.name()).function(ACTION.SYS_LOGIN.name()).object(MasterObject.Account.name()).mode(LogType.LI.name()).content(account.getUsername()).title("Login").ip(userPrincipal.getIp()).account(account).build();
+			SystemLog systemLog = SystemLog.builder()
+					.module(MODULE.SYSTEM.name())
+					.function(ACTION.SYS_LOGIN.name())
+					.object(MasterObject.Account.name())
+					.mode(LogType.LI.name())
+					.content(account.getUsername())
+					.title("Login")
+					.ip(userPrincipal.getIp())
+					.account(account)
+					.build();
 			systemLog.setCreatedBy(account.getId());
 			systemLogRepo.save(systemLog);
 		} else {

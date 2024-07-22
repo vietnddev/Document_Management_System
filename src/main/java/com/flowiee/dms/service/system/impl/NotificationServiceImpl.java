@@ -4,10 +4,13 @@ import com.flowiee.dms.entity.system.Notification;
 import com.flowiee.dms.repository.system.NotificationRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.NotificationService;
-import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,18 +34,11 @@ public class NotificationServiceImpl extends BaseService implements Notification
     }
 
     @Override
-    public Notification update(Notification entity, Integer entityId) {
-        return null;
-    }
-
-    @Override
-    public String delete(Integer notifyId) {
-        notificationRepository.deleteById(notifyId);
-        return MessageCode.DELETE_SUCCESS.getDescription();
-    }
-
-    @Override
-    public List<Notification> findByReceive(Integer receivedId) {
-        return findByReceive(receivedId);
+    public Page<Notification> findByReceive(int pageNum, int pageSize, Integer receivedId) {
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").ascending());
+        if (pageNum == -1 || pageSize == -1) {
+            pageable = Pageable.unpaged();
+        }
+        return notificationRepository.findByReceiver(receivedId, pageable);
     }
 }
