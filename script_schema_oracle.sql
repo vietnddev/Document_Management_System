@@ -39,6 +39,13 @@ SubFolderList AS (
 	FROM DocumentHierarchy dh
     WHERE dh.IS_FOLDER = 'Y'
 	GROUP BY dh.PARENT_ID  
+),
+SubFileList AS (
+ 	SELECT dh.PARENT_ID AS Parent_ID,
+	LISTAGG(dh.ID, '|') WITHIN GROUP (ORDER BY dh.ID) AS SubFilesId
+	FROM DocumentHierarchy dh
+    WHERE dh.IS_FOLDER = 'N'
+	GROUP BY dh.PARENT_ID
 )
 SELECT
     rh.ID AS IDTemp,
@@ -47,11 +54,13 @@ SELECT
     rh.PARENT_ID AS ParentIdTemp,
     CASE WHEN EXISTS (SELECT 1 FROM DOCUMENT sub WHERE sub.PARENT_ID = rh.ID AND sub.IS_FOLDER = 'Y') THEN 'Y' ELSE 'N' END AS Has_SubFolders,
     CASE WHEN EXISTS (SELECT 1 FROM DOCUMENT sub WHERE sub.PARENT_ID = rh.ID AND sub.IS_FOLDER = 'N') THEN 'Y' ELSE 'N' END AS Has_SubFiles,
-    sf.SubFoldersId,
+    sfo.SubFoldersId,
+    sfi.SubFilesId,
     rh.HierarchyLevel,
     rh.RowNumm,
     RTRIM(rh.Path) as PATH,
     d.*
 FROM RecursiveHierarchy rh
-LEFT JOIN SubFolderList sf ON rh.ID = sf.Parent_ID
+LEFT JOIN SubFolderList sfo ON rh.ID = sfo.Parent_ID
+LEFT JOIN SubFileList sfi ON rh.ID = sfi.Parent_ID
 INNER JOIN DOCUMENT d ON d.ID = rh.ID;

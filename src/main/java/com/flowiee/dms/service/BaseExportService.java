@@ -2,14 +2,13 @@ package com.flowiee.dms.service;
 
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.EximModel;
+import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.constants.TemplateExport;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -55,10 +54,7 @@ public abstract class BaseExportService extends BaseService implements ExportSer
     }
 
     private void setHttpHeaders() {
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + mvEximModel.getDefaultOutputName());
-        mvEximModel.setHttpHeaders(httpHeaders);
+        mvEximModel.setHttpHeaders(CommonUtils.getHttpHeaders(mvEximModel.getDefaultOutputName()));
     }
 
     private void setFileContent(ByteArrayOutputStream byteArrayOS) {

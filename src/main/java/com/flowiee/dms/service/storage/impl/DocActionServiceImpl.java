@@ -19,27 +19,21 @@ import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.NotificationService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
+import com.flowiee.dms.utils.PdfUtils;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.*;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +45,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     AccountService      accountService;
     DocDataService      docDataService;
     DocShareService     docShareService;
+    FolderTreeService   folderTreeService;
     FileStorageService  fileStorageService;
     DocumentRepository  documentRepository;
     DocumentInfoService documentInfoService;
@@ -109,7 +104,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         FileExtension.XLS.key().equals(fileUploaded.get().getExtension()) ||
                         FileExtension.XLSX.key().equals(fileUploaded.get().getExtension()))
                 {
-                    FileUtils.cloneFileToPdf(fileCloned, fileClonedInfo.getExtension());
+                    PdfUtils.cloneFileToPdf(fileCloned, fileClonedInfo.getExtension());
                 }
             } catch (IOException | DocumentException e) {
                 logger.error("File to clone does not exist!", e);
@@ -174,7 +169,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws FileNotFoundException {
+    public ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException {
         Optional<DocumentDTO> doc = documentInfoService.findById(documentId);
         if (doc.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", false);
@@ -182,20 +177,62 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         if (!docShareService.isShared(documentId, DocRight.READ.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
-        Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
-        if (fileOpt.isEmpty()) {
-            throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
+        File folder = null;
+        File fileResponse = null;
+        try {
+            if (doc.get().getIsFolder().equals("N")) {
+                Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
+                if (fileOpt.isEmpty()) {
+                    throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
+                }
+                fileResponse = FileUtils.getFileUploaded(fileOpt.get());
+                if (!fileResponse.exists()) {
+                    throw new ResourceNotFoundException("File attachment of this document does not exist!!", false);
+                }
+            } else {
+                folder = new File(Paths.get(FileUtils.getDownloadStorageTempPath().toString() + "/" + CommonUtils.generateUniqueString()).toUri());
+                if (!folder.exists()) {
+                    folder.mkdir();
+                }
+                List<DocumentDTO> listSubFolderFullLevel = documentInfoService.findSubDocByParentId(documentId, null, true);
+                for (DocumentDTO docDTO : listSubFolderFullLevel) {
+                    DocumentDTO docDTO_ = folderTreeService.findByDocId(docDTO.getId());
+                    String path = docDTO_ != null ? docDTO_.getPath() : "";
+                    if (docDTO.getIsFolder().equals("Y")) {
+                        if (path.contains("/")) {
+                            String currentPath = "";
+                            for (String s : path.split("/")) {
+                                currentPath += s.trim() + "/";
+                                Files.createDirectories(Path.of(folder.getPath() + "/" + currentPath));
+                            }
+                        } else {
+                            Files.createDirectories(Path.of(folder.getPath() + "/" + path.trim()));
+                        }
+                    } else {
+                        Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(docDTO.getId());
+                        if (fileStorage.isPresent()) {
+                            File fileUploaded = FileUtils.getFileUploaded(fileStorage.get());
+                            if ((fileUploaded != null && fileUploaded.exists()) && (folder != null && folder.exists())) {
+                                Path pathSrc = Paths.get(fileUploaded.toURI());
+                                Path pathDest = Paths.get(folder.toPath() + "/" + getPathOfFolder(path) + "." + fileStorage.get().getExtension());
+                                Files.copy(pathSrc, pathDest, StandardCopyOption.COPY_ATTRIBUTES);
+                            }
+                        }
+                    }
+                }
+                FileUtils.zipDirectory(folder.getPath(), folder.getPath() + ".zip");
+                fileResponse = new File(folder.getPath() + ".zip");
+            }
+            return ResponseEntity.ok()
+                    .headers(CommonUtils.getHttpHeaders(fileResponse.getName()))
+                    .body(new InputStreamResource(new FileInputStream(fileResponse)));
+        } catch (Exception e) {
+            logger.error("Failed to download document!", e);
+        } finally {
+            if (ObjectUtils.isNotEmpty(folder) && folder.exists())
+                FileUtils.deleteDirectory(folder.toPath());
         }
-        File file = FileUtils.getFileUploaded(fileOpt.get());
-        if (!file.exists()) {
-            throw new ResourceNotFoundException("File attachment of this document does not exist!!", false);
-        }
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileOpt.get().getStorageName());
-
-        return ResponseEntity.ok().headers(httpHeaders).body(new InputStreamResource(new FileInputStream(file)));
+        return null;
     }
 
     private List<DocShare> doShare(int docId, int accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
@@ -216,5 +253,21 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
         }
         return docShared;
+    }
+
+    private String getPathOfFolder(String path) {
+        String currentPath = "";
+        if (path.contains("/")) {
+            for (int i = 0; i < path.split("/").length; i++) {
+                if (i < path.split("/").length - 1) {
+                    currentPath += path.split("/")[i].trim() + "/";
+                } else {
+                    currentPath += path.split("/")[i].trim();
+                }
+            }
+        } else {
+            currentPath = path;
+        }
+        return currentPath;
     }
 }

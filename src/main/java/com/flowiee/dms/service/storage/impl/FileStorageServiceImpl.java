@@ -4,7 +4,6 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
-import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
@@ -12,7 +11,7 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.FileUtils;
+import com.flowiee.dms.utils.PdfUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import com.itextpdf.text.DocumentException;
@@ -22,7 +21,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,7 +78,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
-        FileUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+        PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
 
         return fileSaved;
     }
@@ -114,7 +112,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
-        FileUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+        PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
 
         return "OK";
     }

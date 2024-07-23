@@ -6,7 +6,7 @@ import com.flowiee.dms.model.dto.DocumentDTO;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public interface DocActionService {
@@ -16,5 +16,5 @@ public interface DocActionService {
 
     List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
 
-    ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws FileNotFoundException;
+    ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
 }

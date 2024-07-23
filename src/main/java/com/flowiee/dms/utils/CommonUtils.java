@@ -5,6 +5,8 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.UserPrincipal;
 import com.flowiee.dms.utils.constants.CategoryType;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -105,5 +107,12 @@ public class CommonUtils {
     public static String generateUniqueString() {
         UUID uuid = UUID.randomUUID();
         return uuid.toString();
+    }
+
+    public static HttpHeaders getHttpHeaders(String responseFileName) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + responseFileName);
+        return httpHeaders;
     }
 }

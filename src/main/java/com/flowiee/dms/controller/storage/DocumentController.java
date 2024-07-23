@@ -4,7 +4,6 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
-import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
@@ -21,7 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -122,7 +121,7 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Download document")
     @GetMapping("/doc/download/{id}")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws FileNotFoundException {
+    public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
         return docActionService.downloadDoc(documentId);
     }
 }

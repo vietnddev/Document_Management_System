@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -192,6 +193,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     public DocumentDTO save(DocumentDTO documentDTO) {
         try {
             Document document = Document.fromDocumentDTO(documentDTO);
+            document.setName(document.getName().trim());
             document.setAsName(CommonUtils.generateAliasName(document.getName()));
             if (ObjectUtils.isEmpty(document.getParentId())) {
                 document.setParentId(0);
