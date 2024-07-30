@@ -1,44 +1,28 @@
 package com.flowiee.dms.service.storage.impl;
 
-import com.flowiee.dms.entity.storage.FileStorage;
-import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.system.Account;
-import com.flowiee.dms.exception.BadRequestException;
-import com.flowiee.dms.exception.ResourceNotFoundException;
-import com.flowiee.dms.model.ACTION;
-import com.flowiee.dms.model.FileExtension;
-import com.flowiee.dms.model.MODULE;
+import com.flowiee.dms.exception.AppException;
+import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.repository.storage.DocumentRepository;
 import com.flowiee.dms.service.BaseService;
-import com.flowiee.dms.service.storage.DocShareService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
-import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.AppConstants;
-import com.flowiee.dms.utils.ChangeLog;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
-import com.flowiee.dms.utils.constants.MasterObject;
-import com.flowiee.dms.utils.constants.MessageCode;
-import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.context.annotation.Lazy;
+import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,10 +32,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DocumentInfoServiceImpl extends BaseService implements DocumentInfoService {
     EntityManager      entityManager;
-    DocShareService    docShareService;
-    FileStorageService fileStorageService;
     DocShareRepository docShareRepository;
     DocumentRepository documentRepository;
+
+    @Override
+    public Optional<DocumentDTO> findById(Integer id) {
+        Optional<Document> document = documentRepository.findById(id);
+        return document.map(DocumentDTO::fromDocument);
+    }
 
     @Override
     public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch) {
@@ -62,8 +50,11 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         Account currentAccount = CommonUtils.getUserPrincipal();
         boolean isAdmin = AppConstants.ADMINISTRATOR.equals(currentAccount.getUsername());
         Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), null, isFolder, listId, pageable);
-        List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documents.getContent());
-        //Check the currently logged in account has update (U), delete (D), move (M) or share (S) rights?
+        return new PageImpl<>(DocumentDTO.fromDocuments(documents.getContent()), pageable, documents.getTotalElements());
+    }
+
+    @Override
+    public List<DocumentDTO> setInfoRights(List<DocumentDTO> documentDTOs) {
         for (DocumentDTO d : documentDTOs) {
             List<DocShare> sharesOfDoc = docShareRepository.findByDocAndAccount(d.getId(), CommonUtils.getUserPrincipal().getId(), null);
             for (DocShare ds : sharesOfDoc) {
@@ -79,11 +70,11 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
                 d.setThisAccCanShare(true);
             }
         }
-        return new PageImpl<>(documentDTOs, pageable, documents.getTotalElements());
+        return documentDTOs;
     }
 
     @Override
-    public List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean pIsFolder, boolean fullLevel) {
+    public List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean pIsFolder, boolean fullLevel, boolean onlyBaseInfo) {
         String lvIsFolder = null;
         if (pIsFolder != null) {
             lvIsFolder = pIsFolder.booleanValue() ? "Y" : "N";
@@ -100,15 +91,17 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
                 docDTOs.add(dto);
             }
             for (DocumentDTO tmpFolder : subFolderTemps) {
-                docDTOs.addAll(this.findSubDocByParentId(tmpFolder.getId(), null, true));
+                docDTOs.addAll(this.findSubDocByParentId(tmpFolder.getId(), null, true, onlyBaseInfo));
             }
         }
-        for (DocumentDTO docDTO : docDTOs) {
-            if (docDTO.getIsFolder().equals("N")) {
-                docDTO.setHasSubFolder("N");
-            } else {
-                boolean existsSubDocument = documentRepository.existsSubDocument(docDTO.getId());
-                docDTO.setHasSubFolder(existsSubDocument ? "Y" : "N");
+        if (!onlyBaseInfo) {
+            for (DocumentDTO docDTO : docDTOs) {
+                if (docDTO.getIsFolder().equals("N")) {
+                    docDTO.setHasSubFolder("N");
+                } else {
+                    boolean existsSubDocument = documentRepository.existsSubDocument(docDTO.getId());
+                    docDTO.setHasSubFolder(existsSubDocument ? "Y" : "N");
+                }
             }
         }
 
@@ -116,105 +109,8 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public Optional<DocumentDTO> findById(Integer id) {
-        Optional<Document> document = documentRepository.findById(id);
-        return document.map(DocumentDTO::fromDocument);
-    }
-
-    @Override
-    public DocumentDTO update(DocumentDTO data, Integer documentId) {
-        Optional<Document> document = documentRepository.findById(documentId);
-        if (document.isEmpty()) {
-            throw new ResourceNotFoundException("Document not found!", false);
-        }
-        if (!docShareService.isShared(documentId, DocRight.UPDATE.getValue())) {
-            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
-        }
-        Document documentBefore = ObjectUtils.clone(document.get());
-
-        document.get().setName(data.getName());
-        document.get().setDescription(data.getDescription());
-        Document documentUpdated = documentRepository.save(document.get());
-
-        ChangeLog changeLog = new ChangeLog(documentBefore, documentUpdated);
-        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update document " + document.get().getName(), changeLog);
-        logger.info("{}: Update document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
-
-        return DocumentDTO.fromDocument(documentRepository.save(document.get()));
-    }
-
-    @Transactional
-    @Override
-    public String delete(Integer documentId) {
-        Optional<DocumentDTO> document = this.findById(documentId);
-        if (document.isEmpty()) {
-            throw new ResourceNotFoundException("Document not found!", false);
-        }
-        if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
-            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
-        }
-        List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
-        docShareService.deleteByDocument(documentId);
-        documentRepository.deleteById(documentId);
-
-        //Delete file on drive
-        for (FileStorage fileStorage : fileStorages) {
-            String fileExtension = fileStorage.getExtension();
-            String filePathStr = CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName();
-            String filePathTempStr = "";
-            if (FileExtension.DOC.key().equals(fileExtension)
-                    || FileExtension.DOCX.key().equals(fileExtension)
-                    || FileExtension.XLS.key().equals(fileExtension)
-                    || FileExtension.XLSX.key().equals(fileExtension)) {
-                filePathTempStr = filePathStr.replace("." + fileExtension, ".pdf");
-            }
-            try {
-                Files.deleteIfExists(Paths.get(filePathStr));
-                if (!filePathTempStr.equals("")) {
-                    Files.deleteIfExists(Paths.get(filePathTempStr));
-                }
-            } catch (IOException ex) {
-                throw new AppException(ex);
-            }
-        }
-
-        systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", document.get().getName());
-        logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
-        return MessageCode.DELETE_SUCCESS.getDescription();
-    }
-
-    @Override
     public List<Document> findByDoctype(Integer docTypeId) {
         return documentRepository.findAll(null, null, null, true, null, null, null, null, Pageable.unpaged()).getContent();
-    }
-
-    @Override
-    public DocumentDTO save(DocumentDTO documentDTO) {
-        try {
-            Document document = Document.fromDocumentDTO(documentDTO);
-            document.setAsName(CommonUtils.generateAliasName(document.getName()));
-            if (ObjectUtils.isEmpty(document.getParentId())) {
-                document.setParentId(0);
-            }
-            Document documentSaved = documentRepository.save(document);
-            if ("N".equals(document.getIsFolder()) && documentDTO.getFileUpload() != null) {
-                fileStorageService.saveFileOfDocument(documentDTO.getFileUpload(), documentSaved.getId());
-            }
-            List<DocShare> roleSharesOfDocument = docShareRepository.findByDocument(documentSaved.getParentId());
-            for (DocShare docShare : roleSharesOfDocument) {
-                DocShare roleNew = new DocShare();
-                roleNew.setDocument(new Document(documentSaved.getId()));
-                roleNew.setAccount(new Account(docShare.getAccount().getId()));
-                roleNew.setRole(docShare.getRole());
-                docShareService.save(roleNew);
-            }
-            //docShareService.save();
-            systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, "Thêm mới tài liệu", documentSaved.getName());
-            logger.info("{}: Thêm mới tài liệu {}", DocumentInfoServiceImpl.class.getName(), DocumentDTO.fromDocument(documentSaved));
-            return DocumentDTO.fromDocument(documentSaved);
-        } catch (RuntimeException | IOException | DocumentException ex) {
-            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
-        }
     }
 
     @Override
@@ -271,7 +167,25 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public List<DocumentDTO> findVersions(Integer documentId) {
-        return null;
+    public List<DocMetaModel> findMetadata(Integer documentId) {
+        List<DocMetaModel> listReturn = new ArrayList<>();
+        try {
+            List<Object[]> listData = documentRepository.findMetadata(documentId);
+            if (!listData.isEmpty()) {
+                for (Object[] data : listData) {
+                    DocMetaModel metadata = new DocMetaModel();
+                    metadata.setFieldId(Integer.parseInt(String.valueOf(data[0])));
+                    metadata.setFieldName(String.valueOf(data[1]));
+                    metadata.setDataId(ObjectUtils.isNotEmpty(data[2]) ? Integer.parseInt(String.valueOf(data[2])) : 0);
+                    metadata.setDataValue(ObjectUtils.isNotEmpty(data[3]) ? String.valueOf(data[3]) : null);
+                    metadata.setFieldType(String.valueOf(data[4]));
+                    metadata.setFieldRequired(String.valueOf(data[5]).equals("1"));
+                    listReturn.add(metadata);
+                }
+            }
+        } catch (RuntimeException ex) {
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "metadata of document"), ex);
+        }
+        return listReturn;
     }
 }

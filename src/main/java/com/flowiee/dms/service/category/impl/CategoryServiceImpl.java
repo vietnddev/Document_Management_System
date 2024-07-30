@@ -9,11 +9,13 @@ import com.flowiee.dms.repository.category.CategoryRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.category.CategoryService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
+import com.flowiee.dms.utils.ChangeLog;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -48,21 +51,30 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     @Transactional
     @Override
     public Category update(Category entity, Integer entityId) {
-        Optional<Category> categoryBefore = this.findById(entityId);
-        if (categoryBefore.isEmpty()) {
+        Optional<Category> categoryInput = this.findById(entityId);
+        if (categoryInput.isEmpty()) {
             throw new BadRequestException();
         }
-        categoryBefore.get().compareTo(entity).forEach((key, value) -> {
-            CategoryHistory categoryHistory = new CategoryHistory();
-            categoryHistory.setTitle("Cập nhật danh mục " + categoryBefore.get().getType());
-            categoryHistory.setCategory(new Category(categoryBefore.get().getId(), null));
-            categoryHistory.setField(key);
-            categoryHistory.setOldValue(value.substring(0, value.indexOf("#")));
-            categoryHistory.setNewValue(value.substring(value.indexOf("#") + 1));
-            categoryHistoryRepo.save(categoryHistory);
-        });
+        Category categoryBefore = ObjectUtils.clone(categoryInput.get());
         entity.setId(entityId);
-        return categoryRepo.save(entity);
+        Category categoryAfter = categoryRepo.save(entity);
+
+        ChangeLog changeLog = new ChangeLog(categoryBefore, categoryAfter);
+        for (Map.Entry<String, Object[]> entry : changeLog.getLogChanges().entrySet()) {
+            String field = entry.getKey();
+            String oldValue = ObjectUtils.isNotEmpty(entry.getValue()[0]) ? entry.getValue()[0].toString() : "-";
+            String newValue = ObjectUtils.isNotEmpty(entry.getValue()[1]) ? entry.getValue()[1].toString() : "-";
+
+            categoryHistoryRepo.save(CategoryHistory.builder()
+                    .title("Cập nhật danh mục " + categoryAfter.getType())
+                    .category(categoryAfter)
+                    .field(field)
+                    .oldValue(oldValue)
+                    .newValue(newValue)
+                    .build());
+        }
+
+        return categoryAfter;
     }
 
     @Transactional

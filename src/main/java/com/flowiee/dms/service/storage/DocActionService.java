@@ -1,20 +1,29 @@
 package com.flowiee.dms.service.storage;
 
 import com.flowiee.dms.entity.storage.DocShare;
+import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public interface DocActionService {
+    DocumentDTO saveDoc(DocumentDTO documentDTO);
+
+    DocumentDTO updateDoc(DocumentDTO data, Integer documentId);
+
+    String updateMetadata(List<DocMetaModel> metaDTOs, Integer documentId);
+
+    String deleteDoc(Integer documentId);
+
     DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy);
 
     String moveDoc(Integer docId, Integer destinationId);
 
     List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
 
-    ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws FileNotFoundException;
+    ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
 }

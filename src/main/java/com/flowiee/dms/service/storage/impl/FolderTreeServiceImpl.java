@@ -8,6 +8,7 @@ import com.flowiee.dms.service.storage.FolderTreeService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class FolderTreeServiceImpl extends BaseService implements FolderTreeServ
         logger.info("Generate folder tree");
         List<DocumentDTO> folderTree = new ArrayList<>();
 
-        List<DocumentTreeView> documentTreeViews = documentRepository.findGeneralFolderTree(parentId, isOnlyFolder ? "Y" : null);
+        List<DocumentTreeView> documentTreeViews = documentRepository.findGeneralFolderTree(null, parentId, isOnlyFolder ? "Y" : null);
 
         for (DocumentTreeView docTreeView : documentTreeViews) {
             folderTree.add(DocumentTreeView.toDocDTO(docTreeView));
@@ -47,6 +48,25 @@ public class FolderTreeServiceImpl extends BaseService implements FolderTreeServ
         }
 
         return folderTree;
+    }
+
+    @Override
+    public DocumentDTO findByDocId(int documentId) {
+        List<DocumentTreeView> documentTreeViews = documentRepository.findGeneralFolderTree(documentId, null, null);
+        if (ObjectUtils.isEmpty(documentTreeViews)) {
+            return null;
+        }
+        DocumentDTO documentDTO = DocumentTreeView.toDocDTO(documentTreeViews.get(0));
+        if (documentDTO.getHasSubFolder().equals("Y")) {
+            List<Integer> subFolderIds = new ArrayList<>();
+            if (documentTreeViews.get(0).getSubFoldersId() != null) {
+                for (String subId : documentTreeViews.get(0).getSubFoldersId().split("\\|")) {
+                    subFolderIds.add(Integer.parseInt(subId));
+                }
+            }
+            documentDTO.setSubFolders(this.getSubFoldersFromListByIds(List.of(documentDTO), subFolderIds));
+        }
+        return documentDTO;
     }
 
     private List<DocumentDTO> getSubFoldersFromListByIds(List<DocumentDTO> lsFolders, List<Integer> subFolderId) {

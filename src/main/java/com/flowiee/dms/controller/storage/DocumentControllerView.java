@@ -38,8 +38,8 @@ import java.util.Optional;
 public class DocumentControllerView extends BaseController {
     CategoryService     categoryService;
     DocShareService     docShareService;
+    DocActionService    docActionService;
     FileStorageService  fileStorageService;
-    DocMetadataService  docMetadataService;
     DocumentInfoService documentInfoService;
 
     @GetMapping("/dashboard")
@@ -64,7 +64,7 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewRootDocuments() {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.STG_DOCUMENT);
         modelAndView.addObject("parentId", 0);
-        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false));
+        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false));
         return baseView(modelAndView);
     }
 
@@ -84,7 +84,7 @@ public class DocumentControllerView extends BaseController {
         try {
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.addObject("docBreadcrumb", documentInfoService.findHierarchyOfDocument(document.getId(), document.getParentId()));
-            modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false));
+            modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false));
             modelAndView.addObject("documentParentName", document.getName());
             if (document.getIsFolder().equals("Y")) {
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT);
@@ -96,10 +96,8 @@ public class DocumentControllerView extends BaseController {
                 Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(document.getId());
                 if (fileStorage.isPresent()) {
                     FileDTO fileDTO = FileDTO.fromFileStorage(fileStorage.get());
-                    if (FileExtension.DOC.key().equals(fileDTO.getExtension()) ||
-                        FileExtension.DOCX.key().equals(fileDTO.getExtension()) ||
-                        FileExtension.XLS.key().equals(fileDTO.getExtension()) ||
-                        FileExtension.XLSX.key().equals(fileDTO.getExtension()))
+                    if (FileExtension.DOC.key().equals(fileDTO.getExtension()) || FileExtension.DOCX.key().equals(fileDTO.getExtension()) ||
+                        FileExtension.XLS.key().equals(fileDTO.getExtension()) || FileExtension.XLSX.key().equals(fileDTO.getExtension()))
                     {
                         fileDTO.setSrc(fileDTO.getSrc().replace("." + fileDTO.getExtension(), ".pdf"));
                     }
@@ -110,9 +108,8 @@ public class DocumentControllerView extends BaseController {
 
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT_DETAIL);
                 modelAndView.addObject("docDetail", docDTO);
-                modelAndView.addObject("docMeta", docMetadataService.findMetadata(document.getId()));
+                modelAndView.addObject("docMeta", documentInfoService.findMetadata(document.getId()));
                 modelAndView.addObject("documentId", document.getId());
-                //modelAndView.addObject("listFileOfDocument", fileStorageService.getFileOfDocument(documentId));
             }
             return baseView(modelAndView);
         } catch (RuntimeException ex) {
@@ -138,7 +135,7 @@ public class DocumentControllerView extends BaseController {
         if (document == null || documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
-        documentInfoService.update(document, documentId);
+        docActionService.updateDoc(document, documentId);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }
 
@@ -160,7 +157,7 @@ public class DocumentControllerView extends BaseController {
                 String dataValue = dataValues[i];
                 metaDTOs.add(new DocMetaModel(fieldId, null, dataId, dataValue, null, null, documentId));
             }
-            docMetadataService.updateMetadata(metaDTOs, documentId);
+            docActionService.updateMetadata(metaDTOs, documentId);
         }
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }
@@ -171,7 +168,7 @@ public class DocumentControllerView extends BaseController {
         if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
-        documentInfoService.delete(documentId);
+        docActionService.deleteDoc(documentId);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }
 

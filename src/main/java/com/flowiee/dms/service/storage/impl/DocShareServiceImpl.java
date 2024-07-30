@@ -55,11 +55,17 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
             model.setAccountId(account.getId());
             model.setAccountName(account.getFullName());
             for (DocShare docShare : docShareRepository.findByDocAndAccount(docId, account.getId(), null)) {
-                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.READ.getValue().equals(docShare.getRole())) model.setCanRead(true);
-                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.UPDATE.getValue().equals(docShare.getRole())) model.setCanUpdate(true);
-                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.DELETE.getValue().equals(docShare.getRole())) model.setCanDelete(true);
-                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.MOVE.getValue().equals(docShare.getRole())) model.setCanMove(true);
-                if (AppConstants.ADMINISTRATOR.equals(account.getUsername()) || DocRight.SHARE.getValue().equals(docShare.getRole())) model.setCanShare(true);
+                boolean isAdmin = AppConstants.ADMINISTRATOR.equals(account.getUsername());
+                if (isAdmin || DocRight.READ.getValue().equals(docShare.getRole()))
+                    model.setCanRead(true);
+                if (isAdmin || DocRight.UPDATE.getValue().equals(docShare.getRole()))
+                    model.setCanUpdate(true);
+                if (isAdmin || DocRight.DELETE.getValue().equals(docShare.getRole()))
+                    model.setCanDelete(true);
+                if (isAdmin || DocRight.MOVE.getValue().equals(docShare.getRole()))
+                    model.setCanMove(true);
+                if (isAdmin || DocRight.SHARE.getValue().equals(docShare.getRole()))
+                    model.setCanShare(true);
             }
             lsModel.add(model);
         }
@@ -99,7 +105,7 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     @Override
     public void deleteAllByDocument(Integer documentId) {
         docShareRepository.deleteAllByDocument(documentId);
-        List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true);
+        List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
         for (DocumentDTO dto : allSubDocs) {
             docShareRepository.deleteAllByDocument(dto.getId());
         }

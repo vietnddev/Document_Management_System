@@ -11,7 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Component
 public class BaseController {
-	protected static final Logger logger = LoggerFactory.getLogger(BaseController.class);
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired protected AccountService accountService;
 

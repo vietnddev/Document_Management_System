@@ -4,7 +4,6 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
-import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
@@ -21,7 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -41,7 +40,8 @@ public class DocumentController extends BaseController {
                                                           @RequestParam(value = "txtSearch", required = false) String txtSearch) {
         try {
             Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch);
-            return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
+            List<DocumentDTO> documentIncludeRights = documentInfoService.setInfoRights(documents.getContent());
+            return ApiResponse.ok(documentIncludeRights, pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "documents"), ex);
         }
@@ -73,7 +73,7 @@ public class DocumentController extends BaseController {
             document.setIsFolder(isFolder);
             document.setDocTypeId(docTypeId);
             document.setFileUpload(fileUpload);
-            return ApiResponse.ok(documentInfoService.save(document));
+            return ApiResponse.ok(docActionService.saveDoc(document));
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
         }
@@ -84,8 +84,8 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Integer parentId) {
         try {
-            List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false);
-            return ApiResponse.ok(documentInfoService.findSubDocByParentId(parentId, null, true), 1, 100, 100, documentDTOs.size());
+            List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false, false);
+            return ApiResponse.ok(documentDTOs, 1, 100, 100, documentDTOs.size());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "folders"), ex);
         }
@@ -95,14 +95,14 @@ public class DocumentController extends BaseController {
     @PutMapping("/doc/update/{id}")
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
     public ApiResponse<DocumentDTO> updateDoc(@PathVariable("id") Integer docId, @ModelAttribute DocumentDTO documentDTO) {
-        return ApiResponse.ok(documentInfoService.update(documentDTO, docId));
+        return ApiResponse.ok(docActionService.updateDoc(documentDTO, docId));
     }
 
     @Operation(summary = "Delete document")
     @DeleteMapping("/doc/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
-        return ApiResponse.ok(documentInfoService.delete(docId));
+        return ApiResponse.ok(docActionService.deleteDoc(docId));
     }
 
     @Operation(summary = "Copy document")
@@ -122,7 +122,7 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Download document")
     @GetMapping("/doc/download/{id}")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws FileNotFoundException {
+    public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
         return docActionService.downloadDoc(documentId);
     }
 }

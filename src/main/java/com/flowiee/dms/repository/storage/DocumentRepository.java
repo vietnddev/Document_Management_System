@@ -60,10 +60,13 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Query("select d from DocumentTreeView d " +
            "where 1=1 " +
+           "and (:documentId is null or d.id = :documentId) " +
            "and (:parentId is null or d.parentId = :parentId) " +
            "and (:isOnlyFolder is null or d.isFolder = :isOnlyFolder) " +
            "order by d.path")
-    List<DocumentTreeView> findGeneralFolderTree(@Param("parentId") Integer parentId, @Param("isOnlyFolder") String isOnlyFolder);
+    List<DocumentTreeView> findGeneralFolderTree(@Param("documentId") Integer documentId,
+                                                 @Param("parentId") Integer parentId,
+                                                 @Param("isOnlyFolder") String isOnlyFolder);
 
     @Query("select case when count(d) > 0 then true else false end " +
            "from Document d " +

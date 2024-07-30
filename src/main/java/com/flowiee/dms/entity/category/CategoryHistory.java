@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
 
+@Builder
 @Entity
 @Table(name = "ctg_history")
 @NoArgsConstructor
