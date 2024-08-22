@@ -16,6 +16,7 @@
                     <option name="selectPageSizeOp" value="30">30</option>
                     <option name="selectPageSizeOp" value="50">50</option>
                     <option name="selectPageSizeOp" value="100">100</option>
+                    <option name="selectPageSizeOp" value="500">500</option>
                 </select>
                 <span class="col-3" id="paginationInfo">Showing ... to ... of ... entries</span>
                 <ul class="pagination col-4 justify-content-center mt-0 mb-0">

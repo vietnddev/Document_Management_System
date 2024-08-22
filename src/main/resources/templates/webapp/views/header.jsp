@@ -31,7 +31,7 @@
     <link rel="stylesheet" th:href="@{/plugins/datatables-responsive/css/responsive.bootstrap4.min.css}">
     <link rel="stylesheet" th:href="@{/plugins/datatables-buttons/css/buttons.bootstrap4.min.css}">
     <!-- SimpleMDE -->
-    <link rel="stylesheet" th:href="@{/plugins/simplemde/simplemde.min.css}">
+    <!--<link rel="stylesheet" th:href="@{/plugins/simplemde/simplemde.min.css}">-->
     <!-- dropzonejs -->
     <link rel="stylesheet" th:href="@{/plugins/dropzone/min/dropzone.min.css}">
     <!-- Ekko Lightbox -->
@@ -193,11 +193,11 @@
     <script th:src="@{/dist/js/demo.js}"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
     <script th:src="@{/dist/js/pages/dashboard.js}"></script>
-    <link rel="stylesheet" href="https://kit.fontawesome.com/68eba0f5f3.css" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="https://kit.fontawesome.com/68eba0f5f3.css" crossorigin="anonymous">-->
     <!--Icon-->
     <script src="https://kit.fontawesome.com/68eba0f5f3.js" crossorigin="anonymous"></script>
     <!-- DataTables  & Plugins -->
-    <script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/plugins/datatables/jquery.dataTables.min.js}"></script>`
     <script th:src="@{/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js}"></script>
     <script th:src="@{/plugins/datatables-responsive/js/dataTables.responsive.min.js}"></script>
     <script th:src="@{/plugins/datatables-responsive/js/responsive.bootstrap4.min.js}"></script>

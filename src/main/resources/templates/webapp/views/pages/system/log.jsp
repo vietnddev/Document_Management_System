@@ -93,18 +93,18 @@
                     let contentTable = $('#contentTable');
                     contentTable.empty();
                     $.each(data, function (index, d) {
-                        contentTable.append(
-                            '<tr>' +
-                                '<td>' + (((pageNum - 1) * pageSize + 1) + index) + '</td>' +
-                                '<td>' + d.username + '</td>' +
-                                '<td>' + d.module + '</td>' +
-                                '<td style="max-width: 100px">' + d.action + '</td>' +
-                                '<td style="max-width: 250px">' + d.content + '</td>' +
-                                '<td style="max-width: 250px">' + d.contentChange + '</td>' +
-                                '<td>' + d.createdAt + '</td>' +
-                                '<td>' + d.ip + '</td>' +
-                            '</tr>'
-                        );
+                        contentTable.append(`
+                            <tr>
+                                <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>
+                                <td>${d.accountName}</td>
+                                <td>${d.module}</td>
+                                <td style="max-width: 100px">${d.title}</td>
+                                <td style="max-width: 250px">${d.content}</td>
+                                <td style="max-width: 250px">${d.contentChange}</td>
+                                <td>${d.createdAt}</td>
+                                <td>${d.ip}</td>
+                            </tr>
+                        `);
                     });
                 }
             }).fail(function () {

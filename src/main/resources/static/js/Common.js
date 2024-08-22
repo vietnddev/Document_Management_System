@@ -45,47 +45,42 @@ function updatePaginationUI(pageNum, pageSize, totalPage, totalElements) {
     $('#totalPages').text("Total pages " + totalPage);
 }
 
-function updateTableContentWhenOnClickPagination(loadNewDataMethod, pageSize, pageNum, totalPage, totalElements) {
+function updateTableContentWhenOnClickPagination(loadNewDataMethod) {
+    let lvPageSize = $('#selectPageSize').val();
     $('#selectPageSize').on('click', function() {
-        if (pageSize === parseInt($(this).val())) {
+        if (lvPageSize === $(this).val()) {
             return;
         }
-        pageSize = parseInt($(this).val());
+        lvPageSize = $(this).val();
         loadNewDataMethod($(this).val(), 1);
     });
 
     $('#firstPage').on('click', function() {
-        if (pageNum === 1) {
+        if (parseInt($('#paginationInfo').attr("pageNum")) === 1) {
             return;
         }
-        loadNewDataMethod(pageSize, 1);
+        loadNewDataMethod(lvPageSize, 1);
     });
 
     $('#previousPage').on('click', function() {
-        if (pageNum === 1) {
+        if (parseInt($('#paginationInfo').attr("pageNum")) === 1) {
             return;
         }
-        loadNewDataMethod(pageSize, pageNum - 1);
+        loadNewDataMethod(lvPageSize, $('#paginationInfo').attr("pageNum") - 1);
     });
 
     $('#nextPage').on('click', function() {
-        if (pageNum === totalPage) {
+        if ($('#paginationInfo').attr("pageNum") === $('#paginationInfo').attr("totalPage")) {
             return;
         }
-        if (totalElements <= pageSize) {
-            return;
-        }
-        loadNewDataMethod(pageSize, pageNum + 1);
+        loadNewDataMethod(lvPageSize, parseInt($('#paginationInfo').attr("pageNum")) + 1);
     });
 
     $('#lastPage').on('click', function() {
-        if (pageNum === totalPage) {
+        if ($('#paginationInfo').attr("pageNum") === $('#paginationInfo').attr("totalPage")) {
             return;
         }
-        if (totalElements <= pageSize) {
-            return;
-        }
-        loadNewDataMethod(pageSize, totalPage);
+        loadNewDataMethod(lvPageSize, $('#paginationInfo').attr("totalPage"));
     });
 }
 

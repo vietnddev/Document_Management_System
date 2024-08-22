@@ -59,9 +59,11 @@ public class SystemLog extends BaseEntity implements java.io.Serializable {
 	@PreUpdate
 	public void updateAudit() {
 		if (ip == null) {
-			ip = CommonUtils.getUserPrincipal().getIp();
-		} else {
-			ip = "unknown";
+			try {
+				ip = CommonUtils.getUserPrincipal().getIp();
+			} catch (Exception ex) {
+				ip = "unknown";
+			}
 		}
 	}
 

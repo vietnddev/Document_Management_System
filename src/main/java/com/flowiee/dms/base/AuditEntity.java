@@ -9,16 +9,15 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
 public class AuditEntity {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     @Column(name = "created_at", updatable = false, columnDefinition = "timestamp default current_timestamp")
@@ -50,10 +49,6 @@ public class AuditEntity {
     @PreUpdate
     @PrePersist
     public void updateAudit() {
-        lastUpdatedAt = LocalDateTime.now();
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
         if (createdBy == null) {
             createdBy = CommonUtils.getUserPrincipal().getId();
         }

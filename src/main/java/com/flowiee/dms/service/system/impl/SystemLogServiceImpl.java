@@ -20,18 +20,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class SystemLogServiceImpl extends BaseService implements SystemLogService {
-    EntityManager       entityManager;
     SystemLogRepository systemLogRepository;
 
     @Override
     public Page<SystemLog> findAll(int pageSize, int pageNum) {
-        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("id").descending());
         Page<SystemLog> logs = systemLogRepository.findAll(pageable);
         for (SystemLog systemLog : logs.getContent()) {
             if (systemLog.getAccount() != null) {
@@ -78,6 +75,7 @@ public class SystemLogServiceImpl extends BaseService implements SystemLogServic
         systemLog.setContentChange(contentChange);
         systemLog.setIp(CommonUtils.getUserPrincipal().getIp());
         systemLog.setAccount(new Account(CommonUtils.getUserPrincipal().getId()));
+        systemLog.setCreatedBy(CommonUtils.getUserPrincipal().getId());
         return systemLogRepository.save(systemLog);
     }
 }

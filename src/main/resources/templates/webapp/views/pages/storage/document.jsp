@@ -123,55 +123,10 @@
             cloneDocument();
             moveDocument();
             search();
-            //updateTableContentWhenOnClickPagination(loadDocuments, mvPageSize, mvPageNum, mvTotalPage, mvTotalElements);
-            updateTableContentWhenOnClickPagination();
+            updateTableContentWhenOnClickPagination(loadDocuments);
             exportData();
             downloadDocument();
         });
-
-        function updateTableContentWhenOnClickPagination() {
-            $('#selectPageSize').on('click', function() {
-                if (mvPageSize === parseInt($(this).val())) {
-                    return;
-                }
-                mvPageSize = $(this).val();
-                loadDocuments($(this).val(), 1);
-            });
-
-            $('#firstPage').on('click', function() {
-                if (mvPageNum === 1) {
-                    return;
-                }
-                loadDocuments(mvPageSize, 1);
-            });
-
-            $('#previousPage').on('click', function() {
-                if (mvPageNum === 1) {
-                    return;
-                }
-                loadDocuments(mvPageSize, mvPageNum - 1);
-            });
-
-            $('#nextPage').on('click', function() {
-                if (mvPageNum === mvTotalPage) {
-                    return;
-                }
-                if (mvTotalElements <= mvPageSize) {
-                    return;
-                }
-                loadDocuments(mvPageSize, mvPageNum + 1);
-            });
-
-            $('#lastPage').on('click', function() {
-                if (mvPageNum === mvTotalPage) {
-                    return;
-                }
-                if (mvTotalElements <= mvPageSize) {
-                    return;
-                }
-                loadDocuments(mvPageSize, mvTotalPage);
-            });
-        }
 
         function search() {
             $("#btnSearch").on("click", function () {
