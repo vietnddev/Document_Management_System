@@ -55,26 +55,32 @@ function shareDoc() {
                 tableShare.empty();
                 $.each(mvAccountShares, function (index, d) {
                     tableShare.append(`
-                                <tr>
-                                    <td>${d.accountName}</td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canReadCbx_${d.accountId}" ${d.canRead ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canUpdateCbx_${d.accountId}" ${d.canUpdate ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canDeleteCbx_${d.accountId}" ${d.canDelete ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canMoveCbx_${d.accountId}" ${d.canMove ? "checked" : ""}></td>
-                                    <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canShareCbx_${d.accountId}" ${d.canShare ? "checked" : ""}></td>
-                                </tr>
-                            `);
+                        <tr>
+                            <td>${d.accountName}</td>
+                            <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canReadCbx_${d.accountId}" ${d.canRead ? "checked" : ""}></td>
+                            <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canUpdateCbx_${d.accountId}" ${d.canUpdate ? "checked" : ""}></td>
+                            <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canDeleteCbx_${d.accountId}" ${d.canDelete ? "checked" : ""}></td>
+                            <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canMoveCbx_${d.accountId}" ${d.canMove ? "checked" : ""}></td>
+                            <td><input class="form-control form-control-sm" type="checkbox" indexAcc="${index}" id="canShareCbx_${d.accountId}" ${d.canShare ? "checked" : ""}></td>
+                        </tr>
+                    `);
                 })
+                let applyIntoBlock = $("#applyIntoBlock");
+                applyIntoBlock.empty();
+                applyIntoBlock.append(`<input type="checkbox" class="mr-3" style="width: 25px; height: 25px" id="applyIntoCbx_${documentId}" checked>
+                                       <span>Áp dụng cho các tài liệu bên trong?</span>`);
             }
         }).fail(function () {
             showErrorModal("Could not connect to the server");
         });
+        mvIsApplyInto = false;
         $("#btnSubmitShare").attr("documentId", documentId);
         $("#modalShare").modal();
     })
 
     $("#btnSubmitShare").on("click", function () {
         let documentId = parseInt($(this).attr("documentId"));
+        let applyInto = $("[id^='applyIntoCbx_']").prop("checked");
         $.each(mvAccountShares, function (index, d) {
             mvAccountShares[index].canRead = $("[id^='canReadCbx_']").eq(index).prop("checked");
             mvAccountShares[index].canUpdate = $("[id^='canUpdateCbx_']").eq(index).prop("checked");
@@ -83,7 +89,7 @@ function shareDoc() {
             mvAccountShares[index].canShare = $("[id^='canShareCbx_']").eq(index).prop("checked");
         })
         $.ajax({
-            url: mvHostURLCallApi + "/stg/doc/share/" + documentId,
+            url: mvHostURLCallApi + "/stg/doc/share/" + documentId + "?applyInto=" + applyInto,
             type: "PUT",
             contentType: "application/json",
             data: JSON.stringify(mvAccountShares),

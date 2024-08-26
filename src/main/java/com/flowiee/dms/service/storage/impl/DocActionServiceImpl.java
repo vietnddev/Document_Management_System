@@ -45,6 +45,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     AccountService      accountService;
     DocDataService      docDataService;
     DocShareService     docShareService;
+    DocHistoryService   docHistoryService;
     FolderTreeService   folderTreeService;
     FileStorageService  fileStorageService;
     DocumentRepository  documentRepository;
@@ -67,11 +68,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
             List<DocShare> roleSharesOfDocument = docShareRepository.findByDocument(documentSaved.getParentId());
             for (DocShare docShare : roleSharesOfDocument) {
-                DocShare roleNew = new DocShare();
-                roleNew.setDocument(new Document(documentSaved.getId()));
-                roleNew.setAccount(new Account(docShare.getAccount().getId()));
-                roleNew.setRole(docShare.getRole());
-                docShareService.save(roleNew);
+                docShareService.save(DocShare.builder()
+                        .document(new Document(documentSaved.getId()))
+                        .account(new Account(docShare.getAccount().getId()))
+                        .role(docShare.getRole())
+                        .build());
             }
             //docShareService.save();
             systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, "Thêm mới tài liệu", documentSaved.getName());
@@ -98,6 +99,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         Document documentUpdated = documentRepository.save(document.get());
 
         ChangeLog changeLog = new ChangeLog(documentBefore, documentUpdated);
+        docHistoryService.save(documentUpdated, null, null, changeLog, null);
         systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update document " + document.get().getName(), changeLog);
         logger.info("{}: Update document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
 
@@ -112,9 +114,9 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         }
 
         for (DocMetaModel metaDTO : metaDTOs) {
-            DocData docData = docDataService.findByFieldIdAndDocId(metaDTO.getFieldId(), documentId);
-            if (docData != null) {
-                docDataService.update(metaDTO.getDataValue(), docData.getId());
+            DocData docDataCurrent = docDataService.findByFieldIdAndDocId(metaDTO.getFieldId(), documentId);
+            if (docDataCurrent != null) {
+                docDataService.update(metaDTO.getDataValue(), docDataCurrent.getId());
             } else {
                 docDataService.save(DocData.builder()
                         .docField(new DocField(metaDTO.getFieldId()))
@@ -122,9 +124,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .value(metaDTO.getDataValue())
                         .build());
             }
+            docHistoryService.saveDocDataHistory(document.get(), docDataCurrent, docDataCurrent.getDocField().getName(), docDataCurrent.getValue(), metaDTO.getDataValue());
         }
 
-        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document, "-", "-");
+        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document.get().getName(), "-", "-");
         logger.info(DocumentInfoServiceImpl.class.getName() + ": Update metadata docId=" + documentId);
 
         return MessageCode.UPDATE_SUCCESS.getDescription();
@@ -270,6 +273,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
             //Share rights to this document and all sub-docs of them
             doShare(doc.get().getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(), model.getCanDelete(), model.getCanMove(), model.getCanShare());
+            //Share rights to all of sub-docs
             if (applyForSubFolder) {
                 if (doc.get().getIsFolder().equals("Y")) {
                     List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(doc.get().getId(), null, true, true);

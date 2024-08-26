@@ -57,16 +57,20 @@
                             <div class="card-body table-responsive p-0">
                                 <table class="table table-hover text-nowrap">
                                     <thead>
-                                    <tr>
-                                        <th>Account name</th>
-                                        <th class="text-center">Read</th>
-                                        <th class="text-center">Update</th>
-                                        <th class="text-center">Delete</th>
-                                        <th class="text-center">Move</th>
-                                        <th class="text-center">Share</th>
-                                    </tr>
+                                        <tr>
+                                            <th>Account name</th>
+                                            <th class="text-center">Read</th>
+                                            <th class="text-center">Update</th>
+                                            <th class="text-center">Delete</th>
+                                            <th class="text-center">Move</th>
+                                            <th class="text-center">Share</th>
+                                        </tr>
                                     </thead>
                                     <tbody id="tblSysAccountShare"></tbody>
+                                    <tfoot>
+                                        <td colspan="3" style="display: flex" id="applyIntoBlock"></td>
+                                        <td></td><td></td><td></td><td></td><td></td>
+                                    </tfoot>
                                 </table>
                             </div>
                         </div>

@@ -117,14 +117,14 @@ public class FileUtils {
         return false;
     }
 
-    public static void addFileToDirectory(String filePath, String directoryPath) {
+    public static void addFileToDirectory(String filePath, String directoryPath, StandardCopyOption copyOption) {
         Path sourcePath = Paths.get(filePath);
         Path targetPath = Paths.get(directoryPath, sourcePath.getFileName().toString());
         try {
             if (!Files.exists(sourcePath) || !Files.exists(targetPath)) {
                 return;
             }
-            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(sourcePath, targetPath, copyOption);
             System.out.println("File " + filePath + " copied to " + directoryPath);
         } catch (IOException e) {
             e.printStackTrace();

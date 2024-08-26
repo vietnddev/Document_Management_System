@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,9 +35,9 @@ public class DocShareController {
     @PreAuthorize("@vldModuleStorage.shareDoc(true)")
     public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId,
                                                 @RequestBody List<DocShareModel> accountShares,
-                                                @RequestParam(value = "applyForSubFolder", required = false) Boolean applyForSubFolder) {
-        if (!applyForSubFolder.booleanValue())
-            applyForSubFolder = false;
-        return ApiResponse.ok(docActionService.shareDoc(docId, accountShares, applyForSubFolder));
+                                                @RequestParam(value = "applyInto", required = false) Boolean applyInto) {
+        if (ObjectUtils.isEmpty(applyInto) || !applyInto.booleanValue())
+            applyInto = false;
+        return ApiResponse.ok(docActionService.shareDoc(docId, accountShares, applyInto));
     }
 }

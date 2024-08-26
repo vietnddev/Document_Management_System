@@ -87,6 +87,7 @@
 
         <div th:replace="header :: scripts"></div>
 
+        <script type="text/javascript" th:src="@{/js/document/Document.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/LoadDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/CreateUpdateDocument.js}"></script>
         <script type="text/javascript" th:src="@{/js/document/DeleteDocument.js}"></script>
@@ -110,6 +111,7 @@
         let mvPagination;
 
         $(document).ready(function () {
+            init();
             loadDocuments(mvPageSizeDefault, 1);
             setupSearchTool(mvSearchTool);
             loadFolderTreeOnSideBar();
