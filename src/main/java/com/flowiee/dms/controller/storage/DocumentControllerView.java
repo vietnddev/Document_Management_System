@@ -125,6 +125,7 @@ public class DocumentControllerView extends BaseController {
         if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
+        FileUtils.isAllowUpload(FileUtils.getFileExtension(file.getOriginalFilename()), true);
         fileStorageService.changFileOfDocument(file, documentId);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }

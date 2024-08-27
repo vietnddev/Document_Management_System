@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
@@ -11,6 +12,7 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.ImageUtils;
 import com.flowiee.dms.utils.PdfUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
@@ -78,7 +80,15 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
-        PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+
+        try {
+            PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+        } catch (RuntimeException ex) {
+            if (FileExtension.XLSX.key().equals(fileSaved.getExtension())
+                    || FileExtension.XLSX.key().equals(fileSaved.getExtension())) {
+                ImageUtils.cloneFileToImg(path.toFile(), null);
+            }
+        }
 
         return fileSaved;
     }

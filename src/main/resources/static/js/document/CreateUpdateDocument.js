@@ -24,6 +24,10 @@ function createDocument() {
         $("#desField").val("");
         $("#modalInsertOrUpdate").modal();
     })
+
+    $("#btnImportDoc").on("click", function () {
+        $("#modalImport").modal();
+    })
 }
 
 function updateDocument() {
@@ -115,5 +119,36 @@ function submitInsertOrUpdate() {
                 }
             });
         }
+    })
+}
+
+function importDoc() {
+    $("#formImport").submit(function (e) {
+        e.preventDefault();
+        if ($("#fileImportField").val() === "") {
+            alert("File attach is required!")
+            return;
+        }
+        let apiURL = mvHostURLCallApi + "/stg/doc/import/" + mvParentId;
+        let formData = new FormData();
+        formData.append("applyRightsParent", false);
+        formData.append("fileUpload", $("#fileImportField")[0].files[0]); //input có type là file
+        $.ajax({
+            url: apiURL,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response, textStatus, jqXHR) {
+                if (response.status === "OK") {
+                    alert("Import successfully")
+                    window.location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(status + ': ' + JSON.stringify(xhr.responseJSON.message));
+            }
+        });
+
     })
 }

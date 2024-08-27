@@ -30,13 +30,14 @@
                             <div class="card">
                                 <div class="card-header">
                                     <div class="row justify-content-between">
-                                        <div class="col-8" style="display: flex; align-items: center">
+                                        <div class="col" style="display: flex; align-items: center">
                                             <h3 class="card-title"><strong th:text="${documentParentName}"></strong></h3>
                                         </div>
-                                        <div class="col-4 text-right">
-                                            <button type="button" class="btn btn-primary" id="btnInsertFile">Thêm mới tài liệu</button>
-                                            <button type="button" class="btn btn-warning" id="btnInsertFolder">Thêm mới thư mục</button>
-                                            <button type="button" class="btn btn-info"    data-target="#modalExportData" data-toggle="modal">Xuất dữ liệu</button>
+                                        <div class="col text-right">
+                                            <button type="button" class="btn btn-sm btn-primary" id="btnInsertFile">Thêm mới tài liệu</button>
+                                            <button type="button" class="btn btn-sm btn-warning" id="btnInsertFolder">Thêm mới thư mục</button>
+                                            <button type="button" class="btn btn-sm btn-success" id="btnImportDoc">Import dữ liệu</button>
+                                            <button type="button" class="btn btn-sm btn-info"    data-target="#modalExportData" data-toggle="modal">Xuất dữ liệu</button>
                                         </div>
                                     </div>
                                 </div>
@@ -62,6 +63,9 @@
 
                                 <!-- Modal insert and update -->
                                 <div th:replace="pages/storage/fragments/document-fragments :: modalInsertAndUpdateFragment"></div>
+
+                                <!-- Modal import -->
+                                <div th:replace="pages/storage/fragments/document-fragments :: modalImportFragment"></div>
 
                                 <!-- Modal share role -->
                                 <div th:replace="pages/storage/fragments/document-fragments :: modalShareFragment"></div>
@@ -120,6 +124,7 @@
             shareDoc();
             createDocument();
             updateDocument();
+            importDoc();
             submitInsertOrUpdate();
             deleteDocument();
             cloneDocument();

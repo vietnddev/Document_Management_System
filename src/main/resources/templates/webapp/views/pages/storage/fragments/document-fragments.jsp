@@ -125,6 +125,36 @@
             </div>
         </div>
 
+        <!-- Modal import -->
+        <div class="modal fade" id="modalImport" th:fragment="modalImportFragment">
+            <div class="modal-dialog modal-lg">
+                <form id="formImport" enctype="multipart/form-data">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <strong class="modal-title">Import tài liệu</strong>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="fileField">Chọn file</label>
+                                        <input class="form-control" type="file" id="fileImportField" accept=".zip" required/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-end">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-primary" id="btnSubmitImport">Lưu</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- Modal confirm clone document -->
         <div class="modal fade" id="modalMoveDoc" th:fragment="modalMoveDocFragment">
             <div class="modal-dialog">

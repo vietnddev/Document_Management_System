@@ -6,6 +6,7 @@ import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,4 +27,6 @@ public interface DocActionService {
     List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
 
     ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
+
+    List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
 }
