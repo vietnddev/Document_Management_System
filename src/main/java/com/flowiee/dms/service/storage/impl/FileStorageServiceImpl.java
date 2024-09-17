@@ -4,23 +4,29 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
+import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
+import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.FileUtils;
+import com.flowiee.dms.utils.ImageUtils;
 import com.flowiee.dms.utils.PdfUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,6 +75,37 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
+    public FileDTO getFileDisplay(int documentId) {
+        Optional<FileStorage> fileStorageOpt = this.findFileIsActiveOfDocument(documentId);
+        if (fileStorageOpt.isPresent())
+        {
+            FileStorage fileStorage = fileStorageOpt.get();
+            String extension = "." + fileStorage.getExtension();
+            if (FileExtension.DOC.key().equals(fileStorage.getExtension()) || FileExtension.DOCX.key().equals(fileStorage.getExtension()) ||
+                    FileExtension.XLS.key().equals(fileStorage.getExtension()) || FileExtension.XLSX.key().equals(fileStorage.getExtension()))
+            {
+                //pdf
+                FileStorage pdfModel = ObjectUtils.clone(fileStorage);
+                pdfModel.setStorageName(pdfModel.getStorageName().replaceAll(extension, ".pdf"));
+                if (FileUtils.getFileUploaded(pdfModel).exists()) {
+                    extension = ".pdf";
+                }
+                //png
+                FileStorage imageModel = ObjectUtils.clone(pdfModel);
+                imageModel.setStorageName(imageModel.getStorageName().replaceAll(extension, ".png"));
+                if (FileUtils.getFileUploaded(imageModel).exists()) {
+                    extension = ".png";
+                }
+            }
+            FileDTO fileDTO = FileDTO.fromFileStorage(fileStorageOpt.get());
+            fileDTO.setSrc(fileDTO.getSrc().replace("." + fileDTO.getExtension(), extension));
+
+            return fileDTO;
+        }
+        return new FileDTO();
+    }
+
+    @Override
     public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
         FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE);
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
@@ -78,7 +115,15 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
-        PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+
+        try {
+            PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+        } catch (RuntimeException ex) {
+            if (FileExtension.XLSX.key().equals(fileSaved.getExtension())
+                    || FileExtension.XLSX.key().equals(fileSaved.getExtension())) {
+                ImageUtils.cloneFileToImg(path.toFile(), null);
+            }
+        }
 
         return fileSaved;
     }
@@ -112,7 +157,15 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         fileUpload.transferTo(path);
-        PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+
+        try {
+            PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
+        } catch (RuntimeException ex) {
+            if (FileExtension.XLSX.key().equals(fileSaved.getExtension())
+                    || FileExtension.XLSX.key().equals(fileSaved.getExtension())) {
+                ImageUtils.cloneFileToImg(path.toFile(), null);
+            }
+        }
 
         return "OK";
     }

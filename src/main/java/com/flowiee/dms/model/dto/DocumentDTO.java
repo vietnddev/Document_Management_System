@@ -33,6 +33,10 @@ public class DocumentDTO extends Document implements Serializable {
     Boolean thisAccCanMove = false;
     Boolean thisAccCanShare = false;
     String path;
+    @JsonIgnore
+    String action;
+    @JsonIgnore
+    String copySourceName;
 
     public static DocumentDTO fromDocument(Document document) {
         DocumentDTO dto = new DocumentDTO();

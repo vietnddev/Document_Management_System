@@ -26,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,19 +93,7 @@ public class DocumentControllerView extends BaseController {
             }
             if (document.getIsFolder().equals("N")) {
                 DocumentDTO docDTO = DocumentDTO.fromDocument(document);
-
-                Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(document.getId());
-                if (fileStorage.isPresent()) {
-                    FileDTO fileDTO = FileDTO.fromFileStorage(fileStorage.get());
-                    if (FileExtension.DOC.key().equals(fileDTO.getExtension()) || FileExtension.DOCX.key().equals(fileDTO.getExtension()) ||
-                        FileExtension.XLS.key().equals(fileDTO.getExtension()) || FileExtension.XLSX.key().equals(fileDTO.getExtension()))
-                    {
-                        fileDTO.setSrc(fileDTO.getSrc().replace("." + fileDTO.getExtension(), ".pdf"));
-                    }
-                    docDTO.setFile(fileDTO);
-                } else {
-                    docDTO.setFile(new FileDTO());
-                }
+                docDTO.setFile(fileStorageService.getFileDisplay(documentId));
 
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT_DETAIL);
                 modelAndView.addObject("docDetail", docDTO);
@@ -125,6 +114,7 @@ public class DocumentControllerView extends BaseController {
         if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
+        FileUtils.isAllowUpload(FileUtils.getFileExtension(file.getOriginalFilename()), true, null);
         fileStorageService.changFileOfDocument(file, documentId);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }
@@ -168,7 +158,7 @@ public class DocumentControllerView extends BaseController {
         if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
-        docActionService.deleteDoc(documentId);
+        docActionService.deleteDoc(documentId, true);
         return new ModelAndView("redirect:" + request.getHeader("referer"));
     }
 

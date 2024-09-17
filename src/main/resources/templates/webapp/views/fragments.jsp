@@ -35,9 +35,9 @@
         </div>
 
         <div th:fragment="searchTool(documentType)" th:remove="tag">
-            <div class="row col-10 input-group mb-2">
+            <div class="row col-10 input-group input-group-sm mb-2">
                 <input class="form-control col-8 mr-1" id="txtFilter"/>
-                <a class="btn btn-outline-secondary col-2 mr-1" data-toggle="collapse" href="#collapseExample" id="btnOpenSearchAdvance"
+                <a class="btn btn-sm btn-outline-secondary col-2 mr-1" data-toggle="collapse" href="#collapseExample" id="btnOpenSearchAdvance"
                    role="button" aria-expanded="false" aria-controls="collapseExample"><i class="fa-solid fa-caret-down mr-2"></i>Nâng cao</a>
                 <button class="btn btn-info form-control col-2" id="btnSearch"><i class="fa-solid fa-magnifying-glass mr-2"></i>Tìm kiếm</button>
             </div>

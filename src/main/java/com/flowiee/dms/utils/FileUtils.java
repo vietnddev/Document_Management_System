@@ -1,22 +1,36 @@
 package com.flowiee.dms.utils;
 
 import com.flowiee.dms.entity.storage.FileStorage;
+import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.FileExtension;
+import com.flowiee.dms.model.FolderTree;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
+import java.math.BigDecimal;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileUtils {
@@ -76,13 +90,16 @@ public class FileUtils {
         return extension;
     }
 
-    public static boolean isAllowUpload(String fileExtension) {
+    public static boolean isAllowUpload(String fileExtension, boolean throwException, String message) {
         if (ObjectUtils.isNotEmpty(fileExtension)) {
             for (FileExtension ext : FileExtension.values()) {
                 if (ext.key().equalsIgnoreCase(fileExtension) && ext.isAllowUpload()) {
                     return true;
                 }
             }
+        }
+        if (throwException) {
+            throw new AppException(String.format(message != null ? message : "File có định dạng .%s chưa được hỗ trợ!", fileExtension));
         }
         return false;
     }
@@ -100,15 +117,17 @@ public class FileUtils {
         return Path.of(fileDownloadPath + "/storage/temp" );
     }
 
+    public static Path getImportStorageTempPath() {
+        return Path.of(fileUploadPath + "/temp");
+    }
+
     public static boolean lockFile(File file) {
         try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
              FileChannel channel = raf.getChannel();
              FileLock lock = channel.lock()) {
-
             // File đã được khóa thành công
             System.out.println("File đã được khóa thành công: " + file.getAbsolutePath());
             return true;
-
         } catch (IOException e) {
             // Không thể khóa file, có thể file đang được sử dụng hoặc lỗi khác xảy ra
             System.out.println("Không thể khóa file, có thể file đang được sử dụng hoặc có lỗi khác: " + file.getAbsolutePath());
@@ -161,7 +180,7 @@ public class FileUtils {
     }
 
     public static void deleteDirectory(Path path) throws IOException {
-        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+        Files.walkFileTree(path, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
@@ -174,5 +193,120 @@ public class FileUtils {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    // Hàm đệ quy để xây dựng cây thư mục
+    public static FolderTree buildFolderTree(File folder, int level, int parentId, String parentName) {
+        FolderTree folderTree = FolderTree.builder()
+                .name(folder.getName())
+                .isDirectory(folder.isDirectory())
+                .level(level)
+                .parentId(parentId)
+                .parentName(parentName)
+                .subFiles(new ArrayList<>()).build();
+
+        // Lấy danh sách tất cả các file và thư mục con
+        File[] subFiles = folder.listFiles();
+        if (subFiles != null) {
+            for (File file : subFiles) {
+                if (file.isDirectory()) {
+                    // Gọi đệ quy cho thư mục con
+                    folderTree.getSubFiles().add(buildFolderTree(file, level + 1, parentId, folder.getName()));
+                } else {
+                    isAllowUpload(CommonUtils.getFileExtension(file.getName()), true, "Tồn tại tệp có định dạng .%s chưa được hỗ trợ!");
+                    // Thêm file vào danh sách subFiles (ở đây chỉ thêm file, không gọi đệ quy)
+                    folderTree.getSubFiles().add(FolderTree.builder()
+                            .name(file.getName())
+                            .isDirectory(file.isDirectory())
+                            .level(level + 1)
+                            .parentId(parentId)
+                            .parentName(folder.getName())
+                            .file(file)
+                            .build());
+                }
+            }
+        }
+        return folderTree;
+    }
+
+    public static File unzipDirectory(File pFileZip, String pDestDir) throws IOException {
+        String lvDestDir = pDestDir;
+        if (lvDestDir == null) {
+            String pathNotIncludeFileExtension = removeFileExtension(pFileZip.getAbsolutePath());
+            lvDestDir = pathNotIncludeFileExtension.substring(0, pathNotIncludeFileExtension.lastIndexOf('\\'));
+        }
+        File destDirectory = new File(lvDestDir);
+
+        try {
+            byte[] buffer = new byte[1024];
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(pFileZip));
+            ZipEntry zipEntry = zis.getNextEntry();
+            while (zipEntry != null) {
+                File newFile = newFile(destDirectory, zipEntry);
+                if (zipEntry.isDirectory()) {
+                    if (!newFile.isDirectory() && !newFile.mkdirs()) {
+                        throw new IOException("Failed to create directory " + newFile);
+                    }
+                } else {
+                    // fix for Windows-created archives
+                    File parent = newFile.getParentFile();
+                    if (!parent.isDirectory() && !parent.mkdirs()) {
+                        throw new IOException("Failed to create directory " + parent);
+                    }
+
+                    // write file content
+                    FileOutputStream fos = new FileOutputStream(newFile);
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+                    fos.close();
+                }
+                zipEntry = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if (pDestDir == null) {
+            return new File(removeFileExtension(pFileZip.getAbsolutePath()));
+        } else {
+            return destDirectory;
+        }
+    }
+
+    public static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+        File destFile = new File(destinationDir, zipEntry.getName());
+
+        String destDirPath = destinationDir.getCanonicalPath();
+        String destFilePath = destFile.getCanonicalPath();
+
+        if (!destFilePath.startsWith(destDirPath + File.separator)) {
+            throw new IOException("Entry is outside of the target dir: " + zipEntry.getName());
+        }
+
+        return destFile;
+    }
+
+    public static String removeFileExtension(String originalFilename) {
+        String fileExtension = FileUtils.getFileExtension(originalFilename);
+        return originalFilename.replaceAll("." + fileExtension, "");
+    }
+
+    public static MultipartFile convertFileToMultipartFile(File file) throws IOException {
+        // Đọc dữ liệu từ file
+        FileInputStream inputStream = new FileInputStream(file);
+
+        // Tạo đối tượng MockMultipartFile từ File
+        MultipartFile multipartFile = new MockMultipartFile(
+                file.getName(), // Tên của file
+                file.getName(), // Tên gốc của file
+                Files.probeContentType(file.toPath()), // "application/octet-stream", // Loại MIME (hoặc có thể là bất kỳ loại nào bạn muốn)
+                inputStream); // Dữ liệu của file
+
+        return multipartFile;
     }
 }

@@ -37,12 +37,16 @@ public class StartUp {
     public void initResourceConfig() {
         Path templateTempForExportPath = FileUtils.getTemplateExportTempPath();
         Path folderTempForDownloadPath = FileUtils.getDownloadStorageTempPath();
+        Path folderTempImportStoragePath = FileUtils.getImportStorageTempPath();
         try {
             if (!Files.exists(templateTempForExportPath)) {
                 Files.createDirectory(templateTempForExportPath);
             }
             if (!Files.exists(folderTempForDownloadPath)) {
                 Files.createDirectory(folderTempForDownloadPath);
+            }
+            if (!Files.exists(folderTempImportStoragePath)) {
+                Files.createDirectory(folderTempImportStoragePath);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

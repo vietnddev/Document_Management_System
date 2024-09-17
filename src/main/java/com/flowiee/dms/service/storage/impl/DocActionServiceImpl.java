@@ -14,10 +14,7 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.NotificationService;
-import com.flowiee.dms.utils.ChangeLog;
-import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.FileUtils;
-import com.flowiee.dms.utils.PdfUtils;
+import com.flowiee.dms.utils.*;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MasterObject;
@@ -31,6 +28,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.*;
@@ -74,9 +72,16 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .role(docShare.getRole())
                         .build());
             }
-            //docShareService.save();
-            systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, "Thêm mới tài liệu", documentSaved.getName());
-            logger.info("{}: Thêm mới tài liệu {}", DocumentInfoServiceImpl.class.getName(), DocumentDTO.fromDocument(documentSaved));
+
+            String message = "Thêm mới tài liệu";
+            String content = documentSaved.getName();
+            if (ACTION.STG_DOC_COPY.name().equals(documentDTO.getAction())) {
+                message = "Sao chép tài liệu";
+                content = String.format("Sao chép [%s] từ [%s]", content, documentDTO.getCopySourceName());
+            }
+            systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, message, content);
+            logger.info("{}: {} {}", DocumentInfoServiceImpl.class.getName(), message, DocumentDTO.fromDocument(documentSaved));
+
             return DocumentDTO.fromDocument(documentSaved);
         } catch (RuntimeException | IOException | DocumentException ex) {
             throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
@@ -135,19 +140,35 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public String deleteDoc(Integer documentId) {
-        Optional<DocumentDTO> document = documentInfoService.findById(documentId);
+    public String deleteDoc(Integer documentId, boolean isDeleteSubDoc) {
+        Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
-            throw new ResourceNotFoundException("Document not found!", false);
+            throw new ResourceNotFoundException("Document not found! " + documentId, false);
         }
         if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
-        List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
+        deleteDoc(documentId);
+        if (isDeleteSubDoc) {
+            List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+            for (DocumentDTO subDoc : listSubDocs) {
+                deleteDoc(subDoc.getId());
+            }
+        }
+
+        systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
+        logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
+        return MessageCode.DELETE_SUCCESS.getDescription();
+    }
+
+    private void deleteDoc(int documentId) {
+        deleteFileOfDocument(documentId);
         docShareService.deleteByDocument(documentId);
         documentRepository.deleteById(documentId);
+    }
 
-        //Delete file on drive
+    private void deleteFileOfDocument(int documentId) {
+        List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
         for (FileStorage fileStorage : fileStorages) {
             String fileExtension = fileStorage.getExtension();
             String filePathStr = CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName();
@@ -161,22 +182,16 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             try {
                 Files.deleteIfExists(Paths.get(filePathStr));
                 if (!filePathTempStr.equals("")) {
+                    //delete .pdf
+                    Files.deleteIfExists(Paths.get(filePathTempStr));
+                    //delete .png
+                    filePathTempStr = filePathTempStr.replace(".pdf", ".png");
                     Files.deleteIfExists(Paths.get(filePathTempStr));
                 }
             } catch (IOException ex) {
                 throw new AppException(ex);
             }
         }
-
-        //Delete sub documents
-        List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
-        for (DocumentDTO subDoc : listSubDocs) {
-            deleteDoc(subDoc.getId());
-        }
-
-        systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", document.get().getName());
-        logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
-        return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Transactional
@@ -189,8 +204,13 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         if (!docShareService.isShared(docId, DocRight.CREATE.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
+        if ("Y".equals(doc.get().getIsFolder())) {
+            throw new BadRequestException("System does not support copy a document as folder type!");
+        }
         //Copy doc
         doc.get().setId(null);
+        doc.get().setAction(ACTION.STG_DOC_COPY.name());
+        doc.get().setCopySourceName(doc.get().getName());
         doc.get().setName(nameCopy);
         doc.get().setAsName(CommonUtils.generateAliasName(nameCopy));
         Document docCopied = this.saveDoc(doc.get());
@@ -227,15 +247,21 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .build();
                 FileStorage fileClonedInfo = fileStorageService.save(fileCloneInfo);
 
-                if (FileExtension.DOC.key().equals(fileUploaded.get().getExtension()) ||
-                        FileExtension.DOCX.key().equals(fileUploaded.get().getExtension()) ||
-                        FileExtension.XLS.key().equals(fileUploaded.get().getExtension()) ||
-                        FileExtension.XLSX.key().equals(fileUploaded.get().getExtension()))
-                {
-                    PdfUtils.cloneFileToPdf(fileCloned, fileClonedInfo.getExtension());
+                String pdfPathSrc = pathSrc.toString().replace("." + fileClonedInfo.getExtension(), ".pdf");
+                String pdfPathDes = pathDes.toString().replace("." + fileClonedInfo.getExtension(), ".pdf");
+                File pdfFile = new File(pdfPathSrc);
+                if (pdfFile.exists()) {
+                    Files.copy(pdfFile.toPath(), Path.of(pdfPathDes), StandardCopyOption.COPY_ATTRIBUTES).toFile();
                 }
-            } catch (IOException | DocumentException e) {
-                logger.error("File to clone does not exist!", e);
+
+                String pngPathSrc = pathSrc.toString().replace("." + fileClonedInfo.getExtension(), ".png");
+                String pngPathDes = pathDes.toString().replace("." + fileClonedInfo.getExtension(), ".png");
+                File pngFile = new File(pngPathSrc);
+                if (pngFile.exists()) {
+                    Files.copy(pngFile.toPath(), Path.of(pngPathDes), StandardCopyOption.COPY_ATTRIBUTES).toFile();
+                }
+            } catch (IOException e) {
+                logger.error("Copy file attachment failed!", e);
             }
         }
 
@@ -293,6 +319,26 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     .receiver(accountOpt.get())
                     .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), doc.get().getName()))
                     .build());
+        }
+        return docShared;
+    }
+
+    private List<DocShare> doShare(int docId, int accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
+        List<DocShare> docShared = new ArrayList<>();
+        if (canRead) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
+        }
+        if (canUpdate) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE.getValue())));
+        }
+        if (canDelete) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE.getValue())));
+        }
+        if (canMove) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE.getValue())));
+        }
+        if (canShare) {
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
         }
         return docShared;
     }
@@ -362,26 +408,6 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         return null;
     }
 
-    private List<DocShare> doShare(int docId, int accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
-        List<DocShare> docShared = new ArrayList<>();
-        if (canRead) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
-        }
-        if (canUpdate) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE.getValue())));
-        }
-        if (canDelete) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE.getValue())));
-        }
-        if (canMove) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE.getValue())));
-        }
-        if (canShare) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
-        }
-        return docShared;
-    }
-
     private String getPathOfFolder(String path) {
         String currentPath = "";
         if (path.contains("/")) {
@@ -396,5 +422,81 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             currentPath = path;
         }
         return currentPath;
+    }
+
+    @Transactional
+    @Override
+    public List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException {
+        List<DocumentDTO> listImported = new ArrayList<>();
+        if (docParentId > 0) {
+            Optional<DocumentDTO> documentOpt = documentInfoService.findById(docParentId);
+            if (documentOpt.isEmpty()) {
+                throw new ResourceNotFoundException("Document not found!", false);
+            }
+        }
+        //Tạo thư mục tạm lưu file upload
+        File folderTemp = Path.of(FileUtils.getImportStorageTempPath() + "/" + CommonUtils.generateUniqueString()).toFile();
+        if (!folderTemp.exists()) folderTemp.mkdirs();
+        FolderTree folderTree = null;
+        try {
+            //Lưu file upload vào thư mục tạm
+            Path fileZipUploadedPath = Path.of(folderTemp.getAbsolutePath() + "\\" + uploadFile.getOriginalFilename());
+            uploadFile.transferTo(fileZipUploadedPath);
+            //Giải nén file zip
+            File folderExtracted = FileUtils.unzipDirectory(fileZipUploadedPath.toFile(), null);
+            folderTree = FileUtils.buildFolderTree(folderExtracted, 0, docParentId, null);
+            //Save to database
+            listImported = saveDoc_(folderTree, applyRightsParent);
+        } catch (IOException ex) {
+            //do something
+        } finally {
+            if (folderTemp != null) {
+                FileUtils.deleteDirectory(folderTemp.toPath());
+            }
+        }
+
+        return listImported;
+    }
+
+    private List<DocumentDTO> saveDoc_(FolderTree folderTree, boolean applyRightsParent) throws IOException {
+        List<DocumentDTO> list = new ArrayList<>();
+
+        DocumentDTO docDTO = new DocumentDTO();
+        docDTO.setParentId(folderTree.getParentId());
+        docDTO.setIsFolder(folderTree.isDirectory() ? "Y" : "N");
+        docDTO.setName(folderTree.getName());
+        docDTO.setAsName(CommonUtils.generateAliasName(folderTree.getName()));
+        docDTO.setFileUpload((!folderTree.isDirectory() && folderTree.getFile() != null) ? FileUtils.convertFileToMultipartFile(folderTree.getFile()) : null);
+
+        DocumentDTO docDTOSaved = saveDoc(docDTO);
+
+        //Phân quyền cho các file được tải lên
+        if (applyRightsParent) {
+        //    List<DocShareModel> docShareModels = docShareService.findDetailRolesOfDocument(docParentId);
+        }
+
+        list.add(docDTOSaved);
+
+        if (folderTree.isDirectory()) {
+            for (FolderTree f : folderTree.getSubFiles()) {
+                f.setParentId(docDTOSaved.getId());
+                if (f.isDirectory()) {
+                    if (f.getSubFiles().size() > 0) {
+                        saveDoc_(f, applyRightsParent);
+                    }
+                } else {
+                    DocumentDTO docSubDTO = new DocumentDTO();
+                    docSubDTO.setParentId(docDTOSaved.getId());
+                    docSubDTO.setIsFolder("N");
+                    docSubDTO.setName(f.getName());
+                    docSubDTO.setAsName(CommonUtils.generateAliasName(f.getName()));
+                    docSubDTO.setFileUpload((!f.isDirectory() && f.getFile() != null) ? FileUtils.convertFileToMultipartFile(f.getFile()) : null);
+
+                    list.add(saveDoc(docSubDTO));
+                }
+            }
+        }
+
+        return list;
     }
 }

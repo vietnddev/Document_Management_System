@@ -13,7 +13,10 @@ public enum FileExtension {
     PPT("ppt", true),
     PPTX("pptx", true),
     DOC("doc", true),
-    DOCX("docx", true);
+    DOCX("docx", true),
+    TXT("txt", true),
+    LOG("log", true),
+    JSON("json", true);
 
     private final String key;
     private final boolean isAllowUpload;

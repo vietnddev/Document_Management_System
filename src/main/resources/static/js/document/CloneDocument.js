@@ -9,7 +9,7 @@ function cloneDocument() {
 
     $("#btnConfirmCloneDoc").on("click", function () {
         let docId = $(this).attr("docId");
-        let newName = $("#docCloneNameField").val();
+        let newName = $("#docCloneNameField").val().trim();
         if (newName === "") {
             alert("Vui lòng nhập tên tài liệu!")
             return;
@@ -20,8 +20,8 @@ function cloneDocument() {
                 alert("Sao chép thành công!")
                 window.location.reload();
             }
-        }).fail(function () {
-            showErrorModal("Could not connect to the server");
+        }).fail(function (xhr, textStatus, errorThrown) {
+            alert(textStatus + ': ' + JSON.stringify(xhr.responseJSON.message));
         });
     })
 }

@@ -24,6 +24,10 @@ function createDocument() {
         $("#desField").val("");
         $("#modalInsertOrUpdate").modal();
     })
+
+    $("#btnImportDoc").on("click", function () {
+        $("#modalImport").modal();
+    })
 }
 
 function updateDocument() {
@@ -37,7 +41,7 @@ function updateDocument() {
         if (document.isFolder === "N") {
             mvDocType.empty();
             mvDocType.append(`<option value="${document.docTypeId}">${document.docTypeName}</option>`);
-            loadDocTypeCategory(false, document.docTypeId);
+            //loadDocTypeCategory(false, document.docTypeId);
             $("#docTypeBlock").show();
             $("#btnSubmit").attr("isFolder", "N");
         }
@@ -67,6 +71,10 @@ function submitInsertOrUpdate() {
             if (isFolder === "N") {
                 if ($("#fileField").val() === "") {
                     alert("File attach is required!")
+                    return;
+                }
+                if (mvDocType.val() === "-1") {
+                    alert("Vui lòng chọn loại tài liệu!")
                     return;
                 }
                 formData.append("docTypeId", mvDocType.val());
@@ -115,5 +123,36 @@ function submitInsertOrUpdate() {
                 }
             });
         }
+    })
+}
+
+function importDoc() {
+    $("#formImport").submit(function (e) {
+        e.preventDefault();
+        if ($("#fileImportField").val() === "") {
+            alert("File attach is required!")
+            return;
+        }
+        let apiURL = mvHostURLCallApi + "/stg/doc/import/" + mvParentId;
+        let formData = new FormData();
+        formData.append("applyRightsParent", false);
+        formData.append("fileUpload", $("#fileImportField")[0].files[0]); //input có type là file
+        $.ajax({
+            url: apiURL,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response, textStatus, jqXHR) {
+                if (response.status === "OK") {
+                    alert("Import successfully")
+                    window.location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(status + ': ' + JSON.stringify(xhr.responseJSON.message));
+            }
+        });
+
     })
 }

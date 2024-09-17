@@ -1,5 +1,6 @@
 package com.flowiee.dms.utils;
 
+import com.flowiee.dms.entity.category.Category;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +35,12 @@ public class ChangeLog {
             try {
                 Object oldValue = field.get(oldObject);
                 Object newValue = field.get(newObject);
+
+                if (oldValue instanceof Category) {
+                    oldValue = ((Category) oldValue).getName();
+                    newValue = ((Category) newValue).getName();
+                }
+
                 if (!Objects.equals(oldValue, newValue)) {
                     changes.put(field.getName(), new Object[] {oldValue, newValue});
 
@@ -44,6 +51,11 @@ public class ChangeLog {
                 logger.error("Error when checking entity's fields changes {}", oldObject.getClass().getName(), e);
             }
         }
+
+        if (oldValueBuilder.toString().equals("Fields: "))
+            oldValueBuilder = new StringBuilder("Nothing change");
+        if (newValueBuilder.toString().equals("Fields: "))
+            newValueBuilder = new StringBuilder("Nothing change");
 
         this.oldValues = formatValueChange(oldValueBuilder.toString());
         this.newValues = formatValueChange(newValueBuilder.toString());

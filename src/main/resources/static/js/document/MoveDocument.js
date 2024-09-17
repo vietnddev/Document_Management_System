@@ -70,7 +70,6 @@ function loadFolderTreeOnMoveModal() {
                         </li>                        
                     `);
                 }
-                console.log("docId = ${d.id}, docName = " + d.name);
             })
         }).fail(function () {
             showErrorModal("Could not connect to the server");

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -56,27 +57,20 @@ public class DocumentController extends BaseController {
                                                  @RequestParam(value = "description", required = false) String description,
                                                  @RequestParam(value = "isFolder") String isFolder,
                                                  @RequestParam(value = "parentId") Integer parentId) {
-        try {
-            if ("N".equals(isFolder)) {
-                if (fileUpload.isEmpty()) {
-                    throw new BadRequestException("File attach does not exists!");
-                } else {
-                    String fileExtension = FileUtils.getFileExtension(fileUpload.getOriginalFilename());
-                    if (!FileUtils.isAllowUpload(fileExtension))
-                        throw new BadRequestException(String.format("File có định dạng .%s chưa được hỗ trợ!", fileExtension));
-                }
+        if ("N".equals(isFolder)) {
+            if (fileUpload.isEmpty()) {
+                throw new BadRequestException("File attach does not exists!");
             }
-            DocumentDTO document = new DocumentDTO();
-            document.setParentId(parentId);
-            document.setName(name);
-            document.setDescription(description);
-            document.setIsFolder(isFolder);
-            document.setDocTypeId(docTypeId);
-            document.setFileUpload(fileUpload);
-            return ApiResponse.ok(docActionService.saveDoc(document));
-        } catch (RuntimeException ex) {
-            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
+            FileUtils.isAllowUpload(FileUtils.getFileExtension(fileUpload.getOriginalFilename()), true, null);
         }
+        DocumentDTO document = new DocumentDTO();
+        document.setParentId(parentId);
+        document.setName(name);
+        document.setDescription(description);
+        document.setIsFolder(isFolder);
+        document.setDocTypeId(docTypeId);
+        document.setFileUpload(fileUpload);
+        return ApiResponse.ok(docActionService.saveDoc(document));
     }
 
     @Operation(summary = "Find all folders")
@@ -102,7 +96,7 @@ public class DocumentController extends BaseController {
     @DeleteMapping("/doc/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
-        return ApiResponse.ok(docActionService.deleteDoc(docId));
+        return ApiResponse.ok(docActionService.deleteDoc(docId, true));
     }
 
     @Operation(summary = "Copy document")
@@ -124,5 +118,20 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
         return docActionService.downloadDoc(documentId);
+    }
+
+    @Operation(summary = "Import documents")
+    @PostMapping("/doc/import/{parentDocId}")
+    @PreAuthorize("@vldModuleStorage.insertDoc(true)")
+    public ApiResponse<List<DocumentDTO>> importDoc(@PathVariable("parentDocId") int parentDocId,
+                                                    @RequestParam(value = "fileUpload") MultipartFile fileUpload,
+                                                    @RequestParam(value = "applyRightsParent", required = false) Boolean pApplyRightsParent) throws IOException {
+        String fileExtension = FileUtils.getFileExtension(fileUpload.getOriginalFilename());
+        if (!"zip".equals(fileExtension)) {
+            throw new BadRequestException("Hệ thống chỉ hỗ trợ file .zip cho chức năng import!");
+        }
+        boolean applyRightsParent = false;
+        if (ObjectUtils.isNotEmpty(pApplyRightsParent) && pApplyRightsParent.booleanValue() && parentDocId > 0) applyRightsParent = true;
+        return ApiResponse.ok(docActionService.importDoc(parentDocId, fileUpload, applyRightsParent));
     }
 }
