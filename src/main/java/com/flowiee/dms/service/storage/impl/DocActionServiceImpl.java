@@ -168,6 +168,12 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
         }
 
+        //Delete sub documents
+        List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+        for (DocumentDTO subDoc : listSubDocs) {
+            deleteDoc(subDoc.getId());
+        }
+
         systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", document.get().getName());
         logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
         return MessageCode.DELETE_SUCCESS.getDescription();
