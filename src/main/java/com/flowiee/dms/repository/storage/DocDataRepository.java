@@ -23,4 +23,8 @@ public interface DocDataRepository extends JpaRepository<DocData, Integer> {
     @Modifying
     @Query("update DocData d set d.value=:value where d.id=:docDataId")
     void updateMetaData(@Param("value") String value, @Param("docDataId") Integer docDataId);
+
+    @Modifying
+    @Query("delete from DocData d where d.document.id=:documentId")
+    void deleteAllByDocument(@Param("documentId") Integer documentId);
 }

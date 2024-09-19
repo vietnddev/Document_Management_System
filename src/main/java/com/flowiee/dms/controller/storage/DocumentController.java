@@ -4,6 +4,7 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.payload.MoveDocumentReq;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
@@ -120,8 +121,18 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Move document")
     @PutMapping("/doc/move/{id}")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
-    public ApiResponse<String> moveDoc(@PathVariable("id") Integer docId, @RequestParam("destinationId") Integer destinationId) {
-        return ApiResponse.ok(docActionService.moveDoc(docId, destinationId));
+    public ApiResponse<String> moveDoc(@PathVariable("id") Integer docId, @RequestBody MoveDocumentReq request) {
+        return ApiResponse.ok(docActionService.moveDoc(docId, request.getDestinationId()));
+    }
+
+    @Operation(summary = "Move document")
+    @PutMapping("/doc/multi-move")
+    @PreAuthorize("@vldModuleStorage.moveDoc(true)")
+    public ApiResponse<String> moveDoc(@RequestBody MoveDocumentReq request) {
+        for (int docId : request.getSelectedDocuments()) {
+            docActionService.moveDoc(docId, request.getDestinationId());
+        }
+        return ApiResponse.ok(MessageCode.UPDATE_SUCCESS.getDescription());
     }
 
     @Operation(summary = "Download document")

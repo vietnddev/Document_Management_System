@@ -1,12 +1,34 @@
 let currentFolderSelected;
 let documentToMoveId;
+let isMultiMove = false;
+
 function moveDocument() {
     $(document).on("click", ".btn-move", function () {
         documentToMoveId = $(this).attr("docId");
-        let docName = mvDocuments[documentToMoveId].name;
         $("#btnConfirmMoveDoc").attr("docId", documentToMoveId);
         $("#modalMoveDoc").modal();
+        isMultiMove = false;
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+        for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function() {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+            });
+        }
+    })
 
+    $("#btn-multiple-move").on("click", function () {
+        if (mvListOfSelectedDocuments.length === 0) {
+            alert("Vui lòng chọn tài liệu cần di chuyển!");
+            return;
+        }
+
+        documentToMoveId = $(this).attr("docId");
+        $("#btnConfirmMoveDoc").attr("docId", documentToMoveId);
+        $("#modalMoveDoc").modal();
+        isMultiMove = true;
+        console.log("M " + isMultiMove)
         var toggler = document.getElementsByClassName("caret");
         var i;
         for (i = 0; i < toggler.length; i++) {
@@ -24,11 +46,22 @@ function moveDocument() {
         }
         let docSelectedId = currentFolderSelected.attr("docId");
         let apiURL = mvHostURLCallApi + "/stg/doc/move/" + documentToMoveId;
-        let body = {destinationId : docSelectedId};
+        let body = {destinationId: docSelectedId};
+        if (isMultiMove) {
+            apiURL = mvHostURLCallApi + "/stg/doc/multi-move";
+            body = {
+                destinationId: docSelectedId,
+                selectedDocuments: mvListOfSelectedDocuments
+            };
+        }
+        console.log(apiURL)
+        console.log(body)
+        console.log(isMultiMove)
         $.ajax({
             url: apiURL,
             type: 'PUT',
-            data: body,
+            contentType: "application/json",
+            data: JSON.stringify(body),
             success: function(response) {
                 if (response.status === "OK") {
                     alert("Di chuyển thành công!");

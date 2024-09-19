@@ -13,4 +13,6 @@ public interface DocDataService extends BaseCurdService<DocData> {
     DocData findByFieldIdAndDocId(Integer docFieldId, Integer documentId);
 
     String update(String value, Integer docDataId);
+
+    void deleteAllByDocument(Integer documentId);
 }

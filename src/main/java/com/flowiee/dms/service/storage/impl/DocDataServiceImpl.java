@@ -64,4 +64,9 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
         docDataRepository.updateMetaData(value, docDataId);
         return MessageCode.UPDATE_SUCCESS.getDescription();
     }
+
+    @Override
+    public void deleteAllByDocument(Integer documentId) {
+        docDataRepository.deleteAllByDocument(documentId);
+    }
 }
