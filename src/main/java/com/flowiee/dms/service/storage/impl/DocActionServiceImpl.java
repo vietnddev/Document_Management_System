@@ -8,6 +8,7 @@ import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.*;
 import com.flowiee.dms.model.dto.DocumentDTO;
+import com.flowiee.dms.repository.storage.DocHistoryRepository;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.repository.storage.DocumentRepository;
 import com.flowiee.dms.service.BaseService;
@@ -50,6 +51,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     DocShareRepository  docShareRepository;
     DocumentInfoService documentInfoService;
     NotificationService notificationService;
+    DocHistoryRepository docHistoryRepository;
 
     @Override
     public DocumentDTO saveDoc(DocumentDTO documentDTO) {
@@ -149,7 +151,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         deleteDoc(documentId);
-        if (isDeleteSubDoc) {
+        if ("Y".equals(document.get().getIsFolder()) && isDeleteSubDoc) {
             List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
             for (DocumentDTO subDoc : listSubDocs) {
                 deleteDoc(subDoc.getId());
@@ -164,6 +166,8 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     private void deleteDoc(int documentId) {
         deleteFileOfDocument(documentId);
         docShareService.deleteByDocument(documentId);
+        docDataService.deleteAllByDocument(documentId);
+        docHistoryRepository.deleteAllByDocument(documentId);
         documentRepository.deleteById(documentId);
     }
 
