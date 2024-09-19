@@ -29,6 +29,7 @@ function loadDocuments(pageSize, pageNum) {
                 contentTable.append(`
                     <tr>
                         <td>${(((pageNum - 1) * pageSize + 1) + index)}</td>
+                        <td><input type="checkbox" style="width: 25px; height: 25px" name="tickCbx" docId="${d.id}"></td>
                         <td><img src="${iconDoc}"></td>
                         <td>${d.createdAt}</td>
                         <td style="max-width: 300px"><a href="/stg/doc/${d.asName}-${d.id}">${d.name}</a></td>

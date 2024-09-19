@@ -46,12 +46,18 @@
                                         <thead class="align-self-center">
                                             <tr class="align-self-center">
                                                 <th>STT</th>
+                                                <th><input type="checkbox" style="width: 25px; height: 25px" id="tickAllCbx"></th>
                                                 <th></th>
                                                 <th>Thời gian</th>
                                                 <th>Tên</th>
                                                 <th>Loại tài liệu</th>
                                                 <th>Mô tả</th>
-                                                <th>Thao tác</th>
+                                                <th>
+                                                    <div class="row justify-content-between">
+                                                        <span class="col" style="display: flex; align-items: center">Thao tác</span>
+                                                        <button class="col btn btn-danger btn-sm" title="Xóa nhiều tài liệu" id="btn-multiple-delete"><i class="fa-solid fa-trash"></i></button>
+                                                    </div>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody id="contentTable"></tbody>
@@ -113,6 +119,7 @@
         let mvTotalPage = 1;
         let mvTotalElements = 1;
         let mvPagination;
+        let mvListOfSelectedDocuments = [];
 
         $(document).ready(function () {
             init();
