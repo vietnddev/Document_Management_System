@@ -9,6 +9,7 @@ import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
+import com.flowiee.dms.utils.constants.MessageCode;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -97,6 +98,16 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
         return ApiResponse.ok(docActionService.deleteDoc(docId, true));
+    }
+
+    @Operation(summary = "Delete document")
+    @DeleteMapping("/doc/multi-delete")
+    @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
+    public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Integer> pListOfSelectedDocuments) {
+        for (int docId : pListOfSelectedDocuments) {
+            docActionService.deleteDoc(docId, true);
+        }
+        return ApiResponse.ok(MessageCode.DELETE_SUCCESS.getDescription());
     }
 
     @Operation(summary = "Copy document")
