@@ -55,7 +55,8 @@
                                                 <th>
                                                     <div class="row justify-content-between">
                                                         <span class="col" style="display: flex; align-items: center">Thao tác</span>
-                                                        <button class="col btn btn-danger btn-sm" title="Xóa nhiều tài liệu" id="btn-multiple-delete"><i class="fa-solid fa-trash"></i></button>
+                                                        <button class="col btn btn-danger btn-sm mr-1" title="Xóa nhiều tài liệu" id="btn-multiple-delete"><i class="fa-solid fa-trash"></i></button>
+                                                        <button class="col btn btn-success btn-sm" title="Di chuyển nhiều tài liệu" id="btn-multiple-move"> <i class="fa-solid fa-up-down-left-right"></i> </button>
                                                     </div>
                                                 </th>
                                             </tr>
