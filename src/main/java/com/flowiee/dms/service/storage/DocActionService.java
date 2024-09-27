@@ -28,5 +28,7 @@ public interface DocActionService {
 
     ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
 
+    ResponseEntity<InputStreamResource> downloadDocs(List<Integer> documentIdList) throws IOException;
+
     List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
 }

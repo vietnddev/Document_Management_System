@@ -4,6 +4,7 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.payload.DownloadDocumentReq;
 import com.flowiee.dms.model.payload.MoveDocumentReq;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.service.storage.DocActionService;
@@ -101,7 +102,7 @@ public class DocumentController extends BaseController {
         return ApiResponse.ok(docActionService.deleteDoc(docId, true));
     }
 
-    @Operation(summary = "Delete document")
+    @Operation(summary = "Delete documents")
     @DeleteMapping("/doc/multi-delete")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Integer> pListOfSelectedDocuments) {
@@ -125,7 +126,7 @@ public class DocumentController extends BaseController {
         return ApiResponse.ok(docActionService.moveDoc(docId, request.getDestinationId()));
     }
 
-    @Operation(summary = "Move document")
+    @Operation(summary = "Move documents")
     @PutMapping("/doc/multi-move")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
     public ApiResponse<String> moveDoc(@RequestBody MoveDocumentReq request) {
@@ -140,6 +141,13 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
         return docActionService.downloadDoc(documentId);
+    }
+
+    @Operation(summary = "Download documents")
+    @GetMapping("/doc/multi-download")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ResponseEntity<InputStreamResource> downloadDoc(@RequestBody DownloadDocumentReq request) throws IOException {
+        return docActionService.downloadDocs(request.getSelectedDocuments());
     }
 
     @Operation(summary = "Import documents")

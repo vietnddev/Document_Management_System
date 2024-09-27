@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DocumentInfoService {
-    Optional<DocumentDTO> findById(Integer id);
+    Optional<DocumentDTO> findById(int docId, boolean throwException);
+
+    DocumentDTO findById(int docId);
+
+    void checkDocumentValidity(Integer docId);
 
     Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch);
 

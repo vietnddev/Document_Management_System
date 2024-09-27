@@ -201,7 +201,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     @Override
     public DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy) {
-        Optional<DocumentDTO> doc = documentInfoService.findById(docId);
+        Optional<DocumentDTO> doc = documentInfoService.findById(docId, false);
         if (doc.isEmpty()) {
             throw new BadRequestException("Document to copy not found!");
         }
@@ -279,7 +279,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         if (docToMove.isEmpty()) {
             throw new ResourceNotFoundException("Document to move not found!", false);
         }
-        if (documentInfoService.findById(destinationId).isEmpty()) {
+        if (documentInfoService.findById(destinationId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document move to found!", false);
         }
         if (!docShareService.isShared(docId, DocRight.MOVE.getValue())) {
@@ -293,14 +293,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     @Override
     public List<DocShare> shareDoc(Integer pDocId, List<DocShareModel> accountShares, boolean applyForSubFolder) {
-        Optional<DocumentDTO> doc = documentInfoService.findById(pDocId);
-        if (doc.isEmpty() || accountShares.isEmpty()) {
-            throw new ResourceNotFoundException("Document not found!", false);
-        }
-        if (!docShareService.isShared(doc.get().getId(), DocRight.SHARE.getValue())) {
+        DocumentDTO docDTO = documentInfoService.findById(pDocId);
+        if (!docShareService.isShared(docDTO.getId(), DocRight.SHARE.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
-        docShareService.deleteAllByDocument(doc.get().getId());
+        docShareService.deleteAllByDocument(docDTO.getId());
         List<DocShare> docShared = new ArrayList<>();
         for (DocShareModel model : accountShares) {//1 model -> 1 account use document
             Optional<Account> accountOpt = accountService.findById(CommonUtils.getUserPrincipal().getId());
@@ -308,11 +305,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                 continue;
             }
             //Share rights to this document and all sub-docs of them
-            doShare(doc.get().getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(), model.getCanDelete(), model.getCanMove(), model.getCanShare());
+            doShare(docDTO.getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(), model.getCanDelete(), model.getCanMove(), model.getCanShare());
             //Share rights to all of sub-docs
             if (applyForSubFolder) {
-                if (doc.get().getIsFolder().equals("Y")) {
-                    List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(doc.get().getId(), null, true, true);
+                if (docDTO.getIsFolder().equals("Y")) {
+                    List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(docDTO.getId(), null, true, true);
                     for (DocumentDTO dto : subDocs) {
                         doShare(dto.getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(),model.getCanDelete(), model.getCanMove(), model.getCanShare());
                     }
@@ -321,7 +318,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             //Notify
             notificationService.save(Notification.builder()
                     .receiver(accountOpt.get())
-                    .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), doc.get().getName()))
+                    .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), docDTO.getName()))
                     .build());
         }
         return docShared;
@@ -349,17 +346,86 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Override
     public ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException {
-        Optional<DocumentDTO> doc = documentInfoService.findById(documentId);
-        if (doc.isEmpty()) {
-            throw new ResourceNotFoundException("Document not found!", false);
-        }
+        DocumentDTO document = documentInfoService.findById(documentId);
         if (!docShareService.isShared(documentId, DocRight.READ.getValue())) {
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         File folder = null;
         File fileResponse = null;
         try {
-            if (doc.get().getIsFolder().equals("N")) {
+            if (document.getIsFolder().equals("N")) {
+                Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
+                if (fileOpt.isEmpty()) {
+                    throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
+                }
+                fileResponse = FileUtils.getFileUploaded(fileOpt.get());
+                if (!fileResponse.exists()) {
+                    throw new ResourceNotFoundException("File attachment of this document does not exist!!", false);
+                }
+            } else {
+                folder = new File(Paths.get(FileUtils.getDownloadStorageTempPath().toString() + "/" + CommonUtils.generateUniqueString()).toUri());
+                if (!folder.exists())
+                    folder.mkdir();
+                List<DocumentDTO> listSubFolderFullLevel = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+                for (DocumentDTO docDTO : listSubFolderFullLevel) {
+                    DocumentDTO docDTO_ = folderTreeService.findByDocId(docDTO.getId());
+                    String path = docDTO_ != null ? docDTO_.getPath() : "";
+                    if (docDTO.getIsFolder().equals("Y")) {
+                        if (path.contains("/")) {
+                            String currentPath = "";
+                            for (String s : path.split("/")) {
+                                currentPath += s.trim() + "/";
+                                Files.createDirectories(Path.of(folder.getPath() + "/" + currentPath));
+                            }
+                        } else
+                            Files.createDirectories(Path.of(folder.getPath() + "/" + path.trim()));
+                    } else {
+                        Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(docDTO.getId());
+                        if (fileStorage.isPresent()) {
+                            File fileUploaded = FileUtils.getFileUploaded(fileStorage.get());
+                            if ((fileUploaded != null && fileUploaded.exists()) && (folder != null && folder.exists())) {
+                                Path pathSrc = Paths.get(fileUploaded.toURI());
+                                Path pathDest = Paths.get(folder.toPath() + "/" + getPathOfFolder(path) + "." + fileStorage.get().getExtension());
+                                Files.copy(pathSrc, pathDest, StandardCopyOption.COPY_ATTRIBUTES);
+                            }
+                        }
+                    }
+                }
+                FileUtils.zipDirectory(folder.getPath(), folder.getPath() + ".zip");
+                fileResponse = new File(folder.getPath() + ".zip");
+            }
+            return ResponseEntity.ok()
+                    .headers(CommonUtils.getHttpHeaders(fileResponse.getName()))
+                    .body(new InputStreamResource(new FileInputStream(fileResponse)));
+        } catch (Exception e) {
+            logger.error("Failed to download document!", e);
+        } finally {
+            if (ObjectUtils.isNotEmpty(folder) && folder.exists())
+                FileUtils.deleteDirectory(folder.toPath());
+        }
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<InputStreamResource> downloadDocs(List<Integer> pDocumentIdList) throws IOException {
+        File fileResponse = null;
+        try {
+            for (int documentId : pDocumentIdList) {
+                DocumentDTO document = documentInfoService.findById(documentId);
+                if (document.getIsFolder().equals("N")) {
+                    Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
+                    if (fileOpt.isEmpty()) {
+                        throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
+                    }
+                    fileResponse = FileUtils.getFileUploaded(fileOpt.get());
+                    if (!fileResponse.exists()) {
+                        throw new ResourceNotFoundException("File attachment of this document does not exist!!", false);
+                    }
+                } else {
+
+                }
+            }
+            if (document.getIsFolder().equals("N")) {
                 Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
                 if (fileOpt.isEmpty()) {
                     throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
@@ -433,7 +499,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     public List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException {
         List<DocumentDTO> listImported = new ArrayList<>();
         if (docParentId > 0) {
-            Optional<DocumentDTO> documentOpt = documentInfoService.findById(docParentId);
+            Optional<DocumentDTO> documentOpt = documentInfoService.findById(docParentId, true);
             if (documentOpt.isEmpty()) {
                 throw new ResourceNotFoundException("Document not found!", false);
             }

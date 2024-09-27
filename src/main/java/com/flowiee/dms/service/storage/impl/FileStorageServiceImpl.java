@@ -138,12 +138,9 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
-        Optional<DocumentDTO> document = documentInfoService.findById(documentId);
-        if (document.isEmpty()) {
-            throw new BadRequestException();
-        }
+        DocumentDTO document = documentInfoService.findById(documentId);
         //Set inactive cho các version cũ
-        List<FileStorage> listDocFile = document.get().getListDocFile();
+        List<FileStorage> listDocFile = document.getListDocFile();
         for (FileStorage docFile : listDocFile) {
             docFile.setActive(false);
             this.update(docFile, docFile.getId());

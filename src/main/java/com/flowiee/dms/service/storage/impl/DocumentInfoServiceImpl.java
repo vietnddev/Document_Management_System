@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.AppException;
+import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
@@ -36,9 +37,26 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     DocumentRepository documentRepository;
 
     @Override
-    public Optional<DocumentDTO> findById(Integer id) {
-        Optional<Document> document = documentRepository.findById(id);
-        return document.map(DocumentDTO::fromDocument);
+    public Optional<DocumentDTO> findById(int docId, boolean throwException) {
+        Optional<Document> document = documentRepository.findById(docId);
+        if (document.isPresent()) {
+            return Optional.of(DocumentDTO.fromDocument(document.get()));
+        }
+        if (throwException) {
+            throw new ResourceNotFoundException(String.format("Document with id %s does not exist in the system!", docId), false);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public DocumentDTO findById(int docId) {
+        return findById(docId, true).get();
+    }
+
+    @Override
+    public void checkDocumentValidity(Integer docId) {
+        Optional<DocumentDTO> documentDTO = findById(docId, true);
+        //Do something more if it's present
     }
 
     @Override

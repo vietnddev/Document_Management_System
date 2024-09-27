@@ -74,7 +74,7 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewSubDocuments(@PathVariable("aliasPath") String aliasPath) {
         String aliasName = aliasPath.substring(0, aliasPath.lastIndexOf("-"));
         int documentId = Integer.parseInt(aliasPath.substring(aliasPath.lastIndexOf("-") + 1));
-        Optional<DocumentDTO> documentOptional = documentInfoService.findById(documentId);
+        Optional<DocumentDTO> documentOptional = documentInfoService.findById(documentId, false);
         if (documentOptional.isEmpty() || !(aliasName + "-" + documentId).equals(documentOptional.get().getAsName() + "-" + documentOptional.get().getId())) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
@@ -111,7 +111,7 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView changeFile(@RequestParam("file") MultipartFile file,
                                    @PathVariable("id") Integer documentId,
                                    HttpServletRequest request) throws IOException, DocumentException {
-        if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         FileUtils.isAllowUpload(FileUtils.getFileExtension(file.getOriginalFilename()), true, null);
@@ -122,7 +122,7 @@ public class DocumentControllerView extends BaseController {
     @PostMapping("/document/update/{id}")
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
     public ModelAndView update(@ModelAttribute("document") DocumentDTO document, @PathVariable("id") Integer documentId, HttpServletRequest request) {
-        if (document == null || documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (document == null || documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         docActionService.updateDoc(document, documentId);
@@ -136,7 +136,7 @@ public class DocumentControllerView extends BaseController {
                                        @RequestParam(value = "fieldId", required = false) Integer[] fieldIds,
                                        @RequestParam(value = "dataId", required = false) Integer[] dataIds,
                                        @RequestParam(value = "dataValue", required = false) String[] dataValues) {
-        if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         if (ObjectUtils.isNotEmpty(fieldIds) && ObjectUtils.isNotEmpty(dataIds) && ObjectUtils.isNotEmpty(dataValues)) {
@@ -155,7 +155,7 @@ public class DocumentControllerView extends BaseController {
     @PostMapping("/document/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
     public ModelAndView deleteDocument(@PathVariable("id") Integer documentId, HttpServletRequest request) {
-        if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         docActionService.deleteDoc(documentId, true);
@@ -165,7 +165,7 @@ public class DocumentControllerView extends BaseController {
     @PostMapping("/document/move/{id}")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
     public ModelAndView moveDocument(@PathVariable("id") Integer documentId, HttpServletRequest request) {
-        if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         return new ModelAndView("redirect:" + request.getHeader("referer"));
@@ -174,7 +174,7 @@ public class DocumentControllerView extends BaseController {
     @PostMapping("/document/share/{id}")
     @PreAuthorize("@vldModuleStorage.shareDoc(true)")
     public ModelAndView share(@PathVariable("id") Integer documentId, HttpServletRequest request) {
-        if (documentId <= 0 || documentInfoService.findById(documentId).isEmpty()) {
+        if (documentId <= 0 || documentInfoService.findById(documentId, false).isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         return new ModelAndView("redirect:" + request.getHeader("referer"));
