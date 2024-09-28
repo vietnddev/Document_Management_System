@@ -27,7 +27,28 @@ function moveDocument() {
         documentToMoveId = $(this).attr("docId");
         $("#btnConfirmMoveDoc").attr("docId", documentToMoveId);
         $("#modalMoveDoc").modal();
+        isMultiMove = false;
+        var toggler = document.getElementsByClassName("caret");
+        var i;
+        for (i = 0; i < toggler.length; i++) {
+            toggler[i].addEventListener("click", function() {
+                this.parentElement.querySelector(".nested").classList.toggle("active");
+                this.classList.toggle("caret-down");
+            });
+        }
+    })
 
+    $("#btn-multiple-move").on("click", function () {
+        if (mvListOfSelectedDocuments.length === 0) {
+            alert("Vui lòng chọn tài liệu cần di chuyển!");
+            return;
+        }
+
+        documentToMoveId = $(this).attr("docId");
+        $("#btnConfirmMoveDoc").attr("docId", documentToMoveId);
+        $("#modalMoveDoc").modal();
+        isMultiMove = true;
+        console.log("M " + isMultiMove)
         var toggler = document.getElementsByClassName("caret");
         var i;
         for (i = 0; i < toggler.length; i++) {
