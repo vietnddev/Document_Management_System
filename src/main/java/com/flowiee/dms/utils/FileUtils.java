@@ -1,5 +1,6 @@
 package com.flowiee.dms.utils;
 
+import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.FileExtension;
@@ -17,6 +18,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,13 +37,13 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileUtils {
-    public static String rootPath = "src/main/resources/static";
-    public static String fileUploadPath = rootPath + "/uploads/";
-    public static String fileDownloadPath = rootPath + "/downloads/";
-    public static String initCsvDataPath = rootPath + "/data/csv";
-    public static String reportTemplatePath = rootPath + "/report";
-    public static String excelTemplatePath = rootPath + "/templates/excel";
-    public static Path logoPath = Paths.get(FileUtils.rootPath + "/dist/img/FlowieeLogo.png");
+    public static String templatePath = "src/main/resources/static";
+    public static String fileUploadPath = StartUp.getResourceUploadPath() + File.separator + "uploads" + File.separator;
+    public static String fileDownloadPath = StartUp.getResourceUploadPath() + File.separator + "downloads" + File.separator;
+    public static String initCsvDataPath = templatePath + File.separator + "data/csv";
+    public static String reportTemplatePath = templatePath + File.separator + "report";
+    public static String excelTemplatePath = templatePath + File.separator + "templates/excel";
+    public static Path logoPath = Paths.get(StartUp.getResourceUploadPath() + File.separator + "dist/img/FlowieeLogo.png");
 
     public static void createCellCombobox(XSSFWorkbook workbook, XSSFSheet sheet, XSSFSheet hsheet, List<String> listValue, int row, int column, String nameName) {
         //Put các tên danh mục vào column trong sheet danh mục ẩn
@@ -105,7 +108,7 @@ public class FileUtils {
     }
 
     public static File getFileUploaded(FileStorage fileModel) {
-        Path path = Paths.get(rootPath + "/" + fileModel.getDirectoryPath() + "/" + fileModel.getStorageName());
+        Path path = Paths.get(StartUp.getResourceUploadPath() + File.separator + fileModel.getDirectoryPath() + File.separator + fileModel.getStorageName());
         return new File(path.toUri());
     }
 
@@ -308,5 +311,12 @@ public class FileUtils {
                 inputStream); // Dữ liệu của file
 
         return multipartFile;
+    }
+
+    public static String getFileUploadPath() {
+        if (StartUp.getResourceUploadPath() == null) {
+            throw new AppException("The uploaded file saving directory is not configured, please try again later!");
+        }
+        return StartUp.getResourceUploadPath() + "/uploads/";
     }
 }

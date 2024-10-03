@@ -1,5 +1,6 @@
 package com.flowiee.dms.service.storage.impl;
 
+import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.*;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.entity.system.Notification;
@@ -231,7 +232,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         Optional<FileStorage> fileUploaded = fileStorageService.findFileIsActiveOfDocument(docId);
         if (fileUploaded.isPresent()) {
             String newNameFile = CommonUtils.generateUniqueString() + "." + FileUtils.getFileExtension(fileUploaded.get().getStorageName());
-            String directoryPath = FileUtils.rootPath + "/" + fileUploaded.get().getDirectoryPath();
+            String directoryPath = StartUp.getResourceUploadPath() + "/" + fileUploaded.get().getDirectoryPath();
             Path pathSrc = Paths.get(directoryPath + "/" + fileUploaded.get().getStorageName());
             Path pathDes = Paths.get(directoryPath + "/" + newNameFile);
             try {

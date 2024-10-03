@@ -18,6 +18,14 @@ public class BaseAuthorize {
         if (!authentication.isAuthenticated()) {
             throw new AuthenticationException();
         }
+        if ("anonymousUser".equalsIgnoreCase(authentication.getPrincipal().toString())) {
+            throw new AuthenticationException();
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if ("ROLE_ANONYMOUS".equalsIgnoreCase(authority.getAuthority())) {
+                throw new AuthenticationException();
+            }
+        }
         return authentication.isAuthenticated();
     }
 

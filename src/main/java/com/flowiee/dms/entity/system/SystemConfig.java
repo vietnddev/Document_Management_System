@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
 
+import com.flowiee.dms.utils.constants.ConfigCode;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -29,12 +30,15 @@ public class SystemConfig extends BaseEntity implements Serializable {
 
 	@Column(name = "sort")
 	Integer sort;
-	
-	public SystemConfig(Integer id, String key, String name, String value, Integer sort) {
-		super.id = id;
-		this.code = key;
+
+	public SystemConfig(String code, String name, String value) {
+		this.code = code;
+		this.name = name;
 		this.value = value;
-		this.sort = sort;
+	}
+
+	public SystemConfig(ConfigCode code, String name, String value) {
+		this(code.name(), name, value);
 	}
 
 	@Override

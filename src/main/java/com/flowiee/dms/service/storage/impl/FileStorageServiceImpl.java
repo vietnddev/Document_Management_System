@@ -1,7 +1,9 @@
 package com.flowiee.dms.service.storage.impl;
 
+import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.storage.FileStorage;
+import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.FileExtension;
@@ -9,6 +11,7 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
+import com.flowiee.dms.repository.system.FlowieeConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
@@ -16,6 +19,7 @@ import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.ImageUtils;
 import com.flowiee.dms.utils.PdfUtils;
+import com.flowiee.dms.utils.constants.ConfigCode;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import com.itextpdf.text.DocumentException;
@@ -31,17 +35,20 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FileStorageServiceImpl extends BaseService implements FileStorageService {
     DocumentInfoService   documentInfoService;
-    FileStorageRepository fileRepository;
+    FileStorageRepository   fileRepository;
+    FlowieeConfigRepository configRepository;
 
-    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository) {
+    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository, FlowieeConfigRepository configRepository) {
         this.documentInfoService = documentInfoService;
         this.fileRepository = fileRepository;
+        this.configRepository = configRepository;
     }
 
     @Override
@@ -50,8 +57,18 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public FileStorage save(FileStorage entity) {
-        return fileRepository.save(entity);
+    public FileStorage save(FileStorage fileStorage) {
+        FileStorage fileStorageSaved = fileRepository.save(fileStorage);
+
+        vldResourceUploadPath(true);
+        Path pathDest = Paths.get(CommonUtils.getPathDirectory(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
+        try {
+            saveFileAttach(fileStorage.getFileAttach(), pathDest);
+        } catch (IOException ex) {
+            throw new AppException("An error occurred while saving the attachment!", ex);
+        }
+
+        return fileStorageSaved;
     }
 
     @Override
@@ -171,6 +188,13 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
+    public void saveFileAttach(MultipartFile multipartFile, Path dest) throws IOException {
+        if (vldResourceUploadPath(true)) {
+            multipartFile.transferTo(dest);
+        }
+    }
+
+    @Override
     public String delete(Integer fileId) {
         Optional<FileStorage> fileStorage = fileRepository.findById(fileId);
         if (fileStorage.isEmpty()) {
@@ -178,5 +202,22 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         }
         fileRepository.deleteById(fileId);
         return MessageCode.DELETE_SUCCESS.getDescription();
+    }
+
+    private boolean vldResourceUploadPath(boolean throwException) {
+        if (StartUp.getResourceUploadPath() == null) {
+            SystemConfig resourceUploadPathConfig = configRepository.findByCode(ConfigCode.resourceUploadPath.name());
+            if (resourceUploadPathConfig != null && ObjectUtils.isNotEmpty(resourceUploadPathConfig.getValue())) {
+                StartUp.mvResourceUploadPath = resourceUploadPathConfig.getValue();
+                return true;
+            } else {
+                if (throwException) {
+                    throw new AppException("The uploaded file saving directory is not configured, please try again later!");
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

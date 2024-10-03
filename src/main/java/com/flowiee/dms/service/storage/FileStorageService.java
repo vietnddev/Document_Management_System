@@ -7,6 +7,7 @@ import com.itextpdf.text.DocumentException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,4 +23,6 @@ public interface FileStorageService extends BaseCurdService<FileStorage> {
     List<FileStorage> findFilesOfDocument(Integer documentId);
 
     FileDTO getFileDisplay(int documentId);
+
+    void saveFileAttach(MultipartFile multipartFile, Path dest) throws IOException;
 }
