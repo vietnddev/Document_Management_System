@@ -12,7 +12,8 @@ public class ResourceConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
             .addResourceHandler("/uploads/**")
-            .addResourceLocations("file:/" + System.getProperty("user.dir") + "/" + CommonUtils.fileUploadPath)
+            //.addResourceLocations("file:/" + System.getProperty("user.dir") + "/" + CommonUtils.fileUploadPath)
+            .addResourceLocations("file:/" + System.getProperty("user.dir") + "/" + null)
             .setCachePeriod(3600)
             .resourceChain(true)
             .addResolver(new PathResourceResolver());

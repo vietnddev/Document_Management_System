@@ -53,7 +53,7 @@ public class CommonUtils {
 
     public static String getPathDirectory(String systemModule) {
         try {
-            StringBuilder path = new StringBuilder(fileUploadPath);
+            StringBuilder path = new StringBuilder(FileUtils.getFileUploadPath());
             if (MODULE.STORAGE.name().equals(systemModule)) {
                 path.append("storage");
             } else if (MODULE.CATEGORY.name().equals(systemModule)) {

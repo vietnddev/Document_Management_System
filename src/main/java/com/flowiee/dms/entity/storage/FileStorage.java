@@ -77,6 +77,10 @@ public class FileStorage extends BaseEntity implements Serializable {
     String src;
 
     @JsonIgnore
+    @Transient
+    MultipartFile fileAttach;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "fileStorage", fetch = FetchType.LAZY)
     List<DocHistory> listDocHistory;
 
@@ -90,6 +94,7 @@ public class FileStorage extends BaseEntity implements Serializable {
         this.directoryPath = CommonUtils.getPathDirectory(pModule.name()).substring(CommonUtils.getPathDirectory(pModule.name()).indexOf("uploads"));
         this.account = CommonUtils.getUserPrincipal().toAccountEntity();
         this.isActive = false;
+        this.fileAttach = file;
     }
 
 	@Override

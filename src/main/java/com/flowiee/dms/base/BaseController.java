@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.ModelAndView;
 
 @Component
-public class BaseController {
+public class BaseController extends BaseAuthorize {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Autowired protected AccountService accountService;
