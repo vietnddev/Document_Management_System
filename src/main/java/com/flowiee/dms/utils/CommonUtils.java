@@ -21,6 +21,7 @@ public class CommonUtils {
     public static final String fileUploadPath = rootPath + "/uploads/";
     public static final String templateExportExcelPath = rootPath + "/templates/excel";
     public static Date START_APP_TIME = null;
+    public static final String productID = "DMS";
 
     public static String getCategoryType(String key) {
         Map<String, String> map = new HashMap<>();
@@ -99,7 +100,9 @@ public class CommonUtils {
     public static UserPrincipal getUserPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication.isAuthenticated()) {
-            return (UserPrincipal) authentication.getPrincipal();
+            if (!"anonymousUser".equalsIgnoreCase(authentication.getPrincipal().toString())) {
+                return (UserPrincipal) authentication.getPrincipal();
+            }
         }
         throw new AuthenticationException();
     }

@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 
 @Builder
 @Entity
-@Table(name = "log")
+@Table(name = "action_log")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
