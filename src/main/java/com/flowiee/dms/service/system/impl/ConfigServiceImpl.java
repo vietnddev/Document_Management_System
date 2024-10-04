@@ -2,7 +2,7 @@ package com.flowiee.dms.service.system.impl;
 
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.system.SystemConfig;
-import com.flowiee.dms.repository.system.FlowieeConfigRepository;
+import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.service.system.LanguageService;
@@ -21,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ConfigServiceImpl extends BaseService implements ConfigService {
     LanguageService         languageService;
-    FlowieeConfigRepository sysConfigRepo;
+    SystemConfigRepository sysConfigRepo;
 
     @Override
     public Optional<SystemConfig> findById(Integer id) {

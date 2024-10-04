@@ -11,7 +11,7 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
-import com.flowiee.dms.repository.system.FlowieeConfigRepository;
+import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
@@ -43,9 +42,9 @@ import java.util.Optional;
 public class FileStorageServiceImpl extends BaseService implements FileStorageService {
     DocumentInfoService   documentInfoService;
     FileStorageRepository   fileRepository;
-    FlowieeConfigRepository configRepository;
+    SystemConfigRepository configRepository;
 
-    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository, FlowieeConfigRepository configRepository) {
+    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository, SystemConfigRepository configRepository) {
         this.documentInfoService = documentInfoService;
         this.fileRepository = fileRepository;
         this.configRepository = configRepository;

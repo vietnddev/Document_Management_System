@@ -4,6 +4,7 @@ import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.*;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.entity.system.Notification;
+import com.flowiee.dms.entity.system.SystemLog;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
@@ -17,10 +18,7 @@ import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.NotificationService;
 import com.flowiee.dms.utils.*;
-import com.flowiee.dms.utils.constants.DocRight;
-import com.flowiee.dms.utils.constants.ErrorCode;
-import com.flowiee.dms.utils.constants.MasterObject;
-import com.flowiee.dms.utils.constants.MessageCode;
+import com.flowiee.dms.utils.constants.*;
 import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -144,31 +143,61 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     @Override
     public String deleteDoc(Integer documentId, boolean isDeleteSubDoc) {
+        return deleteDoc(documentId, isDeleteSubDoc, false, DELETE_NORMAL);
+    }
+
+    @Transactional
+    @Override
+    public String deleteDoc(Integer documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete) {
         Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found! " + documentId, false);
         }
-        if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
-            throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
+        if (DELETE_SCHEDULE != modeDelete) {
+            if (!docShareService.isShared(documentId, DocRight.DELETE.getValue())) {
+                throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
+            }
         }
-        deleteDoc(documentId);
+        if (forceDelete) {
+            deleteDoc(documentId);
+        } else {
+            document.get().setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
+            document.get().setDeletedAt(LocalDateTime.now());
+            documentRepository.save(document.get());
+        }
         if ("Y".equals(document.get().getIsFolder()) && isDeleteSubDoc) {
             List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
             for (DocumentDTO subDoc : listSubDocs) {
-                deleteDoc(subDoc.getId());
+                if (forceDelete) {
+                    deleteDoc(subDoc.getId());
+                } else {
+                    Document subDocToDelete = Document.fromDocumentDTO(subDoc);
+                    subDocToDelete.setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
+                    subDocToDelete.setDeletedAt(LocalDateTime.now());
+                    documentRepository.save(subDocToDelete);
+                }
             }
         }
 
-        systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
+        if (DELETE_SCHEDULE == modeDelete) {
+            SystemLog systemLog = SystemLog.builder().build();
+            systemLog.setIp("TP");
+            systemLog.setAccount(accountService.findByUsername(AppConstants.ADMINISTRATOR));
+            systemLog.setCreatedBy(-1);
+            systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, "Xóa tài liệu", "id=" + documentId, "-", systemLog);
+        } else {
+            systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
+        }
         logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
         return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
-    private void deleteDoc(int documentId) {
+    @Transactional
+    public void deleteDoc(int documentId) {
         deleteFileOfDocument(documentId);
+        docHistoryRepository.deleteAllByDocument(documentId);
         docShareService.deleteByDocument(documentId);
         docDataService.deleteAllByDocument(documentId);
-        docHistoryRepository.deleteAllByDocument(documentId);
         documentRepository.deleteById(documentId);
     }
 

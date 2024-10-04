@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FlowieeConfigRepository extends JpaRepository<SystemConfig, Integer> {
+public interface SystemConfigRepository extends JpaRepository<SystemConfig, Integer> {
     @Query("from SystemConfig order by sort")
     List<SystemConfig> findAll();
 

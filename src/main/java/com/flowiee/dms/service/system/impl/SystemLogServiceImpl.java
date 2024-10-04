@@ -65,6 +65,11 @@ public class SystemLogServiceImpl extends BaseService implements SystemLogServic
 
     @Override
     public SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange) {
+        return this.writeLog(module, function, object, mode, title, content, contentChange, null);
+    }
+
+    @Override
+    public SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange, SystemLog pSystemLog) {
         SystemLog systemLog = new SystemLog();
         systemLog.setModule(module.name());
         systemLog.setFunction(function.name());
@@ -73,9 +78,18 @@ public class SystemLogServiceImpl extends BaseService implements SystemLogServic
         systemLog.setTitle(title);
         systemLog.setContent(content);
         systemLog.setContentChange(contentChange);
-        systemLog.setIp(CommonUtils.getUserPrincipal().getIp());
-        systemLog.setAccount(new Account(CommonUtils.getUserPrincipal().getId()));
-        systemLog.setCreatedBy(CommonUtils.getUserPrincipal().getId());
+        if (pSystemLog != null) {
+            systemLog.setIp(pSystemLog.getIp());
+            systemLog.setAccount(pSystemLog.getAccount());
+            systemLog.setCreatedBy(pSystemLog.getCreatedBy());
+        }
+        if (systemLog.getIp() == null)
+            systemLog.setIp(CommonUtils.getUserPrincipal().getIp());
+        if (systemLog.getAccount() == null)
+            systemLog.setAccount(new Account(CommonUtils.getUserPrincipal().getId()));
+        if (systemLog.getCreatedBy() == null)
+            systemLog.setCreatedBy(CommonUtils.getUserPrincipal().getId());
+
         return systemLogRepository.save(systemLog);
     }
 }

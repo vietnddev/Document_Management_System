@@ -65,6 +65,7 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
         return MessageCode.UPDATE_SUCCESS.getDescription();
     }
 
+    @Transactional
     @Override
     public void deleteAllByDocument(Integer documentId) {
         docDataRepository.deleteAllByDocument(documentId);

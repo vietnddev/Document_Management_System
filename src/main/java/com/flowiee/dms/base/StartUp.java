@@ -1,11 +1,12 @@
 package com.flowiee.dms.base;
 
 import com.flowiee.dms.entity.system.SystemConfig;
-import com.flowiee.dms.repository.system.FlowieeConfigRepository;
+import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.system.LanguageService;
-import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ConfigCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,12 +21,13 @@ import java.util.List;
 @Configuration
 public class StartUp {
 	private final LanguageService languageService;
-	private final FlowieeConfigRepository configRepository;
+	private final SystemConfigRepository configRepository;
 
+    protected Logger logger = LoggerFactory.getLogger(getClass());
     public static Date START_APP_TIME = null;
     public static String mvResourceUploadPath = null;
 
-	public StartUp(LanguageService languageService, FlowieeConfigRepository configRepository) {
+	public StartUp(LanguageService languageService, SystemConfigRepository configRepository) {
 		this.languageService = languageService;
 		this.configRepository = configRepository;
 	}
@@ -41,7 +43,7 @@ public class StartUp {
         };
     }
 
-    private void initData() throws Exception {
+    private void initData() {
         String flagConfigCode = ConfigCode.initData.name();
         SystemConfig flagConfigObj = configRepository.findByCode(flagConfigCode);
         if (flagConfigObj == null) {
@@ -55,6 +57,7 @@ public class StartUp {
             cnf.add(initDefaultAudit(ConfigCode.maxSizeFileUpload, "Dung lượng file tối đa cho phép upload", null));
             cnf.add(initDefaultAudit(ConfigCode.extensionAllowedFileUpload, "Định dạng file được phép upload", null));
             cnf.add(initDefaultAudit(ConfigCode.resourceUploadPath, "Thư mực chứa tệp upload", null));
+            cnf.add(initDefaultAudit(ConfigCode.timeStorageFileInRecycleBin, "Thời gian lưu trữ tệp ở thùng rác", "15"));
             configRepository.saveAll(cnf);
         }
     }
@@ -67,6 +70,7 @@ public class StartUp {
         SystemConfig systemConfig = configRepository.findByCode(ConfigCode.resourceUploadPath.name());
         if (systemConfig != null) {
             mvResourceUploadPath = systemConfig.getValue();
+            logger.info(systemConfig.getCode() + ": " + mvResourceUploadPath);
         }
 
         Path templateTempForExportPath = FileUtils.getTemplateExportTempPath();
