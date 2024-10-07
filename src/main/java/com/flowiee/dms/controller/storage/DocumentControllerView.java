@@ -2,14 +2,11 @@ package com.flowiee.dms.controller.storage;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.category.Category;
-import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.ForbiddenException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.DocMetaModel;
-import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.dto.DocumentDTO;
-import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.service.category.CategoryService;
 import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.utils.*;
@@ -26,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

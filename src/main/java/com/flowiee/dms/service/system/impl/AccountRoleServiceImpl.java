@@ -7,16 +7,16 @@ import com.flowiee.dms.model.ACTION;
 import com.flowiee.dms.model.role.ActionModel;
 import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.model.role.ModuleModel;
+import com.flowiee.dms.repository.system.AccountRepository;
 import com.flowiee.dms.repository.system.AccountRoleRepository;
 import com.flowiee.dms.service.BaseService;
-import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.GroupAccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,21 +24,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class AccountRoleServiceImpl extends BaseService implements RoleService {
-    AccountService        accountService;
-    GroupAccountService   groupAccountService;
+    AccountRepository accountRepository;
+    GroupAccountService groupAccountService;
     AccountRoleRepository accountRoleRepository;
-
-    public AccountRoleServiceImpl(AccountRoleRepository accountRoleRepo, @Lazy AccountService accountService, GroupAccountService groupAccountService) {
-        this.accountRoleRepository = accountRoleRepo;
-        this.accountService = accountService;
-        this.groupAccountService = groupAccountService;
-    }
 
     @Override
     public List<RoleModel> findAllRoleByAccountId(Integer accountId) {
-        Optional<Account> account = accountService.findById(accountId);
+        Optional<Account> account = accountRepository.findById(accountId);
         if (account.isEmpty()) {
             return new ArrayList<>();
         }

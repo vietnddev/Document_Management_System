@@ -28,7 +28,6 @@ public class DocumentExportService extends BaseExportService {
 
     DateTimeFormatter mvFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-
     @Override
     protected void writeData(Object pCondition) {
         XSSFSheet sheet = mvWorkbook.getSheetAt(0);

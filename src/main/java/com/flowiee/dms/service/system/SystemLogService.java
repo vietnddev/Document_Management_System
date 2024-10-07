@@ -22,4 +22,6 @@ public interface SystemLogService {
     SystemLog writeLogDelete(MODULE module, ACTION function, MasterObject object, String title, String content);
 
     SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange);
+
+    SystemLog writeLog(MODULE module, ACTION function, MasterObject object, LogType mode, String title, String content, String contentChange, SystemLog systemLog);
 }

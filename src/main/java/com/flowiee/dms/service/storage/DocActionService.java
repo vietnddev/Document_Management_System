@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface DocActionService {
+    static int DELETE_NORMAL = 0;
+    static int DELETE_SCHEDULE = 1;
+
     DocumentDTO saveDoc(DocumentDTO documentDTO);
 
     DocumentDTO updateDoc(DocumentDTO data, Integer documentId);
@@ -19,6 +22,8 @@ public interface DocActionService {
     String updateMetadata(List<DocMetaModel> metaDTOs, Integer documentId);
 
     String deleteDoc(Integer documentId, boolean isDeleteSubDoc);
+
+    String deleteDoc(Integer documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete);
 
     DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy);
 

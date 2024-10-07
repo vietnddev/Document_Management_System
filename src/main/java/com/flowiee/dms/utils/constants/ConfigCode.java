@@ -9,5 +9,6 @@ public enum ConfigCode {
     sysTimeOut,
     maxSizeFileUpload,
     extensionAllowedFileUpload,
-    resourceUploadPath
+    resourceUploadPath,
+    timeStorageFileInRecycleBin
 }

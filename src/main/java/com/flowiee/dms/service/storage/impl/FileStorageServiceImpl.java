@@ -11,7 +11,7 @@ import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
 import com.flowiee.dms.repository.storage.FileStorageRepository;
-import com.flowiee.dms.repository.system.FlowieeConfigRepository;
+import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
@@ -24,9 +24,9 @@ import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import com.itextpdf.text.DocumentException;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,21 +35,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class FileStorageServiceImpl extends BaseService implements FileStorageService {
-    DocumentInfoService   documentInfoService;
-    FileStorageRepository   fileRepository;
-    FlowieeConfigRepository configRepository;
-
-    public FileStorageServiceImpl(@Lazy DocumentInfoService documentInfoService, FileStorageRepository fileRepository, FlowieeConfigRepository configRepository) {
-        this.documentInfoService = documentInfoService;
-        this.fileRepository = fileRepository;
-        this.configRepository = configRepository;
-    }
+    DocumentInfoService documentInfoService;
+    FileStorageRepository fileRepository;
+    SystemConfigRepository configRepository;
 
     @Override
     public Optional<FileStorage> findById(Integer fileId) {

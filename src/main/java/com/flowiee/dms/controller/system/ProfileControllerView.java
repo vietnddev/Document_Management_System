@@ -51,14 +51,9 @@ public class ProfileControllerView extends BaseController {
 		Account profile = accountService.findCurrentAccount();
 
 		BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder();
-		if (bCrypt.matches(password_old,
-				accountService.findByUsername(profile.getUsername()).getPassword())) {
+		if (bCrypt.matches(password_old, accountService.findByUsername(profile.getUsername()).getPassword())) {
 			if (password_new.equals(password_renew)) {
-				accountEntity.setId(accountService.findByUsername(profile.getUsername()).getId());
-				accountEntity.setUsername(profile.getUsername());
-				accountEntity.setFullName(accountService.findByUsername(profile.getUsername()).getFullName());
-				accountEntity.setPassword(bCrypt.encode(password_new));
-				accountEntity.setStatus(true);
+				profile.setPassword(bCrypt.encode(password_new));
 				accountService.save(accountEntity);
 
 				redirectAttributes.addAttribute("message", "Cập nhật thành công!");
