@@ -319,4 +319,25 @@ public class FileUtils {
         }
         return StartUp.getResourceUploadPath() + "/uploads/";
     }
+
+    public static long getFolderSize(File folder) {
+        long length = 0;
+
+        // Lấy danh sách tất cả các file và thư mục con
+        File[] files = folder.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                if (file.isFile()) {
+                    // Nếu là file, lấy dung lượng của file
+                    length += file.length();
+                } else {
+                    // Nếu là thư mục, gọi đệ quy để lấy dung lượng thư mục con
+                    length += getFolderSize(file);
+                }
+            }
+        }
+
+        return length;
+    }
 }

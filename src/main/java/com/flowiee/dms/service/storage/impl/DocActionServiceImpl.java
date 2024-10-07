@@ -166,7 +166,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             documentRepository.save(document.get());
         }
         if ("Y".equals(document.get().getIsFolder()) && isDeleteSubDoc) {
-            List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+            List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
             for (DocumentDTO subDoc : listSubDocs) {
                 if (forceDelete) {
                     deleteDoc(subDoc.getId());
@@ -342,7 +342,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             //Share rights to all of sub-docs
             if (applyForSubFolder) {
                 if (doc.get().getIsFolder().equals("Y")) {
-                    List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(doc.get().getId(), null, true, true);
+                    List<DocumentDTO> subDocs = documentInfoService.findSubDocByParentId(doc.get().getId(), null, true, true, false);
                     for (DocumentDTO dto : subDocs) {
                         doShare(dto.getId(), model.getAccountId(), model.getCanRead(), model.getCanUpdate(),model.getCanDelete(), model.getCanMove(), model.getCanShare());
                     }
@@ -402,7 +402,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                 folder = new File(Paths.get(FileUtils.getDownloadStorageTempPath().toString() + "/" + CommonUtils.generateUniqueString()).toUri());
                 if (!folder.exists())
                     folder.mkdir();
-                List<DocumentDTO> listSubFolderFullLevel = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+                List<DocumentDTO> listSubFolderFullLevel = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
                 for (DocumentDTO docDTO : listSubFolderFullLevel) {
                     DocumentDTO docDTO_ = folderTreeService.findByDocId(docDTO.getId());
                     String path = docDTO_ != null ? docDTO_.getPath() : "";
@@ -490,6 +490,28 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         }
 
         return listImported;
+    }
+
+    @Transactional
+    @Override
+    public void restore(int documentId) {
+        Optional<Document> document = documentRepository.findById(documentId);
+        if (document.isEmpty()) {
+            throw new BadRequestException(String.format("Document with id %s not found!", documentId));
+        }
+        if (document.get().getDeletedAt() == null) {
+            throw new BadRequestException(String.format("Document with name %s not in the trash!", document.get().getName()));
+        }
+        document.get().setDeletedAt(null);
+        document.get().setDeletedBy(null);
+        documentRepository.save(document.get());
+
+        if (!document.get().isFile()) {
+            List<DocumentDTO> subDocDTOs = documentInfoService.findSubDocByParentId(documentId, null, true, true, true);
+            for (DocumentDTO d : subDocDTOs) {
+                documentRepository.setDeleteInformation(d.getId(), null, null);
+            }
+        }
     }
 
     private List<DocumentDTO> saveDoc_(FolderTree folderTree, boolean applyRightsParent) throws IOException {

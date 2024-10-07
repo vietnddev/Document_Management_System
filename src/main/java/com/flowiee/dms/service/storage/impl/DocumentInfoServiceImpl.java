@@ -42,15 +42,37 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch) {
+    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch, Boolean isDeleted) {
         Pageable pageable = Pageable.unpaged();
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
         }
         Account currentAccount = CommonUtils.getUserPrincipal();
         boolean isAdmin = AppConstants.ADMINISTRATOR.equals(currentAccount.getUsername());
-        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), null, isFolder, listId, pageable);
+        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), null, isFolder, listId, isDeleted, pageable);
         return new PageImpl<>(DocumentDTO.fromDocuments(documents.getContent()), pageable, documents.getTotalElements());
+    }
+
+    @Override
+    public Page<Document> findAllDeletedDocument(int pageSize, int pageNum) {
+        Pageable pageable = Pageable.unpaged();
+        Page<Document> documentPage = documentRepository.findAllDeletedDocument(pageable);
+
+        List<Integer> foDocumentId = new ArrayList<>();
+        for (Document d : documentPage.getContent()) {
+            if (!d.isFile()) {
+                foDocumentId.add(d.getId());
+            }
+        }
+
+        List<Document> documentResult = new ArrayList<>();
+        for (Document d : documentPage.getContent()) {
+            if (!foDocumentId.contains(d.getParentId())) {
+                documentResult.add(d);
+            }
+        }
+
+        return new PageImpl<>(documentResult, pageable, documentResult.size());
     }
 
     @Override
@@ -74,24 +96,24 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean pIsFolder, boolean fullLevel, boolean onlyBaseInfo) {
+    public List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean pIsFolder, boolean fullLevel, boolean onlyBaseInfo, boolean isDeleted) {
         String lvIsFolder = null;
         if (pIsFolder != null) {
             lvIsFolder = pIsFolder.booleanValue() ? "Y" : "N";
         }
         List<DocumentDTO> docDTOs = new ArrayList<>();
         if (!fullLevel) {
-            docDTOs = this.findDocuments(-1, -1, parentId, null, lvIsFolder, null).getContent();
+            docDTOs = this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, isDeleted).getContent();
         } else {
             List<DocumentDTO> subFolderTemps = new ArrayList<>();
-            for (DocumentDTO dto : this.findDocuments(-1, -1, parentId, null, lvIsFolder, null).getContent()) {
+            for (DocumentDTO dto : this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, isDeleted).getContent()) {
                 if (dto.getIsFolder().equals("Y")) {
                     subFolderTemps.add(dto);
                 }
                 docDTOs.add(dto);
             }
             for (DocumentDTO tmpFolder : subFolderTemps) {
-                docDTOs.addAll(this.findSubDocByParentId(tmpFolder.getId(), null, true, onlyBaseInfo));
+                docDTOs.addAll(this.findSubDocByParentId(tmpFolder.getId(), null, true, onlyBaseInfo, isDeleted));
             }
         }
         if (!onlyBaseInfo) {
@@ -110,7 +132,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
 
     @Override
     public List<Document> findByDoctype(Integer docTypeId) {
-        return documentRepository.findAll(null, null, null, true, null, null, null, null, Pageable.unpaged()).getContent();
+        return documentRepository.findAll(null, null, null, true, null, docTypeId, null, null, null, Pageable.unpaged()).getContent();
     }
 
     @Override

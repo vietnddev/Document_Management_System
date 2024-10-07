@@ -11,11 +11,13 @@ import java.util.Optional;
 public interface DocumentInfoService {
     Optional<DocumentDTO> findById(Integer id);
 
-    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch);
+    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch, Boolean isDeleted);
+
+    Page<Document> findAllDeletedDocument(int pageSize, int pageNum);
 
     List<DocumentDTO> setInfoRights(List<DocumentDTO> documentDTOs);
 
-    List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean isFolder, boolean fullLevel, boolean onlyBaseInfo);
+    List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean isFolder, boolean fullLevel, boolean onlyBaseInfo, boolean isDeleted);
 
     List<Document> findByDoctype(Integer docType);
 

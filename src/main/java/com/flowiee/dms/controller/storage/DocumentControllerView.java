@@ -61,7 +61,7 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewRootDocuments() {
         ModelAndView modelAndView = new ModelAndView(PagesUtils.STG_DOCUMENT);
         modelAndView.addObject("parentId", 0);
-        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false));
+        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false, false));
         return baseView(modelAndView);
     }
 
@@ -81,7 +81,7 @@ public class DocumentControllerView extends BaseController {
         try {
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.addObject("docBreadcrumb", documentInfoService.findHierarchyOfDocument(document.getId(), document.getParentId()));
-            modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false));
+            modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0, true, false, false, false));
             modelAndView.addObject("documentParentName", document.getName());
             if (document.getIsFolder().equals("Y")) {
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT);
@@ -174,5 +174,11 @@ public class DocumentControllerView extends BaseController {
             throw new ResourceNotFoundException("Document not found!", true);
         }
         return new ModelAndView("redirect:" + request.getHeader("referer"));
+    }
+
+    @GetMapping("/doc/trash")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ModelAndView viewTrash() {
+        return baseView(new ModelAndView(PagesUtils.STG_TRASH));
     }
 }

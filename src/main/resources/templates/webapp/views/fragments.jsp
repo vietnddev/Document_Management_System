@@ -64,16 +64,33 @@
 
         <div th:fragment="folderTree">
             <div class="main-sidebar sidebar-dark-primary elevation-4">
-                <nav class="sidebar mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <li class="nav-item" th:each="ft : ${folderTree}">
-                            <a href="#" th:class="'nav-link folder-' + ${ft.id}" th:hasSubFolder="${ft.hasSubFolder}" th:collapse="N">
-                                <p>[[${ft.name}]] <i class="fas fa-angle-left right" th:if="${ft.hasSubFolder == 'Y'}"></i></p>
-                            </a>
-                            <ul class="nav nav-treeview" th:id="'sub-folders-' + ${ft.id}" style="margin-left: 15px"></ul>
-                        </li>
-                    </ul>
-                </nav>
+                <div class="sidebar">
+                    <nav class="mt-2">
+                        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">
+                                    <i class="fa-solid fa-database nav-icon mr-2 sb_myDocs" ></i>
+                                    <p class="sb_myDocs" >My documents</p>
+                                    <i class="fas fa-angle-left right" ></i>
+                                </a>
+                                <ul class="nav nav-treeview ml-3">
+                                    <li class="nav-item" th:each="ft : ${folderTree}">
+                                        <a href="#" th:class="'nav-link folder-' + ${ft.id}" th:hasSubFolder="${ft.hasSubFolder}" th:collapse="N">
+                                            <p class="sb_myDocs_foLink" th:link="'/stg/doc/' + ${ft.asName} + '-' + ${ft.id}">[[${ft.name}]]</p><i class="fas fa-angle-left right" th:if="${ft.hasSubFolder == 'Y'}"></i>
+                                        </a>
+                                        <ul class="nav nav-treeview" th:id="'sub-folders-' + ${ft.id}" style="margin-left: 15px"></ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/stg/doc/quota}" class="nav-link"><i class="fa-solid fa-cloud mr-2"></i>Bộ nhớ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a th:href="@{/stg/doc/trash}" class="nav-link"><i class="fa-solid fa-trash mr-2"></i>Thùng rác</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
 

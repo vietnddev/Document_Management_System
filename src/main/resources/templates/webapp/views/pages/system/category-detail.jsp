@@ -317,8 +317,8 @@
                         `);
                     });
                 }
-            }).fail(function () {
-                showErrorModal("Could not connect to the server");//nếu ko gọi xuống được controller thì báo lỗi
+            }).fail(function (xhr) {
+                showErrorModal($.parseJSON(xhr.responseText).message);
             });
         }
     </script>

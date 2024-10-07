@@ -105,7 +105,7 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     @Override
     public void deleteAllByDocument(Integer documentId) {
         docShareRepository.deleteAllByDocument(documentId);
-        List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true);
+        List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
         for (DocumentDTO dto : allSubDocs) {
             docShareRepository.deleteAllByDocument(dto.getId());
         }

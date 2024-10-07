@@ -1,11 +1,13 @@
 package com.flowiee.dms.controller.storage;
 
 import com.flowiee.dms.base.BaseController;
+import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.payload.MoveDocumentReq;
 import com.flowiee.dms.model.dto.DocumentDTO;
+import com.flowiee.dms.model.payload.RestoreDocumentReq;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.FileUtils;
@@ -42,7 +44,7 @@ public class DocumentController extends BaseController {
                                                           @RequestParam("parentId") Integer parentId,
                                                           @RequestParam(value = "txtSearch", required = false) String txtSearch) {
         try {
-            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch);
+            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch, false);
             List<DocumentDTO> documentIncludeRights = documentInfoService.setInfoRights(documents.getContent());
             return ApiResponse.ok(documentIncludeRights, pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {
@@ -80,7 +82,7 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Integer parentId) {
         try {
-            List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false, false);
+            List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false, false, false);
             return ApiResponse.ok(documentDTOs, 1, 100, 100, documentDTOs.size());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "folders"), ex);
@@ -97,16 +99,24 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Delete document")
     @DeleteMapping("/doc/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId) {
+    public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId, @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
+        if (ObjectUtils.isNotEmpty(forceDelete) && forceDelete.booleanValue()) {
+            return ApiResponse.ok(docActionService.deleteDoc(docId, true, true, DocActionService.DELETE_NORMAL));
+        }
         return ApiResponse.ok(docActionService.deleteDoc(docId, true));
     }
 
     @Operation(summary = "Delete document")
     @DeleteMapping("/doc/multi-delete")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Integer> pListOfSelectedDocuments) {
+    public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Integer> pListOfSelectedDocuments,
+                                         @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
         for (int docId : pListOfSelectedDocuments) {
-            docActionService.deleteDoc(docId, true);
+            if (ObjectUtils.isNotEmpty(forceDelete) && forceDelete.booleanValue()) {
+                docActionService.deleteDoc(docId, true, true, DocActionService.DELETE_NORMAL);
+            } else {
+                docActionService.deleteDoc(docId, true);
+            }
         }
         return ApiResponse.ok(MessageCode.DELETE_SUCCESS.getDescription());
     }
@@ -155,5 +165,41 @@ public class DocumentController extends BaseController {
         boolean applyRightsParent = false;
         if (ObjectUtils.isNotEmpty(pApplyRightsParent) && pApplyRightsParent.booleanValue() && parentDocId > 0) applyRightsParent = true;
         return ApiResponse.ok(docActionService.importDoc(parentDocId, fileUpload, applyRightsParent));
+    }
+
+    @Operation(summary = "Find all documents in trash")
+    @GetMapping("/doc/trash")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ApiResponse<List<Document>> getDocumentsInTrash(@RequestParam("pageSize") Integer pageSize, @RequestParam("pageNum") Integer pageNum) {
+        try {
+            Page<Document> documents = documentInfoService.findAllDeletedDocument(pageSize, pageNum - 1);
+            return ApiResponse.ok(documents.getContent(), pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
+        } catch (RuntimeException ex) {
+            throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "documents"), ex);
+        }
+    }
+
+    @Operation(summary = "Restore document")
+    @PutMapping("/doc/trash/restore/{documentId}")
+    @PreAuthorize("@vldModuleStorage.updateDoc(true)")
+    public ApiResponse<String> restoreDocument(@PathVariable("documentId") Integer documentId) {
+        if (documentId == null || documentId <= 0) {
+            throw new BadRequestException("Request invalid!");
+        }
+        docActionService.restore(documentId);
+        return ApiResponse.ok("Khôi phục thành công!", null);
+    }
+
+    @Operation(summary = "Restore documents")
+    @PutMapping("/doc/trash/multi-restore")
+    @PreAuthorize("@vldModuleStorage.updateDoc(true)")
+    public ApiResponse<String> restoreDocuments(@RequestBody RestoreDocumentReq requestBody) {
+        if (requestBody == null || requestBody.getSelectedDocuments() == null) {
+            throw new BadRequestException("Request invalid!");
+        }
+        for (int documentId : requestBody.getSelectedDocuments()) {
+            docActionService.restore(documentId);
+        }
+        return ApiResponse.ok("Khôi phục thành công!", null);
     }
 }

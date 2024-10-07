@@ -163,8 +163,8 @@
                         mvDocType.append('<option value=' + d.id + '>' + d.name + '</option>');
                     });
                 }
-            }).fail(function () {
-                showErrorModal("Could not connect to the server");
+            }).fail(function (xhr) {
+                showErrorModal($.parseJSON(xhr.responseText).message);
             });
         }
 

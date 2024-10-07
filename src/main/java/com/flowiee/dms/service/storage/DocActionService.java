@@ -12,8 +12,8 @@ import java.io.IOException;
 import java.util.List;
 
 public interface DocActionService {
-    static int DELETE_NORMAL = 0;
-    static int DELETE_SCHEDULE = 1;
+    int DELETE_NORMAL = 0;
+    int DELETE_SCHEDULE = 1;
 
     DocumentDTO saveDoc(DocumentDTO documentDTO);
 
@@ -34,4 +34,6 @@ public interface DocActionService {
     ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
 
     List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
+
+    void restore(int documentId);
 }

@@ -21,4 +21,5 @@ public class PagesUtils {
     public static final String STG_DOCUMENT = mdlSTORAGE + "/document";
     public static final String STG_DOCUMENT_DETAIL = mdlSTORAGE + "/document-detail";
     public static final String STG_DOCTYPE_DETAIL = mdlSTORAGE + "/doctype-detail";
+    public static final String STG_TRASH = mdlSTORAGE + "/trash";
 }

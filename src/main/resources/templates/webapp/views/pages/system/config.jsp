@@ -143,8 +143,8 @@
                         alert(response.data);
                         window.location.reload();
                     }
-                }).fail(function () {
-                    showErrorModal("Could not connect to the server");
+                }).fail(function (xhr) {
+                    showErrorModal($.parseJSON(xhr.responseText).message);
                 });
             })
         }
@@ -209,8 +209,8 @@
                         `);
                     });
                 }
-            }).fail(function () {
-                showErrorModal("Could not connect to the server");
+            }).fail(function (xhr) {
+                showErrorModal($.parseJSON(xhr.responseText).message);
             });
         }
     </script>

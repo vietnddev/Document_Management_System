@@ -134,7 +134,7 @@ function loadFolderTreeOnSideBar() {
                 subFolders.append(`
                     <li class="nav-item">
                         <a href="#" class="nav-link folder-${d.id}" hasSubFolder="${d.hasSubFolder}" collapse="N">
-                            <p>${d.name} ${iconDropdownList}</p>
+                            <p class="sb_myDocs_foLink" link="/stg/doc/${d.asName}-${d.id}">${d.name}</p> ${iconDropdownList}
                         </a>
                         <ul class="nav nav-treeview" id="sub-folders-${d.id}" style="margin-left: 15px"></ul>
                     </li>
@@ -146,3 +146,11 @@ function loadFolderTreeOnSideBar() {
         $(this).attr("collapse", "Y");
     });
 }
+
+$(".sb_myDocs").on("click", function () {
+    window.location.href = mvHostURL + "/stg/doc";
+})
+
+$(document).on("click", ".sb_myDocs_foLink", function () {
+    window.location.href = mvHostURL + $(this).attr("link");
+})

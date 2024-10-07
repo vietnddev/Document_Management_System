@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Builder
 @Entity
@@ -46,15 +47,15 @@ public class Document extends BaseEntity implements Serializable {
     Category docType;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<DocData> listDocData;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<FileStorage> listDocFile;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     List<DocShare> listDocShare;
 
     @JsonIgnore
@@ -103,9 +104,13 @@ public class Document extends BaseEntity implements Serializable {
         return map;
     }
 
+    public boolean isFile() {
+        return Objects.equals(isFolder, "N");
+    }
+
 	@Override
 	public String toString() {
 		return "Document {id=" + super.id + ", parentId=" + parentId + ", isFolder=" + isFolder + ", name=" + name + ", aliasName=" + asName
 				+ ", moTa=" + description + "}";
-	}        
+	}
 }

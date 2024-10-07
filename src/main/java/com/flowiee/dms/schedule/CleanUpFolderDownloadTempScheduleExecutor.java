@@ -12,7 +12,7 @@ import java.io.File;
 @Component
 public class CleanUpFolderDownloadTempScheduleExecutor extends ScheduleService {
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     @Override
     public void execute() {
         ScheduleStatus scheduleStatus = startSchedule(ScheduleTask.CleanUpFolderDownloadTemp);

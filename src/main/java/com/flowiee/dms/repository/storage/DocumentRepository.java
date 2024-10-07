@@ -17,7 +17,8 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document, Integer> {
     @Query("select distinct d " +
            "from Document d " +
-           "left join DocShare ds on ds.document.id = d.id " +
+           "left join DocShare ds " +
+           "    on ds.document.id = d.id " +
            "where 1=1 " +
            "    and (:txtSearch is null or d.name like %:txtSearch%) " +
            "    and (:parentId is null or d.parentId=:parentId) " +
@@ -25,7 +26,7 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "    and (:docTypeId is null or d.docType.id=:docTypeId) " +
            "    and (:isFolder is null or d.isFolder=:isFolder) " +
            "    and (:listId is null or d.id in :listId) " +
-           "    and d.deletedAt is null")
+           "    and (:isDeleted is null or (d.deletedAt is not null and :isDeleted = true) or (d.deletedAt is null and :isDeleted = false))")
     Page<Document> findAll(@Param("txtSearch") String txtSearch,
                            @Param("parentId") Integer parentId,
                            @Param("currentAccountId") Integer currentAccountId,
@@ -34,7 +35,11 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                            @Param("docTypeId") Integer docTypeId,
                            @Param("isFolder") String isFolder,
                            @Param("listId") List<Integer> listId,
+                           @Param("isDeleted") Boolean isDeleted,
                            Pageable pageable);
+
+    @Query("from Document d where d.deletedAt is not null order by d.deletedAt desc")
+    Page<Document> findAllDeletedDocument(Pageable pageable);
 
     @Query(value = "select f.id as field_Id_0, " +
                    "       f.name as field_name_1, " +
@@ -92,8 +97,11 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "    and d.deletedAt is null")
     boolean existsSubDocument(@Param("docId") Integer docId);
 
+    @Modifying
     @Query("update Document d set d.deletedAt = :deletedAt, d.deletedBy = :deletedBy where d.id = :documentId")
-    void setDeleteInformation();
+    void setDeleteInformation(@Param("documentId") int documentId,
+                              @Param("deletedAt") LocalDateTime deletedAt,
+                              @Param("deletedBy") String deletedBy);
 
     @Query("from Document d where d.deletedAt <= :dateDelete")
     List<Document> findExpiredDocumentsInRecycleBin(@Param("dateDelete") LocalDateTime dateDelete);
