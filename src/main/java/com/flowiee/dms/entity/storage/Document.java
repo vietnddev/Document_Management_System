@@ -10,9 +10,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Builder
@@ -83,25 +81,6 @@ public class Document extends BaseEntity implements Serializable {
             document.setDocType(new Category(dto.getDocTypeId(), dto.getDocTypeName()));
         }
         return document;
-    }
-
-    public Map<String, String> compareTo(Document documentToCompare) {
-        Map<String, String> map = new HashMap<>();
-        if (!this.getParentId().equals(documentToCompare.getParentId())) {
-            map.put("Move", "From " +this.getParentId() + "#To " + documentToCompare.getParentId());
-        }
-        if (!this.getName().equals(documentToCompare.getName())) {
-            map.put("Document name", this.getName() + "#" + documentToCompare.getName());
-        }
-        if (!this.getDocType().getName().equals(documentToCompare.getDocType().getName())) {
-            map.put("Document type", this.getDocType().getName() + "#" + documentToCompare.getDocType().getName());
-        }
-        if (!this.getDescription().equals(documentToCompare.getDescription())) {
-            String descriptionOld = this.getDescription().length() > 9999 ? this.getDescription().substring(0, 9999) : this.getDescription();
-            String descriptionNew = documentToCompare.getDescription().length() > 9999 ? documentToCompare.getDescription().substring(0, 9999) : documentToCompare.getDescription();
-            map.put("Description", descriptionOld + "#" + descriptionNew);
-        }
-        return map;
     }
 
     public boolean isFile() {

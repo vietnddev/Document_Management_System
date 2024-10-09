@@ -5,6 +5,7 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.SummaryQuota;
 import com.flowiee.dms.model.payload.MoveDocumentReq;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.payload.RestoreDocumentReq;
@@ -20,6 +21,7 @@ import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -201,5 +203,16 @@ public class DocumentController extends BaseController {
             docActionService.restore(documentId);
         }
         return ApiResponse.ok("Khôi phục thành công!", null);
+    }
+
+    @Operation(summary = "Get summary quota")
+    @GetMapping("/doc/quota")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ApiResponse<SummaryQuota> getSummaryQuota(@RequestParam("pageSize") Integer pageSize,
+                                                     @RequestParam("pageNum") Integer pageNum,
+                                                     @RequestParam(value = "sortBy", defaultValue = "fileSize") String sortBy,
+                                                     @RequestParam(value = "sort", defaultValue = "desc") String sortMode) {
+        SummaryQuota summaryQuota = documentInfoService.getSummaryQuota(pageSize, pageNum - 1, sortBy, Sort.Direction.fromString(sortMode));
+        return ApiResponse.ok(summaryQuota, pageNum, pageSize, summaryQuota.getDocumentQuotaPage().getTotalPages(), summaryQuota.getDocuments().size());
     }
 }

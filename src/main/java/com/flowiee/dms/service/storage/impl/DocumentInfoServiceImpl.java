@@ -5,6 +5,7 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.DocMetaModel;
+import com.flowiee.dms.model.SummaryQuota;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.repository.storage.DocumentRepository;
@@ -195,19 +196,47 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
             List<Object[]> listData = documentRepository.findMetadata(documentId);
             if (!listData.isEmpty()) {
                 for (Object[] data : listData) {
-                    DocMetaModel metadata = new DocMetaModel();
-                    metadata.setFieldId(Integer.parseInt(String.valueOf(data[0])));
-                    metadata.setFieldName(String.valueOf(data[1]));
-                    metadata.setDataId(ObjectUtils.isNotEmpty(data[2]) ? Integer.parseInt(String.valueOf(data[2])) : 0);
-                    metadata.setDataValue(ObjectUtils.isNotEmpty(data[3]) ? String.valueOf(data[3]) : null);
-                    metadata.setFieldType(String.valueOf(data[4]));
-                    metadata.setFieldRequired(String.valueOf(data[5]).equals("1"));
-                    listReturn.add(metadata);
+                    listReturn.add(DocMetaModel.builder()
+                            .fieldId(Integer.parseInt(String.valueOf(data[0])))
+                            .fieldName(String.valueOf(data[1]))
+                            .dataId(ObjectUtils.isNotEmpty(data[2]) ? Integer.parseInt(String.valueOf(data[2])) : 0)
+                            .dataValue(ObjectUtils.isNotEmpty(data[3]) ? String.valueOf(data[3]) : null)
+                            .fieldType(String.valueOf(data[4])).fieldRequired(String.valueOf(data[5]).equals("1"))
+                            .build());
                 }
             }
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "metadata of document"), ex);
         }
         return listReturn;
+    }
+
+    @Override
+    public SummaryQuota getSummaryQuota(int pageSize, int pageNum, String sortBy, Sort.Direction sortMode) {
+        Pageable pageable = PageRequest.of(pageNum, pageSize,
+                sortMode.equals(Sort.Direction.ASC) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+        pageable = Pageable.unpaged();
+        Page<Object[]> documentPage = documentRepository.findDocumentSortByMemoryUsed(pageable);
+
+        long totalMemoryUsed = 0;
+        List<SummaryQuota.DocumentQuota> docQuotas = new ArrayList<>();
+
+        for (Object[] obj : documentPage.getContent()) {//d.id, d.name, d.asName, d.docType, f.fileSize
+            long memoryUsed = Long.parseLong(String.valueOf(obj[4]));
+            totalMemoryUsed += memoryUsed;
+
+            docQuotas.add(SummaryQuota.DocumentQuota.builder()
+                    .id(Integer.parseInt(String.valueOf(obj[0])))
+                    .icon(null)
+                    .name(String.valueOf(obj[1]))
+                    .memoryUsed((memoryUsed / (1024 * 1024)) + " MB")
+                    .build());
+        }
+
+        return SummaryQuota.builder()
+                .totalMemoryUsed((totalMemoryUsed / 1024) + " GB")
+                .documentQuotaPage(documentPage)
+                .documents(docQuotas)
+                .build();
     }
 }

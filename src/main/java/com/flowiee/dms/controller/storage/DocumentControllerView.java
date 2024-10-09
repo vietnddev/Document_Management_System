@@ -181,4 +181,10 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewTrash() {
         return baseView(new ModelAndView(PagesUtils.STG_TRASH));
     }
+
+    @GetMapping("/doc/quota")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ModelAndView viewQuota() {
+        return baseView(new ModelAndView(PagesUtils.STG_QUOTA));
+    }
 }

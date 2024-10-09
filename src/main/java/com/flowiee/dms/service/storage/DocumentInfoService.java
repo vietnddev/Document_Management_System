@@ -2,8 +2,10 @@ package com.flowiee.dms.service.storage;
 
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.model.DocMetaModel;
+import com.flowiee.dms.model.SummaryQuota;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,4 +28,6 @@ public interface DocumentInfoService {
     List<DocumentDTO> findSharedDocFromOthers(Integer accountId);
 
     List<DocMetaModel> findMetadata(Integer documentId);
+
+    SummaryQuota getSummaryQuota(int pageSize, int pageNum, String sortBy, Sort.Direction sortMode);
 }

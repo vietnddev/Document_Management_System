@@ -105,4 +105,12 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Query("from Document d where d.deletedAt <= :dateDelete")
     List<Document> findExpiredDocumentsInRecycleBin(@Param("dateDelete") LocalDateTime dateDelete);
+
+    @Query("select d.id, d.name, d.asName, d.docType, f.fileSize " +
+           "from Document d " +
+           "inner join FileStorage f" +
+           "    on f.document.id = d.id" +
+           "    and f.isActive = true " +
+           "where d.isFolder = 'N'")
+    Page<Object[]> findDocumentSortByMemoryUsed(Pageable pageable);
 }
