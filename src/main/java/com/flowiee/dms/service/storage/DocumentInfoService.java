@@ -30,4 +30,6 @@ public interface DocumentInfoService {
     List<DocMetaModel> findMetadata(Long documentId);
 
     SummaryQuota getSummaryQuota(int pageSize, int pageNum, String sortBy, Sort.Direction sortMode);
+
+    Page<DocumentDTO> getDocumentsSharedByOthers(int pageSize, int pageNum);
 }

@@ -113,4 +113,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
            "    and f.isActive = true " +
            "where d.isFolder = 'N'")
     Page<Object[]> findDocumentSortByMemoryUsed(Pageable pageable);
+
+    @Query("from Document d where d.id in (select ds.document.id from DocShare ds where ds.account.id = :accountId)")
+    Page<Document> findDocumentsSharedByOthers(@Param("accountId") Long accountId, Pageable pageable);
 }

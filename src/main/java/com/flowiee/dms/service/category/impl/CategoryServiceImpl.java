@@ -1,5 +1,6 @@
 package com.flowiee.dms.service.category.impl;
 
+import com.flowiee.dms.entity.system.SystemLog;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.DataInUseException;
 import com.flowiee.dms.entity.category.Category;
@@ -62,8 +63,8 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
         ChangeLog changeLog = new ChangeLog(categoryBefore, categoryAfter);
         for (Map.Entry<String, Object[]> entry : changeLog.getLogChanges().entrySet()) {
             String field = entry.getKey();
-            String oldValue = ObjectUtils.isNotEmpty(entry.getValue()[0]) ? entry.getValue()[0].toString() : "-";
-            String newValue = ObjectUtils.isNotEmpty(entry.getValue()[1]) ? entry.getValue()[1].toString() : "-";
+            String oldValue = ObjectUtils.isNotEmpty(entry.getValue()[0]) ? entry.getValue()[0].toString() : SystemLog.EMPTY;
+            String newValue = ObjectUtils.isNotEmpty(entry.getValue()[1]) ? entry.getValue()[1].toString() : SystemLog.EMPTY;
 
             categoryHistoryRepo.save(CategoryHistory.builder()
                     .title("Cập nhật danh mục " + categoryAfter.getType())

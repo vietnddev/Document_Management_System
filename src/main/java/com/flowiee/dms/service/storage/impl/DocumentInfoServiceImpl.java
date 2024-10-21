@@ -280,4 +280,12 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
 
         return mmrDisplay;
     }
+
+    @Override
+    public Page<DocumentDTO> getDocumentsSharedByOthers(int pageSize, int pageNum) {
+        Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
+        Page<Document> documentPage = documentRepository.findDocumentsSharedByOthers(CommonUtils.getUserPrincipal().getId(), pageable);
+        List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documentPage.getContent());
+        return new PageImpl<>(documentDTOs, pageable, documentDTOs.size());
+    }
 }

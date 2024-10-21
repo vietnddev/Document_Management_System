@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Column;
+import javax.persistence.Lob;
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -82,6 +84,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                 content = String.format("Sao chép [%s] từ [%s]", content, documentDTO.getCopySourceName());
             }
             systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, message, content);
+            docHistoryService.save(DocHistory.builder()
+                    .document(documentSaved)
+                    .title("Thêm mới " + documentSaved.getName())
+                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                    .build());
             logger.info("{}: {} {}", DocumentInfoServiceImpl.class.getName(), message, DocumentDTO.fromDocument(documentSaved));
 
             return DocumentDTO.fromDocument(documentSaved);
@@ -134,7 +141,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             docHistoryService.saveDocDataHistory(document.get(), docDataCurrent, docDataCurrent.getDocField().getName(), docDataCurrent.getValue(), metaDTO.getDataValue());
         }
 
-        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document.get().getName(), "-", "-");
+        systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document.get().getName(), SystemLog.EMPTY, SystemLog.EMPTY);
         logger.info(DocumentInfoServiceImpl.class.getName() + ": Update metadata docId=" + documentId);
 
         return MessageCode.UPDATE_SUCCESS.getDescription();
@@ -163,7 +170,12 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         } else {
             document.get().setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
             document.get().setDeletedAt(LocalDateTime.now());
-            documentRepository.save(document.get());
+            Document documentMovedToTrash = documentRepository.save(document.get());
+            docHistoryService.save(DocHistory.builder()
+                    .document(documentMovedToTrash)
+                    .title("Chuyển vào thùng rác")
+                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                    .build());
         }
         if ("Y".equals(document.get().getIsFolder()) && isDeleteSubDoc) {
             List<DocumentDTO> listSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
@@ -174,7 +186,12 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     Document subDocToDelete = Document.fromDocumentDTO(subDoc);
                     subDocToDelete.setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
                     subDocToDelete.setDeletedAt(LocalDateTime.now());
-                    documentRepository.save(subDocToDelete);
+                    Document subDocumentMovedToTrash = documentRepository.save(subDocToDelete);
+                    docHistoryService.save(DocHistory.builder()
+                            .document(subDocumentMovedToTrash)
+                            .title("Chuyển vào thùng rác")
+                            .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                            .build());
                 }
             }
         }
@@ -184,7 +201,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             systemLog.setIp("TP");
             systemLog.setAccount(accountService.findByUsername(AppConstants.ADMINISTRATOR));
             systemLog.setCreatedBy(-1l);
-            systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, "Xóa tài liệu", "id=" + documentId, "-", systemLog);
+            systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, "Xóa tài liệu", "id=" + documentId, SystemLog.EMPTY, systemLog);
         } else {
             systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
         }
@@ -316,7 +333,12 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             throw new BadRequestException(ErrorCode.FORBIDDEN_ERROR.getDescription());
         }
         docToMove.get().setParentId(destinationId);
-        documentRepository.save(docToMove.get());
+        Document documentMoved = documentRepository.save(docToMove.get());
+        docHistoryService.save(DocHistory.builder()
+                .document(documentMoved)
+                .title("Di chuyển đến thư mục [" + documentMoved.getName() + "]")
+                .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                .build());
         return "Move successfully!";
     }
 
@@ -352,6 +374,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             notificationService.save(Notification.builder()
                     .receiver(accountOpt.get())
                     .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), doc.get().getName()))
+                    .build());
+            docHistoryService.save(DocHistory.builder()
+                    .document(new Document(pDocId))
+                    .title("Phân quyền")
+                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
                     .build());
         }
         return docShared;
@@ -489,6 +516,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
         }
 
+        List<String> idList = new ArrayList<>();
+        for (DocumentDTO dto : listImported)
+            idList.add(dto.getId() + "");
+        systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, LogType.IM, "Import tài liệu", idList.toArray().toString(), SystemLog.EMPTY);
+
         return listImported;
     }
 
@@ -504,12 +536,22 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         }
         document.get().setDeletedAt(null);
         document.get().setDeletedBy(null);
-        documentRepository.save(document.get());
+        Document documentRestored = documentRepository.save(document.get());
+        docHistoryService.save(DocHistory.builder()
+                .document(documentRestored)
+                .title("Khôi phục khỏi thùng rác")
+                .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                .build());
 
         if (!document.get().isFile()) {
             List<DocumentDTO> subDocDTOs = documentInfoService.findSubDocByParentId(documentId, null, true, true, true);
             for (DocumentDTO d : subDocDTOs) {
                 documentRepository.setDeleteInformation(d.getId(), null, null);
+                docHistoryService.save(DocHistory.builder()
+                        .document(new Document(d.getId()))
+                        .title("Khôi phục khỏi thùng rác")
+                        .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                        .build());
             }
         }
     }

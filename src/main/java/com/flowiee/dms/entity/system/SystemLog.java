@@ -19,6 +19,8 @@ import lombok.experimental.FieldDefaults;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SystemLog extends BaseEntity implements java.io.Serializable {
+	public static String EMPTY = "-";
+
 	@Column(name = "module", length = 50, nullable = false)
 	String module;
 

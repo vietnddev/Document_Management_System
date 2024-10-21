@@ -19,6 +19,8 @@ import java.io.Serializable;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocHistory extends BaseEntity implements Serializable {
+    public static String EMPTY = "-";
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_id")
     Document document;

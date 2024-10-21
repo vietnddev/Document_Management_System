@@ -215,4 +215,12 @@ public class DocumentController extends BaseController {
         SummaryQuota summaryQuota = documentInfoService.getSummaryQuota(pageSize, pageNum - 1, sortBy, Sort.Direction.fromString(sortMode));
         return ApiResponse.ok(summaryQuota, pageNum, pageSize, summaryQuota.getDocumentQuotaPage().getTotalPages(), summaryQuota.getDocuments().size());
     }
+
+    @Operation(summary = "Get documents shared by others")
+    @GetMapping("/doc/shared-by-others")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ApiResponse<List<DocumentDTO>> getDocumentsSharedByOtherUsers(@RequestParam("pageSize") Integer pageSize,
+                                                                         @RequestParam("pageNum") Integer pageNum) {
+        return ApiResponse.ok(documentInfoService.getDocumentsSharedByOthers(pageSize, pageNum - 1).getContent());
+    }
 }

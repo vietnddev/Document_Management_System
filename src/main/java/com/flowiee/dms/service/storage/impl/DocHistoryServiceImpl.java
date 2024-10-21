@@ -45,8 +45,8 @@ public class DocHistoryServiceImpl extends BaseService implements DocHistoryServ
                     .fileStorage(fileStorage != null ? fileStorage : null)
                     .title(title != null ? title : "Modify " + document.getName())
                     .fieldName(log.getKey())
-                    .oldValue(oldValue != null ? oldValue.toString() : "-")
-                    .newValue(newValue != null ? newValue.toString() : "-")
+                    .oldValue(oldValue != null ? oldValue.toString() : DocHistory.EMPTY)
+                    .newValue(newValue != null ? newValue.toString() : DocHistory.EMPTY)
                     .build()));
         }
         return docHistories;
@@ -59,8 +59,8 @@ public class DocHistoryServiceImpl extends BaseService implements DocHistoryServ
                 .docData(docData)
                 .title("Modify metadata of " + document.getName())
                 .fieldName(field)
-                .oldValue(oldValue != null ? oldValue.toString() : "-")
-                .newValue(newValue != null ? newValue.toString() : "-")
+                .oldValue(oldValue != null ? oldValue.toString() : DocHistory.EMPTY)
+                .newValue(newValue != null ? newValue.toString() : DocHistory.EMPTY)
                 .build());
     }
 
