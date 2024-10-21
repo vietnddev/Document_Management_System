@@ -31,11 +31,16 @@
                                 <div class="card-body align-items-center p-0">
                                     <table class="table table-bordered table-striped align-items-center">
                                         <thead class="align-self-center">
+                                            <tr>
+                                                <td colspan="4">Các tệp sử dụng bộ nhớ:</td>
+                                            </tr>
                                             <tr class="align-self-center">
                                                 <th>STT</th>
                                                 <th></th>
                                                 <th>Tên tệp</th>
-                                                <th>Bộ nhớ đã dùng</th>
+                                                <th>Bộ nhớ đã dùng
+                                                    <i class="fa-solid fa-sort ml-1" id="sortBySize" style="cursor: pointer"></i>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody id="contentTable"></tbody>
@@ -61,17 +66,38 @@
     <script type="text/javascript">
         let mvDocuments = [];
         let mvListOfSelectedDocuments = [];
+        let mvSortBy;
+        let mvSortMode = "desc";
 
         $(document).ready(function () {
+            init();
             loadDocuments(mvPageSizeDefault, 1);
             updateTableContentWhenOnClickPagination(loadDocuments);
         });
+
+        function init() {
+            sort();
+        }
+
+        function sort() {
+            $("#sortBySize").on("click", function () {
+                mvSortBy = "fileSize";
+                if (mvSortMode === "desc") {
+                    mvSortMode = "asc";
+                } else {
+                    mvSortMode = "desc";
+                }
+                loadDocuments(getPageSize(), getPageNum());
+            })
+        }
 
         function loadDocuments(pageSize, pageNum) {
             let apiURL = mvHostURLCallApi + "/stg/doc/quota";
             let params = {
                 pageSize: pageSize,
-                pageNum: pageNum
+                pageNum: pageNum,
+                sortBy: mvSortBy,
+                sort: mvSortMode
             }
             $.get(apiURL, params, function (response) {
                 if (response.status === "OK") {

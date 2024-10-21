@@ -154,3 +154,11 @@ $(".sb_myDocs").on("click", function () {
 $(document).on("click", ".sb_myDocs_foLink", function () {
     window.location.href = mvHostURL + $(this).attr("link");
 })
+
+let getPageSize = () => {
+    return parseInt($('#selectPageSize').val(), 10);
+}
+
+let getPageNum = () => {
+    return parseInt($('#paginationInfo').attr("pageNum"), 10);
+}
