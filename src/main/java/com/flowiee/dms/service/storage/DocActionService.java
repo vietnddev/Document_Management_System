@@ -17,23 +17,23 @@ public interface DocActionService {
 
     DocumentDTO saveDoc(DocumentDTO documentDTO);
 
-    DocumentDTO updateDoc(DocumentDTO data, Integer documentId);
+    DocumentDTO updateDoc(DocumentDTO data, Long documentId);
 
-    String updateMetadata(List<DocMetaModel> metaDTOs, Integer documentId);
+    String updateMetadata(List<DocMetaModel> metaDTOs, Long documentId);
 
-    String deleteDoc(Integer documentId, boolean isDeleteSubDoc);
+    String deleteDoc(Long documentId, boolean isDeleteSubDoc);
 
-    String deleteDoc(Integer documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete);
+    String deleteDoc(Long documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete);
 
-    DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy);
+    DocumentDTO copyDoc(Long docId, Long destinationId, String nameCopy);
 
-    String moveDoc(Integer docId, Integer destinationId);
+    String moveDoc(Long docId, Long destinationId);
 
-    List<DocShare> shareDoc(Integer docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
+    List<DocShare> shareDoc(Long docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
 
-    ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException;
+    ResponseEntity<InputStreamResource> downloadDoc(long documentId) throws IOException;
 
-    List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
+    List<DocumentDTO> importDoc(long docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
 
-    void restore(int documentId);
+    void restore(long documentId);
 }

@@ -41,7 +41,7 @@ public class SystemControllerView extends BaseController {
 
     @PostMapping("/config/update/{id}")
     @PreAuthorize("@vldModuleSystem.setupConfig(true)")
-    public ModelAndView update(@ModelAttribute("config") SystemConfig config, @PathVariable("id") Integer configId) {
+    public ModelAndView update(@ModelAttribute("config") SystemConfig config, @PathVariable("id") Long configId) {
         if (configId <= 0 || configService.findById(configId).isEmpty()) {
             throw new ResourceNotFoundException("Config not found!", true);
         }

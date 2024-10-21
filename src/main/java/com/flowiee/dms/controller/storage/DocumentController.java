@@ -43,7 +43,7 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllDocuments(@RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam("pageNum") Integer pageNum,
-                                                          @RequestParam("parentId") Integer parentId,
+                                                          @RequestParam("parentId") Long parentId,
                                                           @RequestParam(value = "txtSearch", required = false) String txtSearch) {
         try {
             Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch, false);
@@ -58,11 +58,11 @@ public class DocumentController extends BaseController {
     @PostMapping("/doc/create")
     @PreAuthorize("@vldModuleStorage.insertDoc(true)")
     public ApiResponse<DocumentDTO> insertNewDoc(@RequestParam(value = "fileUpload", required = false) MultipartFile fileUpload,
-                                                 @RequestParam(value = "docTypeId", required = false) Integer docTypeId,
+                                                 @RequestParam(value = "docTypeId", required = false) Long docTypeId,
                                                  @RequestParam(value = "name") String name,
                                                  @RequestParam(value = "description", required = false) String description,
                                                  @RequestParam(value = "isFolder") String isFolder,
-                                                 @RequestParam(value = "parentId") Integer parentId) {
+                                                 @RequestParam(value = "parentId") Long parentId) {
         if ("N".equals(isFolder)) {
             if (fileUpload.isEmpty()) {
                 throw new BadRequestException("File attach does not exists!");
@@ -82,7 +82,7 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Find all folders")
     @GetMapping("/doc/folders")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Integer parentId) {
+    public ApiResponse<List<DocumentDTO>> getAllFolders(@RequestParam(value = "parentId", required = false) Long parentId) {
         try {
             List<DocumentDTO> documentDTOs = documentInfoService.findSubDocByParentId(parentId, true, false, false, false);
             return ApiResponse.ok(documentDTOs, 1, 100, 100, documentDTOs.size());
@@ -94,14 +94,14 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Update document")
     @PutMapping("/doc/update/{id}")
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
-    public ApiResponse<DocumentDTO> updateDoc(@PathVariable("id") Integer docId, @ModelAttribute DocumentDTO documentDTO) {
+    public ApiResponse<DocumentDTO> updateDoc(@PathVariable("id") Long docId, @ModelAttribute DocumentDTO documentDTO) {
         return ApiResponse.ok(docActionService.updateDoc(documentDTO, docId));
     }
 
     @Operation(summary = "Delete document")
     @DeleteMapping("/doc/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDoc(@PathVariable("id") Integer docId, @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
+    public ApiResponse<String> deleteDoc(@PathVariable("id") Long docId, @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
         if (ObjectUtils.isNotEmpty(forceDelete) && forceDelete.booleanValue()) {
             return ApiResponse.ok(docActionService.deleteDoc(docId, true, true, DocActionService.DELETE_NORMAL));
         }
@@ -111,9 +111,9 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Delete document")
     @DeleteMapping("/doc/multi-delete")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Integer> pListOfSelectedDocuments,
+    public ApiResponse<String> deleteDoc(@RequestParam(value = "ids") List<Long> pListOfSelectedDocuments,
                                          @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
-        for (int docId : pListOfSelectedDocuments) {
+        for (long docId : pListOfSelectedDocuments) {
             if (ObjectUtils.isNotEmpty(forceDelete) && forceDelete.booleanValue()) {
                 docActionService.deleteDoc(docId, true, true, DocActionService.DELETE_NORMAL);
             } else {
@@ -126,14 +126,14 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Copy document")
     @PostMapping("/doc/copy/{id}")
     @PreAuthorize("@vldModuleStorage.copyDoc(true)")
-    public ApiResponse<DocumentDTO> copyDoc(@PathVariable("id") Integer docId, @RequestParam("nameCopy") String nameCopy) {
+    public ApiResponse<DocumentDTO> copyDoc(@PathVariable("id") Long docId, @RequestParam("nameCopy") String nameCopy) {
         return ApiResponse.ok(docActionService.copyDoc(docId, null, nameCopy));
     }
 
     @Operation(summary = "Move document")
     @PutMapping("/doc/move/{id}")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
-    public ApiResponse<String> moveDoc(@PathVariable("id") Integer docId, @RequestBody MoveDocumentReq request) {
+    public ApiResponse<String> moveDoc(@PathVariable("id") Long docId, @RequestBody MoveDocumentReq request) {
         return ApiResponse.ok(docActionService.moveDoc(docId, request.getDestinationId()));
     }
 
@@ -141,7 +141,7 @@ public class DocumentController extends BaseController {
     @PutMapping("/doc/multi-move")
     @PreAuthorize("@vldModuleStorage.moveDoc(true)")
     public ApiResponse<String> moveDoc(@RequestBody MoveDocumentReq request) {
-        for (int docId : request.getSelectedDocuments()) {
+        for (long docId : request.getSelectedDocuments()) {
             docActionService.moveDoc(docId, request.getDestinationId());
         }
         return ApiResponse.ok(MessageCode.UPDATE_SUCCESS.getDescription());

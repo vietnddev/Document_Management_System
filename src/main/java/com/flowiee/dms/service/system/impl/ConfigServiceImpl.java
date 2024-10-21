@@ -24,7 +24,7 @@ public class ConfigServiceImpl extends BaseService implements ConfigService {
     SystemConfigRepository sysConfigRepo;
 
     @Override
-    public Optional<SystemConfig> findById(Integer id) {
+    public Optional<SystemConfig> findById(Long id) {
         return sysConfigRepo.findById(id);
     }
 
@@ -39,14 +39,14 @@ public class ConfigServiceImpl extends BaseService implements ConfigService {
     }
 
     @Override
-    public SystemConfig update(SystemConfig systemConfig, Integer id) {
+    public SystemConfig update(SystemConfig systemConfig, Long id) {
         systemConfig.setId(id);
         logger.info("Update config success! " + systemConfig.toString());
         return sysConfigRepo.save(systemConfig);
     }
 
     @Override
-    public String delete(Integer id) {
+    public String delete(Long id) {
         try {
             sysConfigRepo.deleteById(id);
             return MessageCode.DELETE_SUCCESS.getDescription();

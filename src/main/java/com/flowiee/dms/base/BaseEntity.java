@@ -11,7 +11,7 @@ public class BaseEntity extends AuditEntity implements Cloneable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public Integer id;
+    public Long id;
 
     @Override
     public Object clone() throws CloneNotSupportedException {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Integer> {
+public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("from Category c where c.code = 'ROOT' order by c.sort")
     List<Category> findRootCategory();
 
@@ -22,7 +22,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
            "and (:parentId is null or c.parentId=:parentId) " +
            "and (:idNotIn is null or c.id <> :idNotIn) " +
            "order by c.sort")
-    Page<Category> findSubCategory(@Param("type") String type, @Param("parentId") Integer parentId, @Param("idNotIn") Integer idNotIn, Pageable pageable);
+    Page<Category> findSubCategory(@Param("type") String type, @Param("parentId") Long parentId, @Param("idNotIn") Long idNotIn, Pageable pageable);
 
     @Query("from Category c where c.type in (:type) and (c.code is null or c.code <> 'ROOT') order by c.sort")
     List<Category> findSubCategory(@Param("type") List<String> type);

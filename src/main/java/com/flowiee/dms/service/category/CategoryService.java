@@ -9,5 +9,5 @@ import java.util.List;
 public interface CategoryService extends BaseCurdService<Category> {
     List<Category> findRootCategory();
 
-    Page<Category> findSubCategory(String categoryType, Integer parentId, Integer idNotIn, int pageSize, int pageNum);
+    Page<Category> findSubCategory(String categoryType, Long parentId, Long idNotIn, int pageSize, int pageNum);
 }

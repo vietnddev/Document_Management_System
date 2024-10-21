@@ -25,7 +25,7 @@ public class FileController {
     @Operation(summary = "Find all files of document")
     @GetMapping("/doc/files/{id}")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ApiResponse<List<FileDTO>> getAllFilesOfDoc(@PathVariable("id") Integer docId) {
+    public ApiResponse<List<FileDTO>> getAllFilesOfDoc(@PathVariable("id") Long docId) {
         return ApiResponse.ok(FileDTO.fromFileStorages(fileStorageService.findFilesOfDocument(docId)));
     }
 }

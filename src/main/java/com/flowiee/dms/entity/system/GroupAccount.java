@@ -32,7 +32,7 @@ public class GroupAccount extends BaseEntity implements Serializable {
     @Column(name = "note")
     String note;
 
-    public GroupAccount(Integer id, String groupCode, String groupName) {
+    public GroupAccount(Long id, String groupCode, String groupName) {
         this.id = id;
         this.groupCode = groupCode;
         this.groupName = groupName;

@@ -17,8 +17,8 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileDTO implements Serializable{
-    Integer id;
-    Integer documentId;
+    Long id;
+    Long documentId;
     Integer sort;
     String name;
     String storageName;

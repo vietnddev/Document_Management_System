@@ -44,7 +44,7 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     }
 
     @Override
-    public List<DocShareModel> findDetailRolesOfDocument(Integer docId) {
+    public List<DocShareModel> findDetailRolesOfDocument(Long docId) {
         List<DocShareModel> lsModel = new ArrayList<>();
         for (Account account : accountService.findAll()) {
             if (account.getUsername().equals(AppConstants.ADMINISTRATOR)) {
@@ -73,12 +73,12 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     }
 
     @Override
-    public Optional<DocShare> findById(Integer id) {
+    public Optional<DocShare> findById(Long id) {
         return docShareRepository.findById(id);
     }
 
     @Override
-    public boolean isShared(int documentId, String role) {
+    public boolean isShared(long documentId, String role) {
         if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
             return true;
         }
@@ -91,19 +91,19 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
 
     @Transactional
     @Override
-    public void deleteByAccount(Integer accountId) {
+    public void deleteByAccount(Long accountId) {
         docShareRepository.deleteAllByAccount(accountId);
     }
 
     @Transactional
     @Override
-    public void deleteByDocument(Integer documentId) {
+    public void deleteByDocument(Long documentId) {
         docShareRepository.deleteAllByDocument(documentId);
     }
 
     @Transactional
     @Override
-    public void deleteAllByDocument(Integer documentId) {
+    public void deleteAllByDocument(Long documentId) {
         docShareRepository.deleteAllByDocument(documentId);
         List<DocumentDTO> allSubDocs = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
         for (DocumentDTO dto : allSubDocs) {
@@ -117,13 +117,13 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
     }
 
     @Override
-    public DocShare update(DocShare entity, Integer entityId) {
+    public DocShare update(DocShare entity, Long entityId) {
         entity.setId(entityId);
         return docShareRepository.save(entity);
     }
 
     @Override
-    public String delete(Integer entityId) {
+    public String delete(Long entityId) {
         docShareRepository.deleteById(entityId);
         return MessageCode.DELETE_SUCCESS.getDescription();
     }

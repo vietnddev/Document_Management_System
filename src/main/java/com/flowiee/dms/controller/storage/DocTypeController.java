@@ -28,7 +28,7 @@ public class DocTypeController extends BaseController {
 
     @GetMapping("/doc/doc-type/{id}")
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
-    public ModelAndView viewDocTypeDetail(@PathVariable("id") Integer docTypeId) {
+    public ModelAndView viewDocTypeDetail(@PathVariable("id") Long docTypeId) {
         Optional<Category> docType = categoryService.findById(docTypeId);
         if (docType.isEmpty()) {
             throw new ResourceNotFoundException("Document type not found!", false);

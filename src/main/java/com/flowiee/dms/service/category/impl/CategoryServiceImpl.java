@@ -36,7 +36,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     CategoryHistoryRepository categoryHistoryRepo;
 
     @Override
-    public Optional<Category> findById(Integer entityId) {
+    public Optional<Category> findById(Long entityId) {
         return categoryRepo.findById(entityId);
     }
 
@@ -50,7 +50,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
 
     @Transactional
     @Override
-    public Category update(Category entity, Integer entityId) {
+    public Category update(Category entity, Long entityId) {
         Optional<Category> categoryInput = this.findById(entityId);
         if (categoryInput.isEmpty()) {
             throw new BadRequestException();
@@ -79,7 +79,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
 
     @Transactional
     @Override
-    public String delete(Integer entityId) {
+    public String delete(Long entityId) {
         Optional<Category> category = this.findById(entityId);
         if (entityId == null || entityId <= 0 || category.isEmpty()) {
             throw new BadRequestException("Category not found!");
@@ -108,7 +108,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
     }
 
     @Override
-    public Page<Category> findSubCategory(String categoryType, Integer parentId, Integer idNotIn, int pageSize, int pageNum) {
+    public Page<Category> findSubCategory(String categoryType, Long parentId, Long idNotIn, int pageSize, int pageNum) {
         Pageable pageable = Pageable.unpaged();
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());

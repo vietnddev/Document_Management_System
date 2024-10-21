@@ -46,7 +46,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     SystemConfigRepository configRepository;
 
     @Override
-    public Optional<FileStorage> findById(Integer fileId) {
+    public Optional<FileStorage> findById(Long fileId) {
         return fileRepository.findById(fileId);
     }
 
@@ -66,13 +66,13 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public FileStorage update(FileStorage entity, Integer entityId) {
+    public FileStorage update(FileStorage entity, Long entityId) {
         entity.setId(entityId);
         return fileRepository.save(entity);
     }
 
     @Override
-    public Optional<FileStorage> findFileIsActiveOfDocument(Integer documentId) {
+    public Optional<FileStorage> findFileIsActiveOfDocument(Long documentId) {
         List<FileStorage> listFiles = fileRepository.findFileOfDocument(documentId, true);
         if (listFiles != null && !listFiles.isEmpty()) {
             return Optional.of(listFiles.get(0));
@@ -81,12 +81,12 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public List<FileStorage> findFilesOfDocument(Integer documentId) {
+    public List<FileStorage> findFilesOfDocument(Long documentId) {
         return fileRepository.findFileOfDocument(documentId, null);
     }
 
     @Override
-    public FileDTO getFileDisplay(int documentId) {
+    public FileDTO getFileDisplay(long documentId) {
         Optional<FileStorage> fileStorageOpt = this.findFileIsActiveOfDocument(documentId);
         if (fileStorageOpt.isPresent())
         {
@@ -117,7 +117,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
+    public FileStorage saveFileOfDocument(MultipartFile fileUpload, Long documentId) throws IOException, DocumentException {
         FileStorage fileInfo = new FileStorage(fileUpload, MODULE.STORAGE);
         fileInfo.setCustomizeName(fileUpload.getOriginalFilename());
         fileInfo.setDocument(new Document(documentId));
@@ -148,7 +148,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException {
+    public String changFileOfDocument(MultipartFile fileUpload, Long documentId) throws IOException, DocumentException {
         Optional<DocumentDTO> document = documentInfoService.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException();
@@ -189,7 +189,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public String delete(Integer fileId) {
+    public String delete(Long fileId) {
         Optional<FileStorage> fileStorage = fileRepository.findById(fileId);
         if (fileStorage.isEmpty()) {
             throw new AppException(ErrorCode.DELETE_ERROR.getDescription());

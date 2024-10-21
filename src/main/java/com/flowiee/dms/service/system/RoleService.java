@@ -9,25 +9,25 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RoleService {
-    List<RoleModel> findAllRoleByAccountId(Integer accountId);
+    List<RoleModel> findAllRoleByAccountId(Long accountId);
 
-    List<RoleModel> findAllRoleByGroupId(Integer groupId);
+    List<RoleModel> findAllRoleByGroupId(Long groupId);
 
     List<ActionModel> findAllAction();
 
-    Optional<AccountRole> findById(Integer id);
+    Optional<AccountRole> findById(Long id);
 
-    List<AccountRole> findByAccountId(Integer accountId);
+    List<AccountRole> findByAccountId(Long accountId);
 
-    List<AccountRole> findByGroupId(Integer accountId);
+    List<AccountRole> findByGroupId(Long accountId);
 
-    String updatePermission(String moduleKey, String actionKey, Integer accountId);
+    String updatePermission(String moduleKey, String actionKey, Long accountId);
 
-    boolean isAuthorized(int accountId, String module, String action);
+    boolean isAuthorized(long accountId, String module, String action);
 
-    String deleteAllRole(Integer groupId, Integer accountId);
+    String deleteAllRole(Long groupId, Long accountId);
 
-    List<RoleModel> updateRightsOfGroup(List<RoleModel> rights, Integer groupId);
+    List<RoleModel> updateRightsOfGroup(List<RoleModel> rights, Long groupId);
 
     List<AccountRole> findByAction(ACTION action);
 }

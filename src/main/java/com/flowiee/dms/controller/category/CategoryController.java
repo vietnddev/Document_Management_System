@@ -42,10 +42,10 @@ public class CategoryController {
     @GetMapping("/{type}")
     @PreAuthorize("@vldModuleCategory.readCategory(true)")
     public ApiResponse<List<Category>> findByType(@PathVariable("type") String categoryType,
-                                                  @RequestParam(value = "parentId", required = false) Integer parentId,
+                                                  @RequestParam(value = "parentId", required = false) Long parentId,
                                                   @RequestParam(value = "pageSize", required = false) Integer pageSize,
                                                   @RequestParam(value = "pageNum", required = false) Integer pageNum,
-                                                  @RequestParam(value = "idNotIn", required = false) Integer idNotIn) {
+                                                  @RequestParam(value = "idNotIn", required = false) Long idNotIn) {
         try {
             if (!CommonUtils.isValidCategory(categoryType)) {
                 throw new BadRequestException("Category type inValid!");
@@ -75,7 +75,7 @@ public class CategoryController {
     @Operation(summary = "Update category")
     @PutMapping("/update/{categoryId}")
     @PreAuthorize("@vldModuleCategory.updateCategory(true)")
-    public ApiResponse<Category> updateCategory(@RequestBody Category category, @PathVariable("categoryId") Integer categoryId) {
+    public ApiResponse<Category> updateCategory(@RequestBody Category category, @PathVariable("categoryId") Long categoryId) {
         try {
             if (categoryService.findById(categoryId).isEmpty()) {
                 throw new BadRequestException();
@@ -99,7 +99,7 @@ public class CategoryController {
     @Operation(summary = "Delete category")
     @DeleteMapping("/delete/{categoryId}")
     @PreAuthorize("@vldModuleCategory.deleteCategory(true)")
-    public ApiResponse<String> deleteCategory(@PathVariable("categoryId") Integer categoryId) {
+    public ApiResponse<String> deleteCategory(@PathVariable("categoryId") Long categoryId) {
         try {
             if (categoryService.findById(categoryId).isEmpty()) {
                 throw new BadRequestException();

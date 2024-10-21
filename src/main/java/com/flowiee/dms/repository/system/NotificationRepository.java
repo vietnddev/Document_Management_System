@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, Integer> {
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
     @Query("from Notification n where n.receiver.id=:receiver")
-    Page<Notification> findByReceiver(@Param("receiver") Integer receiver, Pageable pageable);
+    Page<Notification> findByReceiver(@Param("receiver") Long receiver, Pageable pageable);
 }

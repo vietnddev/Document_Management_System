@@ -11,23 +11,23 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DocumentInfoService {
-    Optional<DocumentDTO> findById(Integer id);
+    Optional<DocumentDTO> findById(Long id);
 
-    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Integer parentId, List<Integer> listId, String isFolder, String pTxtSearch, Boolean isDeleted);
+    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Long parentId, List<Long> listId, String isFolder, String pTxtSearch, Boolean isDeleted);
 
     Page<Document> findAllDeletedDocument(int pageSize, int pageNum);
 
     List<DocumentDTO> setInfoRights(List<DocumentDTO> documentDTOs);
 
-    List<DocumentDTO> findSubDocByParentId(Integer parentId, Boolean isFolder, boolean fullLevel, boolean onlyBaseInfo, boolean isDeleted);
+    List<DocumentDTO> findSubDocByParentId(Long parentId, Boolean isFolder, boolean fullLevel, boolean onlyBaseInfo, boolean isDeleted);
 
-    List<Document> findByDoctype(Integer docType);
+    List<Document> findByDoctype(Long docType);
 
-    List<DocumentDTO> findHierarchyOfDocument(Integer documentId, Integer parentId);
+    List<DocumentDTO> findHierarchyOfDocument(Long documentId, Long parentId);
 
-    List<DocumentDTO> findSharedDocFromOthers(Integer accountId);
+    List<DocumentDTO> findSharedDocFromOthers(Long accountId);
 
-    List<DocMetaModel> findMetadata(Integer documentId);
+    List<DocMetaModel> findMetadata(Long documentId);
 
     SummaryQuota getSummaryQuota(int pageSize, int pageNum, String sortBy, Sort.Direction sortMode);
 }

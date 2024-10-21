@@ -38,7 +38,7 @@ public class ConfigController {
     @Operation(summary = "Update config")
     @PutMapping("/config/update/{id}")
     @PreAuthorize("@vldModuleSystem.setupConfig(true)")
-    public ApiResponse<SystemConfig> updateConfig(@RequestBody SystemConfig config, @PathVariable("id") Integer configId) {
+    public ApiResponse<SystemConfig> updateConfig(@RequestBody SystemConfig config, @PathVariable("id") Long configId) {
         try {
             if (configId <= 0 || configService.findById(configId).isEmpty()) {
                 throw new ResourceNotFoundException("Config not found!", false);

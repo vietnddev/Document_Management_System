@@ -12,10 +12,10 @@ import java.util.List;
 
 @Transactional
 @Repository
-public interface AccountRoleRepository extends JpaRepository<AccountRole, Integer> {
-    List<AccountRole> findByAccountId(Integer accountId);
+public interface AccountRoleRepository extends JpaRepository<AccountRole, Long> {
+    List<AccountRole> findByAccountId(Long accountId);
 
-    List<AccountRole> findByGroupId(Integer accountId);
+    List<AccountRole> findByGroupId(Long accountId);
 
     @Query("from AccountRole " +
             "where 1=1 " +
@@ -23,13 +23,13 @@ public interface AccountRoleRepository extends JpaRepository<AccountRole, Intege
             "and (:accountId is null or accountId=:accountId) " +
             "and module=:module " +
             "and action=:action")
-    AccountRole isAuthorized(@Param("groupId") Integer groupId,
-                             @Param("accountId") Integer accountId,
+    AccountRole isAuthorized(@Param("groupId") Long groupId,
+                             @Param("accountId") Long accountId,
                              @Param("module") String module,
                              @Param("action") String action);
 
     @Modifying
-    void deleteByAccountId(Integer accountId);
+    void deleteByAccountId(Long accountId);
 
     @Query("from AccountRole r " +
             "where 1=1 " +

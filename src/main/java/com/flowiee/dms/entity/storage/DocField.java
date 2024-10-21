@@ -57,7 +57,7 @@ public class DocField extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "docField", fetch = FetchType.LAZY)
     List<DocData> listDocData;
 
-    public DocField(Integer id) {
+    public DocField(Long id) {
     	super.id = id;
     }
 }

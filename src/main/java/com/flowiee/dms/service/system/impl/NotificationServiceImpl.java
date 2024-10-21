@@ -23,7 +23,7 @@ public class NotificationServiceImpl extends BaseService implements Notification
     NotificationRepository notificationRepository;
 
     @Override
-    public Optional<Notification> findById(Integer entityId) {
+    public Optional<Notification> findById(Long entityId) {
         return notificationRepository.findById(entityId);
     }
 
@@ -34,7 +34,7 @@ public class NotificationServiceImpl extends BaseService implements Notification
     }
 
     @Override
-    public Page<Notification> findByReceive(int pageNum, int pageSize, Integer receivedId) {
+    public Page<Notification> findByReceive(int pageNum, int pageSize, Long receivedId) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").ascending());
         if (pageNum == -1 || pageSize == -1) {
             pageable = Pageable.unpaged();

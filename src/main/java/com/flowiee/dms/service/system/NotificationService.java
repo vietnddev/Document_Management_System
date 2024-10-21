@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import java.util.Optional;
 
 public interface NotificationService {
-    Optional<Notification> findById(Integer notifyId);
+    Optional<Notification> findById(Long notifyId);
 
     Notification save(Notification notify);
 
-    Page<Notification> findByReceive(int pageNum, int pageSize, Integer receivedId);
+    Page<Notification> findByReceive(int pageNum, int pageSize, Long receivedId);
 }

@@ -31,7 +31,7 @@ public class DocShare extends BaseEntity implements Serializable {
     @Column(name = "role", nullable = false)
     String role;
 
-    public DocShare(Integer documentId, Integer accountId, String role) {
+    public DocShare(Long documentId, Long accountId, String role) {
         this.document = new Document(documentId);
         this.account = new Account(accountId);
         this.role = role;

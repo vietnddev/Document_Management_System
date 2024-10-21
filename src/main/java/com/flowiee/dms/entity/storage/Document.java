@@ -24,7 +24,7 @@ import java.util.Objects;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Document extends BaseEntity implements Serializable {
     @Column(name = "parent_id", nullable = false)
-    Integer parentId;
+    Long parentId;
 
     @Column(name = "is_folder", nullable = false)
     String isFolder;
@@ -60,11 +60,11 @@ public class Document extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
     List<DocHistory> listDocHistory;
 
-    public Document(Integer id) {
+    public Document(Long id) {
     	super.id = id;
     }
     
-    public Document(Integer id, String name) {
+    public Document(Long id, String name) {
     	this.name = name;
     }
 

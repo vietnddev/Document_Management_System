@@ -45,7 +45,7 @@ public class GroupAccountServiceImpl extends BaseService implements GroupAccount
     }
 
     @Override
-    public Optional<GroupAccount> findById(Integer groupId) {
+    public Optional<GroupAccount> findById(Long groupId) {
         if (groupId == null || groupId <= 0) {
             return Optional.empty();
         }
@@ -58,7 +58,7 @@ public class GroupAccountServiceImpl extends BaseService implements GroupAccount
     }
 
     @Override
-    public GroupAccount update(GroupAccount groupAccount, Integer groupId) {
+    public GroupAccount update(GroupAccount groupAccount, Long groupId) {
         Optional<GroupAccount> groupAccountOpt = this.findById(groupId);
         if (groupAccountOpt.isEmpty()) {
             throw new ResourceNotFoundException("Group account not found", false);
@@ -75,7 +75,7 @@ public class GroupAccountServiceImpl extends BaseService implements GroupAccount
     }
 
     @Override
-    public String delete(Integer groupId) {
+    public String delete(Long groupId) {
         if (this.findById(groupId).isEmpty()) {
             throw new BadRequestException();
         }

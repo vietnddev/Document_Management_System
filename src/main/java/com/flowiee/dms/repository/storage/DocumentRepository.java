@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface DocumentRepository extends JpaRepository<Document, Integer> {
+public interface DocumentRepository extends JpaRepository<Document, Long> {
     @Query("select distinct d " +
            "from Document d " +
            "left join DocShare ds " +
@@ -28,13 +28,13 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "    and (:listId is null or d.id in :listId) " +
            "    and (:isDeleted is null or (d.deletedAt is not null and :isDeleted = true) or (d.deletedAt is null and :isDeleted = false))")
     Page<Document> findAll(@Param("txtSearch") String txtSearch,
-                           @Param("parentId") Integer parentId,
-                           @Param("currentAccountId") Integer currentAccountId,
+                           @Param("parentId") Long parentId,
+                           @Param("currentAccountId") Long currentAccountId,
                            @Param("isAdmin") boolean isAdmin,
-                           @Param("accountId") Integer accountId,
-                           @Param("docTypeId") Integer docTypeId,
+                           @Param("accountId") Long accountId,
+                           @Param("docTypeId") Long docTypeId,
                            @Param("isFolder") String isFolder,
-                           @Param("listId") List<Integer> listId,
+                           @Param("listId") List<Long> listId,
                            @Param("isDeleted") Boolean isDeleted,
                            Pageable pageable);
 
@@ -59,14 +59,14 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
                    "    and d.deletedAt is null " +
                    "order by f.sort",
            nativeQuery = true)
-    List<Object[]> findMetadata(@Param("documentId") Integer documentId);
+    List<Object[]> findMetadata(@Param("documentId") long documentId);
 
     @Query("from Document d " +
            "where 1=1 " +
            "    and d.id in (select ds.document.id from DocShare ds where ds.account.id=:accountId) " +
            "    and d.deletedAt is null " +
            "order by d.isFolder, d.createdAt")
-    List<Document> findWasSharedDoc(@Param("accountId") Integer accountId);
+    List<Document> findWasSharedDoc(@Param("accountId") Long accountId);
 
     @Query("select " +
            "    count(case when d.isFolder = 'Y' then 1 end) as total_folder, " +
@@ -86,8 +86,8 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "    and (:isOnlyFolder is null or d.isFolder = :isOnlyFolder) " +
            "    and d.deletedAt is null " +
            "order by d.path")
-    List<DocumentTreeView> findGeneralFolderTree(@Param("documentId") Integer documentId,
-                                                 @Param("parentId") Integer parentId,
+    List<DocumentTreeView> findGeneralFolderTree(@Param("documentId") Long documentId,
+                                                 @Param("parentId") Long parentId,
                                                  @Param("isOnlyFolder") String isOnlyFolder);
 
     @Query("select case when count(d) > 0 then true else false end " +
@@ -95,11 +95,11 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
            "where 1=1 " +
            "    and d.parentId = :docId " +
            "    and d.deletedAt is null")
-    boolean existsSubDocument(@Param("docId") Integer docId);
+    boolean existsSubDocument(@Param("docId") Long docId);
 
     @Modifying
     @Query("update Document d set d.deletedAt = :deletedAt, d.deletedBy = :deletedBy where d.id = :documentId")
-    void setDeleteInformation(@Param("documentId") int documentId,
+    void setDeleteInformation(@Param("documentId") long documentId,
                               @Param("deletedAt") LocalDateTime deletedAt,
                               @Param("deletedBy") String deletedBy);
 
@@ -108,8 +108,8 @@ public interface DocumentRepository extends JpaRepository<Document, Integer> {
 
     @Query("select d.id, d.name, d.asName, d.docType, f.fileSize " +
            "from Document d " +
-           "inner join FileStorage f" +
-           "    on f.document.id = d.id" +
+           "inner join FileStorage f " +
+           "    on f.document.id = d.id " +
            "    and f.isActive = true " +
            "where d.isFolder = 'N'")
     Page<Object[]> findDocumentSortByMemoryUsed(Pageable pageable);

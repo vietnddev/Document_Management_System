@@ -11,7 +11,7 @@ import java.util.List;
 public interface DocHistoryService {
     List<DocHistory> findAll();
 
-    List<DocHistory> findByDocData(Integer docDataId);
+    List<DocHistory> findByDocData(Long docDataId);
 
     DocHistory save(DocHistory docHistory);
 

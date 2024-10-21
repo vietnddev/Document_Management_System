@@ -98,7 +98,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 	}
 
 	@Override
-	public Optional<Account> findById(Integer accountId) {
+	public Optional<Account> findById(Long accountId) {
 		return accountRepository.findById(accountId);
 	}
 
@@ -125,7 +125,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 
 	@Transactional
 	@Override
-	public Account update(Account account, Integer entityId) {
+	public Account update(Account account, Long entityId) {
 		try {
 			account.setId(entityId);
 			if (account.getRole() != null && account.getRole().equals(AppConstants.ADMINISTRATOR)) {
@@ -144,7 +144,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 
 	@Transactional
 	@Override
-	public String delete(Integer accountId) {
+	public String delete(Long accountId) {
 		Account account = null;
 		try {
 			account = accountRepository.findById(accountId).orElse(null);

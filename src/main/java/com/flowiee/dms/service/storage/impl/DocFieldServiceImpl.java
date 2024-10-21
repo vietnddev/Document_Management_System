@@ -36,12 +36,12 @@ public class DocFieldServiceImpl extends BaseService implements DocFieldService 
     }
 
     @Override
-    public Optional<DocField> findById(Integer id) {
+    public Optional<DocField> findById(Long id) {
         return docFieldRepository.findById(id);
     }
 
     @Override
-    public List<DocField> findByDocTypeId(Integer doctypeId) {
+    public List<DocField> findByDocTypeId(Long doctypeId) {
         return docFieldRepository.findByDoctype(doctypeId);
     }
 
@@ -55,7 +55,7 @@ public class DocFieldServiceImpl extends BaseService implements DocFieldService 
     }
 
     @Override
-    public DocField update(DocField pDocField, Integer docFieldId) {
+    public DocField update(DocField pDocField, Long docFieldId) {
         Optional<DocField> docFieldOpt = this.findById(docFieldId);
         if (docFieldOpt.isEmpty()) {
             throw new ResourceNotFoundException("DocField not found!", true);
@@ -73,7 +73,7 @@ public class DocFieldServiceImpl extends BaseService implements DocFieldService 
 
     @Transactional
     @Override
-    public String delete(Integer id) {
+    public String delete(Long id) {
         Optional<DocField> docField = this.findById(id);
         if (docField.isEmpty()) {
             throw new ResourceNotFoundException("DocField not found!", true);

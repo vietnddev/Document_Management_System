@@ -32,7 +32,7 @@ public class DocFieldController {
 
     @PostMapping(value = "/doc/doc-field/update/{id}", params = "update")
     @PreAuthorize("@vldModuleStorage.updateDoc(true)")
-    public ModelAndView updateDocField(HttpServletRequest request, @ModelAttribute("docField") DocField docField, @PathVariable("id") Integer docFieldId) {
+    public ModelAndView updateDocField(HttpServletRequest request, @ModelAttribute("docField") DocField docField, @PathVariable("id") Long docFieldId) {
         if (docFieldId <= 0 || docFieldService.findById(docFieldId).isEmpty()) {
             throw new ResourceNotFoundException("DocField not found!", false);
         }
@@ -44,7 +44,7 @@ public class DocFieldController {
     @Operation(summary = "Delete field")
     @DeleteMapping("/doc/doc-field/delete/{id}")
     @PreAuthorize("@vldModuleStorage.deleteDoc(true)")
-    public ApiResponse<String> deleteDocField(@PathVariable("id") Integer docFiledId) {
+    public ApiResponse<String> deleteDocField(@PathVariable("id") Long docFiledId) {
         if (docFieldService.findById(docFiledId).isEmpty()) {
             throw new ResourceNotFoundException("DocField not found!", false);
         }

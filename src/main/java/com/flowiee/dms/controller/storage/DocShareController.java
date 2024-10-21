@@ -26,14 +26,14 @@ public class DocShareController {
     @Operation(summary = "Get detail shared role of document")
     @GetMapping("/doc/share/{id}")
     @PreAuthorize("@vldModuleStorage.shareDoc(true)")
-    public ApiResponse<List<DocShareModel>> shareDoc(@PathVariable("id") Integer docId) {
+    public ApiResponse<List<DocShareModel>> shareDoc(@PathVariable("id") Long docId) {
         return ApiResponse.ok(docShareService.findDetailRolesOfDocument(docId));
     }
 
     @Operation(summary = "Share document")
     @PutMapping("/doc/share/{id}")
     @PreAuthorize("@vldModuleStorage.shareDoc(true)")
-    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Integer docId,
+    public ApiResponse<List<DocShare>> shareDoc(@PathVariable("id") Long docId,
                                                 @RequestBody List<DocShareModel> accountShares,
                                                 @RequestParam(value = "applyInto", required = false) Boolean applyInto) {
         if (ObjectUtils.isEmpty(applyInto) || !applyInto.booleanValue())

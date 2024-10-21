@@ -9,6 +9,6 @@ import java.util.List;
 @Getter
 @Setter
 public class MoveDocumentReq implements Serializable {
-    int destinationId;
+    long destinationId;
     List<Integer> selectedDocuments;
 }

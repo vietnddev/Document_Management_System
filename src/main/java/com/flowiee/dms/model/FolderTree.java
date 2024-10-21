@@ -13,9 +13,9 @@ import java.util.List;
 @Setter
 public class FolderTree {
     private int level;
-    private int id;
+    private long id;
     private String name;
-    private int parentId;
+    private long parentId;
     private String parentName;
     private boolean isDirectory;
     private File file;

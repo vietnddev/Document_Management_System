@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CategoryHistoryRepository extends JpaRepository<CategoryHistory, Integer> {
+public interface CategoryHistoryRepository extends JpaRepository<CategoryHistory, Long> {
     @Modifying
     @Query("delete from CategoryHistory where category.id=:categoryId")
-    void deleteAllByCategory(@Param("categoryId") Integer categoryId);
+    void deleteAllByCategory(@Param("categoryId") Long categoryId);
 }

@@ -9,13 +9,13 @@ import java.util.List;
 public interface DocShareService extends BaseCurdService<DocShare> {
     List<DocShare> findAll();
 
-    List<DocShareModel> findDetailRolesOfDocument(Integer documentId);
+    List<DocShareModel> findDetailRolesOfDocument(Long documentId);
 
-    boolean isShared(int documentId, String role);
+    boolean isShared(long documentId, String role);
 
-    void deleteByAccount(Integer accountId);
+    void deleteByAccount(Long accountId);
 
-    void deleteByDocument(Integer documentId);
+    void deleteByDocument(Long documentId);
 
-    void deleteAllByDocument(Integer documentId);
+    void deleteAllByDocument(Long documentId);
 }

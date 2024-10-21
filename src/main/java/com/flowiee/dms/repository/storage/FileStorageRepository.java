@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface FileStorageRepository extends JpaRepository<FileStorage, Integer> {
+public interface FileStorageRepository extends JpaRepository<FileStorage, Long> {
     @Query("from FileStorage f where f.document.id=:documentId and (:status is null or f.isActive=:status) order by f.isActive, f.createdAt desc")
-    List<FileStorage> findFileOfDocument(@Param("documentId") Integer documentId, @Param("status") Boolean status);
+    List<FileStorage> findFileOfDocument(@Param("documentId") Long documentId, @Param("status") Boolean status);
 }

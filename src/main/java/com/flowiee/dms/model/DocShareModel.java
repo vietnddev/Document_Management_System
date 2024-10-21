@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocShareModel {
-    Integer documentId;
-    Integer accountId;
+    Long documentId;
+    Long accountId;
     String accountName;
     Boolean canRead;
     Boolean canUpdate;

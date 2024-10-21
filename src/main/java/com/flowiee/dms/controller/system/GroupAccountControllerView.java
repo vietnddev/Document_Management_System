@@ -32,7 +32,7 @@ public class GroupAccountControllerView extends BaseController {
 
     @GetMapping(value = "/{id}")
     @PreAuthorize("@vldModuleSystem.readGroupAccount(true)")
-    public ModelAndView findDetailGroup(@PathVariable("id") Integer groupId) {
+    public ModelAndView findDetailGroup(@PathVariable("id") Long groupId) {
         Optional<GroupAccount> groupAcc = groupAccountService.findById(groupId);
         if (groupAcc.isEmpty()) {
             throw new ResourceNotFoundException("Group account not found!", true);

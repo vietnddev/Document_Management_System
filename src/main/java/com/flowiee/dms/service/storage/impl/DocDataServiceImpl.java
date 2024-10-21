@@ -24,7 +24,7 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
         return docDataRepository.findAll();
     }
 
-    public Optional<DocData> findById(Integer id) {
+    public Optional<DocData> findById(Long id) {
         return docDataRepository.findById(id);
     }
 
@@ -33,41 +33,41 @@ public class DocDataServiceImpl extends BaseService implements DocDataService {
     }
 
     @Override
-    public DocData update(DocData entity, Integer entityId) {
+    public DocData update(DocData entity, Long entityId) {
         entity.setId(entityId);
         return docDataRepository.save(entity);
     }
 
-    public String delete(Integer id) {
+    public String delete(Long id) {
         docDataRepository.deleteById(id);
         return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override
-    public List<DocData> findByDocField(Integer docFieldId) {
+    public List<DocData> findByDocField(Long docFieldId) {
         return docDataRepository.findByDocField(docFieldId);
     }
 
     @Override
-    public List<DocData> findByDocument(Integer documentId) {
+    public List<DocData> findByDocument(Long documentId) {
         return docDataRepository.findByDocumentId(documentId);
     }
 
     @Override
-    public DocData findByFieldIdAndDocId(Integer docFieldId, Integer documentId) {
+    public DocData findByFieldIdAndDocId(Long docFieldId, Long documentId) {
         return docDataRepository.findByFieldIdAndDocId(docFieldId, documentId);
     }
 
     @Transactional
     @Override
-    public String update(String value, Integer docDataId) {
+    public String update(String value, Long docDataId) {
         docDataRepository.updateMetaData(value, docDataId);
         return MessageCode.UPDATE_SUCCESS.getDescription();
     }
 
     @Transactional
     @Override
-    public void deleteAllByDocument(Integer documentId) {
+    public void deleteAllByDocument(Long documentId) {
         docDataRepository.deleteAllByDocument(documentId);
     }
 }

@@ -8,5 +8,5 @@ import java.util.List;
 public interface DocFieldService extends BaseCurdService<DocField> {
     List<DocField> findAll();
 
-    List<DocField> findByDocTypeId(Integer doctypeId);
+    List<DocField> findByDocTypeId(Long doctypeId);
 }

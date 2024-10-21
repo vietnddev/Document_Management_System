@@ -65,7 +65,7 @@ public class DocHistoryServiceImpl extends BaseService implements DocHistoryServ
     }
 
     @Override
-    public List<DocHistory> findByDocData(Integer docDataId) {
+    public List<DocHistory> findByDocData(Long docDataId) {
         return docHistoryRepository.findByDocData(docDataId);
     }
 }

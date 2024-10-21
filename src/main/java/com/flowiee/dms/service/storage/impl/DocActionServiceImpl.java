@@ -60,7 +60,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             document.setName(document.getName().trim());
             document.setAsName(CommonUtils.generateAliasName(document.getName()));
             if (ObjectUtils.isEmpty(document.getParentId())) {
-                document.setParentId(0);
+                document.setParentId(0l);
             }
             Document documentSaved = documentRepository.save(document);
             if ("N".equals(document.getIsFolder()) && documentDTO.getFileUpload() != null) {
@@ -91,7 +91,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     }
 
     @Override
-    public DocumentDTO updateDoc(DocumentDTO data, Integer documentId) {
+    public DocumentDTO updateDoc(DocumentDTO data, Long documentId) {
         Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", false);
@@ -114,7 +114,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     }
 
     @Override
-    public String updateMetadata(List<DocMetaModel> metaDTOs, Integer documentId) {
+    public String updateMetadata(List<DocMetaModel> metaDTOs, Long documentId) {
         Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", true);
@@ -142,13 +142,13 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public String deleteDoc(Integer documentId, boolean isDeleteSubDoc) {
+    public String deleteDoc(Long documentId, boolean isDeleteSubDoc) {
         return deleteDoc(documentId, isDeleteSubDoc, false, DELETE_NORMAL);
     }
 
     @Transactional
     @Override
-    public String deleteDoc(Integer documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete) {
+    public String deleteDoc(Long documentId, boolean isDeleteSubDoc, boolean forceDelete, int modeDelete) {
         Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
             throw new ResourceNotFoundException("Document not found! " + documentId, false);
@@ -183,7 +183,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             SystemLog systemLog = SystemLog.builder().build();
             systemLog.setIp("TP");
             systemLog.setAccount(accountService.findByUsername(AppConstants.ADMINISTRATOR));
-            systemLog.setCreatedBy(-1);
+            systemLog.setCreatedBy(-1l);
             systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, "Xóa tài liệu", "id=" + documentId, "-", systemLog);
         } else {
             systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
@@ -193,7 +193,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     }
 
     @Transactional
-    public void deleteDoc(int documentId) {
+    public void deleteDoc(long documentId) {
         deleteFileOfDocument(documentId);
         docHistoryRepository.deleteAllByDocument(documentId);
         docShareService.deleteByDocument(documentId);
@@ -201,7 +201,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         documentRepository.deleteById(documentId);
     }
 
-    private void deleteFileOfDocument(int documentId) {
+    private void deleteFileOfDocument(long documentId) {
         List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
         for (FileStorage fileStorage : fileStorages) {
             String fileExtension = fileStorage.getExtension();
@@ -230,7 +230,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public DocumentDTO copyDoc(Integer docId, Integer destinationId, String nameCopy) {
+    public DocumentDTO copyDoc(Long docId, Long destinationId, String nameCopy) {
         Optional<DocumentDTO> doc = documentInfoService.findById(docId);
         if (doc.isEmpty()) {
             throw new BadRequestException("Document to copy not found!");
@@ -304,7 +304,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public String moveDoc(Integer docId, Integer destinationId) {
+    public String moveDoc(Long docId, Long destinationId) {
         Optional<Document> docToMove = documentRepository.findById(docId);
         if (docToMove.isEmpty()) {
             throw new ResourceNotFoundException("Document to move not found!", false);
@@ -322,7 +322,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public List<DocShare> shareDoc(Integer pDocId, List<DocShareModel> accountShares, boolean applyForSubFolder) {
+    public List<DocShare> shareDoc(Long pDocId, List<DocShareModel> accountShares, boolean applyForSubFolder) {
         Optional<DocumentDTO> doc = documentInfoService.findById(pDocId);
         if (doc.isEmpty() || accountShares.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", false);
@@ -357,7 +357,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         return docShared;
     }
 
-    private List<DocShare> doShare(int docId, int accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
+    private List<DocShare> doShare(long docId, long accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
         List<DocShare> docShared = new ArrayList<>();
         if (canRead) {
             docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
@@ -378,7 +378,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     }
 
     @Override
-    public ResponseEntity<InputStreamResource> downloadDoc(int documentId) throws IOException {
+    public ResponseEntity<InputStreamResource> downloadDoc(long documentId) throws IOException {
         Optional<DocumentDTO> doc = documentInfoService.findById(documentId);
         if (doc.isEmpty()) {
             throw new ResourceNotFoundException("Document not found!", false);
@@ -460,7 +460,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public List<DocumentDTO> importDoc(int docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException {
+    public List<DocumentDTO> importDoc(long docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException {
         List<DocumentDTO> listImported = new ArrayList<>();
         if (docParentId > 0) {
             Optional<DocumentDTO> documentOpt = documentInfoService.findById(docParentId);
@@ -494,7 +494,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public void restore(int documentId) {
+    public void restore(long documentId) {
         Optional<Document> document = documentRepository.findById(documentId);
         if (document.isEmpty()) {
             throw new BadRequestException(String.format("Document with id %s not found!", documentId));

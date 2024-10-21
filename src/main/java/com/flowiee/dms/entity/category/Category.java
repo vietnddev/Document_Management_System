@@ -72,7 +72,7 @@ public class Category extends BaseEntity implements Serializable {
 	@OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
 	List<CategoryHistory> listCategoryHistory;
 
-	public Category(Integer id, String name) {
+	public Category(Long id, String name) {
 		super.id = id;
 		this.name = name;
 	}

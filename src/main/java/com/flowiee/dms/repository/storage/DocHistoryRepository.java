@@ -10,14 +10,14 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DocHistoryRepository extends JpaRepository<DocHistory, Integer> {
+public interface DocHistoryRepository extends JpaRepository<DocHistory, Long> {
     @Query("from DocHistory d where d.document.id=:documentId")
-    List<DocHistory> findByDocument(@Param("documentId") Integer documentId);
+    List<DocHistory> findByDocument(@Param("documentId") Long documentId);
 
     @Query("from DocHistory d where d.docData.id=:docDataId")
-    List<DocHistory> findByDocData(@Param("docDataId") Integer docDataId);
+    List<DocHistory> findByDocData(@Param("docDataId") Long docDataId);
 
     @Modifying
     @Query("delete from DocHistory d where d.document.id=:documentId")
-    void deleteAllByDocument(@Param("documentId") Integer documentId);
+    void deleteAllByDocument(@Param("documentId") Long documentId);
 }

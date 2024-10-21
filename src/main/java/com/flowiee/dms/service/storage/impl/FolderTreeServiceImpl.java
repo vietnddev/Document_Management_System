@@ -25,7 +25,7 @@ public class FolderTreeServiceImpl extends BaseService implements FolderTreeServ
      * RowNumm: Thư mục số mấy của cấp HierarchyLevel
      * */
     @Override
-    public List<DocumentDTO> getDocumentWithTreeForm(Integer parentId, boolean isOnlyFolder) {
+    public List<DocumentDTO> getDocumentWithTreeForm(Long parentId, boolean isOnlyFolder) {
         logger.info("Generate folder tree");
         List<DocumentDTO> folderTree = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class FolderTreeServiceImpl extends BaseService implements FolderTreeServ
     }
 
     @Override
-    public DocumentDTO findByDocId(int documentId) {
+    public DocumentDTO findByDocId(long documentId) {
         List<DocumentTreeView> documentTreeViews = documentRepository.findGeneralFolderTree(documentId, null, null);
         if (ObjectUtils.isEmpty(documentTreeViews)) {
             return null;

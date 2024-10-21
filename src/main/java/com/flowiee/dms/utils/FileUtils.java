@@ -199,7 +199,7 @@ public class FileUtils {
     }
 
     // Hàm đệ quy để xây dựng cây thư mục
-    public static FolderTree buildFolderTree(File folder, int level, int parentId, String parentName) {
+    public static FolderTree buildFolderTree(File folder, int level, long parentId, String parentName) {
         FolderTree folderTree = FolderTree.builder()
                 .name(folder.getName())
                 .isDirectory(folder.isDirectory())

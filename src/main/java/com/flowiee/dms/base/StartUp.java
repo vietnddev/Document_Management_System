@@ -93,7 +93,7 @@ public class StartUp {
 
     private SystemConfig initDefaultAudit(ConfigCode code, String name, String value) {
         SystemConfig systemConfig = new SystemConfig(code, name, value);
-        systemConfig.setCreatedBy(-1);
+        systemConfig.setCreatedBy(-1l);
         systemConfig.setLastUpdatedBy("SA");
         return systemConfig;
     }

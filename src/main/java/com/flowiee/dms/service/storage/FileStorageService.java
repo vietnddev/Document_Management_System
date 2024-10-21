@@ -12,17 +12,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FileStorageService extends BaseCurdService<FileStorage> {
-    FileStorage saveFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException;
+    FileStorage saveFileOfDocument(MultipartFile fileUpload, Long documentId) throws IOException, DocumentException;
 
     String saveFileOfImport(MultipartFile fileImport, FileStorage fileInfo) throws IOException;
 
-    String changFileOfDocument(MultipartFile fileUpload, Integer documentId) throws IOException, DocumentException;
+    String changFileOfDocument(MultipartFile fileUpload, Long documentId) throws IOException, DocumentException;
 
-    Optional<FileStorage> findFileIsActiveOfDocument(Integer documentId);
+    Optional<FileStorage> findFileIsActiveOfDocument(Long documentId);
 
-    List<FileStorage> findFilesOfDocument(Integer documentId);
+    List<FileStorage> findFilesOfDocument(Long documentId);
 
-    FileDTO getFileDisplay(int documentId);
+    FileDTO getFileDisplay(long documentId);
 
     void saveFileAttach(MultipartFile multipartFile, Path dest) throws IOException;
 }

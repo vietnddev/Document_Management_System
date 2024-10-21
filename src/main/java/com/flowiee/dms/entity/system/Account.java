@@ -81,11 +81,11 @@ public class Account extends BaseEntity implements Serializable {
 	@Transient
 	String ip;
 
-	public Account(Integer id) {
+	public Account(Long id) {
 		super.id = id;
 	}
 
-	public Account(Integer id, String username, String fullName) {
+	public Account(Long id, String username, String fullName) {
 		super.id = id;
 		this.username = username;
 		this.fullName = fullName;

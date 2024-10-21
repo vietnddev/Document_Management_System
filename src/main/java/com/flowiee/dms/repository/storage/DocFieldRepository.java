@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DocFieldRepository extends JpaRepository<DocField, Integer> {
+public interface DocFieldRepository extends JpaRepository<DocField, Long> {
     @Query("from DocField d where d.docType.id=:docTypeId order by d.sort")
-    List<DocField> findByDoctype(@Param("docTypeId") Integer docTypeId);
+    List<DocField> findByDoctype(@Param("docTypeId") Long docTypeId);
 }

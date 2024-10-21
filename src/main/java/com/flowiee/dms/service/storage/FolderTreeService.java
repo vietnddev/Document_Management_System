@@ -5,7 +5,7 @@ import com.flowiee.dms.model.dto.DocumentDTO;
 import java.util.List;
 
 public interface FolderTreeService {
-    List<DocumentDTO> getDocumentWithTreeForm(Integer docParentId, boolean isOnlyFolder);
+    List<DocumentDTO> getDocumentWithTreeForm(Long docParentId, boolean isOnlyFolder);
 
-    DocumentDTO findByDocId(int documentId);
+    DocumentDTO findByDocId(long documentId);
 }

@@ -28,12 +28,12 @@ public class AccountRole extends BaseEntity implements java.io.Serializable {
 	String action;
 
 	@Column(name = "account_id")
-	Integer accountId;
+	Long accountId;
 
 	@Column(name = "group_id")
-	Integer groupId;
+	Long groupId;
 
-	public AccountRole(String module, String action, Integer accountId, Integer groupId) {
+	public AccountRole(String module, String action, Long accountId, Long groupId) {
 		this.module = module;
 		this.action = action;
 		this.accountId = accountId;

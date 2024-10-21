@@ -9,15 +9,15 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocMetaModel {
-	Integer fieldId;
+	Long fieldId;
 	String fieldName;
-    Integer dataId;
+	Long dataId;
     String dataValue;
     String fieldType;
     Boolean fieldRequired;
-	Integer docId;
+	Long docId;
 
-	public DocMetaModel(Integer fieldId, String fieldName, Integer dataId, String dataValue, String fieldType, Boolean fieldRequired, Integer docId) {
+	public DocMetaModel(Long fieldId, String fieldName, Long dataId, String dataValue, String fieldType, Boolean fieldRequired, Long docId) {
 		this.fieldId = fieldId;
 		this.fieldName = fieldName;
 		this.dataId = dataId;

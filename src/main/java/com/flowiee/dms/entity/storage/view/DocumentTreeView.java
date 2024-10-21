@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Table(name = "document_tree_view")
 public class DocumentTreeView extends BaseEntity {
     @Column(name = "parent_id")
-    Integer parentId;
+    Long parentId;
 
     @Column(name = "is_folder")
     String isFolder;
@@ -24,7 +24,7 @@ public class DocumentTreeView extends BaseEntity {
     String description;
 
     @Column(name = "doc_type_id")
-    Integer documentTypeId;
+    Long documentTypeId;
 
     @Column(name = "Has_SubFolders")
     String hasSubFolders;

@@ -29,7 +29,7 @@ public class ProfileControllerView extends BaseController {
 	public ModelAndView updateProfile(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute("account") Account accountEntity) {
 		String username = userDetails.getUsername();
 		String password = accountService.findByUsername(username).getPassword();
-		int accountID = accountService.findByUsername(username).getId();
+		long accountID = accountService.findByUsername(username).getId();
 
 		accountEntity.setId(accountID);
 		accountEntity.setUsername(username);

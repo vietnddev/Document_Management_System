@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocumentDTO extends Document implements Serializable {
-    Integer docTypeId;
+    Long docTypeId;
     String docTypeName;
     FileDTO file;
     @JsonIgnore

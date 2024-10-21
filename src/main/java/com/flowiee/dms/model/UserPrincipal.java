@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserPrincipal extends Account implements UserDetails {
-    Integer id;
+    Long id;
     String username;
     String password;
     String ip;
