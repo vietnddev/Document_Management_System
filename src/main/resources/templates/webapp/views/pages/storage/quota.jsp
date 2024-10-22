@@ -32,7 +32,7 @@
                                     <table class="table table-bordered table-striped align-items-center">
                                         <thead class="align-self-center">
                                             <tr>
-                                                <td colspan="4">Các tệp sử dụng bộ nhớ:</td>
+                                                <td colspan="4">Đã sử dụng <span class="text-uppercase text-bold" id="totalMemoryUsed"></span>, các tệp sử dụng bộ nhớ:</td>
                                             </tr>
                                             <tr class="align-self-center">
                                                 <th>STT</th>
@@ -120,6 +120,8 @@
                             </tr>
                         `);
                     });
+                    $("#totalMemoryUsed").empty();
+                    $("#totalMemoryUsed").append(data.totalMemoryUsed);
                 }
             }).fail(function (xhr) {
                 showErrorModal($.parseJSON(xhr.responseText).message);

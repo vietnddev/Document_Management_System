@@ -23,4 +23,5 @@ public class PagesUtils {
     public static final String STG_DOCTYPE_DETAIL = mdlSTORAGE + "/doctype-detail";
     public static final String STG_TRASH = mdlSTORAGE + "/trash";
     public static final String STG_QUOTA = mdlSTORAGE + "/quota";
+    public static final String STG_SHARED_BY_OTHERS = mdlSTORAGE + "/shared-by-others";
 }

@@ -221,6 +221,7 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getDocumentsSharedByOtherUsers(@RequestParam("pageSize") Integer pageSize,
                                                                          @RequestParam("pageNum") Integer pageNum) {
-        return ApiResponse.ok(documentInfoService.getDocumentsSharedByOthers(pageSize, pageNum - 1).getContent());
+        Page<DocumentDTO> documentDTOPage = documentInfoService.getDocumentsSharedByOthers(pageSize, pageNum - 1);
+        return ApiResponse.ok(documentDTOPage.getContent(), pageNum, pageSize, documentDTOPage.getTotalPages(), documentDTOPage.getTotalElements());
     }
 }

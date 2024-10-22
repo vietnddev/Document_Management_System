@@ -238,7 +238,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         }
 
         return SummaryQuota.builder()
-                .totalMemoryUsed(getMemoryDisplay(new BigDecimal(totalMemoryUsed), "GB"))
+                .totalMemoryUsed(getMemoryDisplay(BigDecimal.valueOf(documentRepository.getTotalMemoryUsed()), "GB"))
                 .documentQuotaPage(documentPage)
                 .documents(docQuotas)
                 .build();
@@ -286,6 +286,19 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
         Page<Document> documentPage = documentRepository.findDocumentsSharedByOthers(CommonUtils.getUserPrincipal().getId(), pageable);
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documentPage.getContent());
-        return new PageImpl<>(documentDTOs, pageable, documentDTOs.size());
+        List<Long> folderIdList = new ArrayList<>();
+        for (DocumentDTO dto : documentDTOs) {
+            if (!dto.isFile()) {
+                folderIdList.add(dto.getId());
+            }
+        }
+        List<DocumentDTO> responseList = new ArrayList<>();
+        for (DocumentDTO dto : documentDTOs) {
+            if (!folderIdList.contains(dto.getParentId())) {
+                responseList.add(dto);
+            }
+        }
+
+        return new PageImpl<>(responseList, pageable, responseList.size());
     }
 }

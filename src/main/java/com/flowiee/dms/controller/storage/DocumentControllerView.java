@@ -187,4 +187,13 @@ public class DocumentControllerView extends BaseController {
     public ModelAndView viewQuota() {
         return baseView(new ModelAndView(PagesUtils.STG_QUOTA));
     }
+
+    @GetMapping("/doc/shared-by-others")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ModelAndView viewDocumentsSharedByOthers() {
+        ModelAndView modelAndView = new ModelAndView(PagesUtils.STG_SHARED_BY_OTHERS);
+        modelAndView.addObject("parentId", 0);
+        modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0l, true, false, false, false));
+        return baseView(modelAndView);
+    }
 }

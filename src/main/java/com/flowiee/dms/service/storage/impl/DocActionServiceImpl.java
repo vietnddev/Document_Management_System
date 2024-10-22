@@ -196,14 +196,18 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
         }
 
+        String title = "Di chuyển tài liệu vào thùng rác";
+        if (forceDelete)
+            title = "Xóa tài liệu";
+
         if (DELETE_SCHEDULE == modeDelete) {
             SystemLog systemLog = SystemLog.builder().build();
             systemLog.setIp("TP");
             systemLog.setAccount(accountService.findByUsername(AppConstants.ADMINISTRATOR));
             systemLog.setCreatedBy(-1l);
-            systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, "Xóa tài liệu", "id=" + documentId, SystemLog.EMPTY, systemLog);
+            systemLogService.writeLog(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, LogType.D, title, "id=" + documentId, SystemLog.EMPTY, systemLog);
         } else {
-            systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, "Xóa tài liệu", "id=" + documentId);
+            systemLogService.writeLogDelete(MODULE.STORAGE, ACTION.STG_DOC_DELETE, MasterObject.Document, title, "id=" + documentId);
         }
         logger.info("{}: Delete document docId={}", DocumentInfoServiceImpl.class.getName(), documentId);
         return MessageCode.DELETE_SUCCESS.getDescription();
