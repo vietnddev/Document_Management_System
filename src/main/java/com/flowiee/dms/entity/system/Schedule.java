@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 public class Schedule {
     @Id
-    @Column(name = "schedule_id", nullable = false)
+    @Column(name = "schedule_id", nullable = false, length = 50)
     private String scheduleId;
 
     @Column(name = "schedule_name", nullable = false)

@@ -391,19 +391,19 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     private List<DocShare> doShare(long docId, long accountId, boolean canRead, boolean canUpdate, boolean canDelete, boolean canMove, boolean canShare) {
         List<DocShare> docShared = new ArrayList<>();
         if (canRead) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ.getValue())));
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.READ)));
         }
         if (canUpdate) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE.getValue())));
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.UPDATE)));
         }
         if (canDelete) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE.getValue())));
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.DELETE)));
         }
         if (canMove) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE.getValue())));
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.MOVE)));
         }
         if (canShare) {
-            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE.getValue())));
+            docShared.add(docShareService.save(new DocShare(docId, accountId, DocRight.SHARE)));
         }
         return docShared;
     }
@@ -453,6 +453,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                             if ((fileUploaded != null && fileUploaded.exists()) && (folder != null && folder.exists())) {
                                 Path pathSrc = Paths.get(fileUploaded.toURI());
                                 Path pathDest = Paths.get(folder.toPath() + "/" + getPathOfFolder(path) + "." + fileStorage.get().getExtension());
+                                prepareDirectoriesTempForDownload(pathDest);
                                 Files.copy(pathSrc, pathDest, StandardCopyOption.COPY_ATTRIBUTES);
                             }
                         }
@@ -471,6 +472,15 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                 FileUtils.deleteDirectory(folder.toPath());
         }
         return null;
+    }
+
+    private void prepareDirectoriesTempForDownload(Path pPathDest) throws IOException {
+        String pathDestStr = pPathDest.toString();
+        int lastIndexOfSeparator = pathDestStr.lastIndexOf(File.separator);
+        Path finalPathDest = Path.of(pathDestStr.substring(0, lastIndexOfSeparator));
+        if (!Files.exists(finalPathDest)) {
+            Files.createDirectories(finalPathDest);
+        }
     }
 
     private String getPathOfFolder(String path) {
@@ -531,23 +541,24 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     @Override
     public void restore(long documentId) {
-        Optional<Document> document = documentRepository.findById(documentId);
-        if (document.isEmpty()) {
+        Optional<Document> documentOpt = documentRepository.findById(documentId);
+        if (documentOpt.isEmpty()) {
             throw new BadRequestException(String.format("Document with id %s not found!", documentId));
         }
-        if (document.get().getDeletedAt() == null) {
-            throw new BadRequestException(String.format("Document with name %s not in the trash!", document.get().getName()));
+        Document document = documentOpt.get();
+        if (document.getDeletedAt() == null) {
+            throw new BadRequestException(String.format("Document with name %s not in the trash!", document.getName()));
         }
-        document.get().setDeletedAt(null);
-        document.get().setDeletedBy(null);
-        Document documentRestored = documentRepository.save(document.get());
+        document.setDeletedAt(null);
+        document.setDeletedBy(null);
+        Document documentRestored = documentRepository.save(document);
         docHistoryService.save(DocHistory.builder()
                 .document(documentRestored)
                 .title("Khôi phục khỏi thùng rác")
                 .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
                 .build());
 
-        if (!document.get().isFile()) {
+        if (!document.isFile()) {
             List<DocumentDTO> subDocDTOs = documentInfoService.findSubDocByParentId(documentId, null, true, true, true);
             for (DocumentDTO d : subDocDTOs) {
                 documentRepository.setDeleteInformation(d.getId(), null, null);

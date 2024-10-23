@@ -5,6 +5,7 @@ import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
 
 import com.flowiee.dms.entity.system.Account;
+import com.flowiee.dms.utils.constants.DocRight;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,13 +29,17 @@ public class DocShare extends BaseEntity implements Serializable {
     @JoinColumn(name = "account_id", nullable = false)
     Account account;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, length = 20)
     String role;
 
     public DocShare(Long documentId, Long accountId, String role) {
         this.document = new Document(documentId);
         this.account = new Account(accountId);
         this.role = role;
+    }
+
+    public DocShare(Long documentId, Long accountId, DocRight role) {
+        this(documentId, accountId, role.getValue());
     }
 
 	@Override

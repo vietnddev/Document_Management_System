@@ -43,10 +43,16 @@ public class DocumentController extends BaseController {
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
     public ApiResponse<List<DocumentDTO>> getAllDocuments(@RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam("pageNum") Integer pageNum,
-                                                          @RequestParam("parentId") Long parentId,
-                                                          @RequestParam(value = "txtSearch", required = false) String txtSearch) {
+                                                          @RequestParam("parentId") Long pParentId,
+                                                          @RequestParam(value = "txtSearch", required = false) String txtSearch,
+                                                          @RequestParam(value = "isSearch", required = false) Boolean isSearch,
+                                                          @RequestParam(value = "docType", required = false) Long pDocType) {
+        Long lvParentId = pParentId;
+        if (Boolean.TRUE.equals(isSearch) && lvParentId == 0) {//&& ObjectUtils.isNotEmpty(txtSearch)
+            lvParentId = null;
+        }
         try {
-            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, parentId, null, null, txtSearch, false);
+            Page<DocumentDTO> documents = documentInfoService.findDocuments(pageSize, pageNum - 1, lvParentId, null, null, txtSearch, pDocType,false);
             List<DocumentDTO> documentIncludeRights = documentInfoService.setInfoRights(documents.getContent());
             return ApiResponse.ok(documentIncludeRights, pageNum, pageSize, documents.getTotalPages(), documents.getTotalElements());
         } catch (RuntimeException ex) {

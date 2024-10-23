@@ -90,7 +90,7 @@ function setupSearchTool(keySearch) {
 
     $("#btnOpenSearchAdvance").on("click", function () {
         documentTypeFilter.empty();
-        documentTypeFilter.append("<option>Chọn loại tài liệu</option>");
+        documentTypeFilter.append(`<option value="">Chọn loại tài liệu</option>`);
 
         $.each(keySearch, function (index, key) {
             if (key === "DOCUMENT_TYPE") {

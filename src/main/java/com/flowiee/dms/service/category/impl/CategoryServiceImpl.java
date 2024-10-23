@@ -32,13 +32,13 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CategoryServiceImpl extends BaseService implements CategoryService {
-    CategoryRepository        categoryRepo;
+    CategoryRepository        categoryRepository;
     DocumentInfoService       documentInfoService;
     CategoryHistoryRepository categoryHistoryRepo;
 
     @Override
     public Optional<Category> findById(Long entityId) {
-        return categoryRepo.findById(entityId);
+        return categoryRepository.findById(entityId);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
         if (entity == null) {
             throw new BadRequestException();
         }
-        return categoryRepo.save(entity);
+        return categoryRepository.save(entity);
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
         }
         Category categoryBefore = ObjectUtils.clone(categoryInput.get());
         entity.setId(entityId);
-        Category categoryAfter = categoryRepo.save(entity);
+        Category categoryAfter = categoryRepository.save(entity);
 
         ChangeLog changeLog = new ChangeLog(categoryBefore, categoryAfter);
         for (Map.Entry<String, Object[]> entry : changeLog.getLogChanges().entrySet()) {
@@ -89,14 +89,14 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
             throw new DataInUseException(ErrorCode.DATA_LOCKED_ERROR.getDescription());
         }
         categoryHistoryRepo.deleteAllByCategory(entityId);
-        categoryRepo.deleteById(entityId);
+        categoryRepository.deleteById(entityId);
         return MessageCode.DELETE_SUCCESS.getDescription();
     }
 
     @Override
     public List<Category> findRootCategory() {
-        List<Category> roots = categoryRepo.findRootCategory();
-        List<Object[]> recordsOfEachType = categoryRepo.totalRecordsOfEachType();
+        List<Category> roots = categoryRepository.findRootCategory();
+        List<Object[]> recordsOfEachType = categoryRepository.totalRecordsOfEachType();
         for (Category c : roots) {
             for (Object[] o : recordsOfEachType) {
                 if (c.getType().equals(o[0])) {
@@ -114,6 +114,6 @@ public class CategoryServiceImpl extends BaseService implements CategoryService 
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
         }
-        return categoryRepo.findSubCategory(categoryType, parentId, idNotIn, pageable);
+        return categoryRepository.findSubCategory(categoryType, parentId, idNotIn, pageable);
     }
 }

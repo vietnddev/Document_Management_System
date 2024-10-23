@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Language extends BaseEntity implements Serializable {
-	@Column(name = "code")
+	@Column(name = "code", length = 3)
     String code;
     
     @Column(name = "key")

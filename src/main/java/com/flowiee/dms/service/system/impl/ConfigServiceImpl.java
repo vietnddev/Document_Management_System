@@ -20,35 +20,35 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ConfigServiceImpl extends BaseService implements ConfigService {
-    LanguageService         languageService;
-    SystemConfigRepository sysConfigRepo;
+    LanguageService        languageService;
+    SystemConfigRepository sysConfigRepository;
 
     @Override
     public Optional<SystemConfig> findById(Long id) {
-        return sysConfigRepo.findById(id);
+        return sysConfigRepository.findById(id);
     }
 
     @Override
     public List<SystemConfig> findAll() {
-        return sysConfigRepo.findAll();
+        return sysConfigRepository.findAll();
     }
 
     @Override
     public SystemConfig save(SystemConfig systemConfig) {
-        return sysConfigRepo.save(systemConfig);
+        return sysConfigRepository.save(systemConfig);
     }
 
     @Override
     public SystemConfig update(SystemConfig systemConfig, Long id) {
         systemConfig.setId(id);
         logger.info("Update config success! " + systemConfig.toString());
-        return sysConfigRepo.save(systemConfig);
+        return sysConfigRepository.save(systemConfig);
     }
 
     @Override
     public String delete(Long id) {
         try {
-            sysConfigRepo.deleteById(id);
+            sysConfigRepository.deleteById(id);
             return MessageCode.DELETE_SUCCESS.getDescription();
         } catch (RuntimeException ex) {
             throw new AppException(ex);

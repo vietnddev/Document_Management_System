@@ -34,6 +34,7 @@ public class DocumentExportService extends BaseExportService {
         List<DocumentDTO> listData = folderTreeService.getDocumentWithTreeForm(null, false);
         for (int i = 0; i < listData.size(); i++) {
             DocumentDTO docDTO = listData.get(i);
+            boolean isFolder = "Y".equals(docDTO.getIsFolder());
 
             List<DocShareModel> docShareDetail = docShareService.findDetailRolesOfDocument(docDTO.getId());
             String[] authorizedAccounts = this.getAuthorizedAccounts(docShareDetail);
@@ -44,16 +45,17 @@ public class DocumentExportService extends BaseExportService {
             String lvShareRight = authorizedAccounts[4];
 
             Optional<Account> account = accountRepository.findById(docDTO.getCreatedBy());
+            String accountName = account.isPresent() ? account.get().getFullName() : "-";
 
             mvWorkbook.createCellStyle().setWrapText(false);
             XSSFRow row = sheet.createRow(i + 3);
             int col = 0;
             row.createCell(col++).setCellValue(i + 1);
             row.createCell(col++).setCellValue(docDTO.getName());
-            row.createCell(col++).setCellValue(docDTO.getIsFolder().equals("Y") ? "Thư mục" : "File");
+            row.createCell(col++).setCellValue(isFolder ? "Thư mục" : "File");
             row.createCell(col++).setCellValue(docDTO.getPath());
             row.createCell(col++).setCellValue(docDTO.getCreatedAt().format(mvFormatter));
-            row.createCell(col++).setCellValue(account.isPresent() ? account.get().getFullName() : "-");
+            row.createCell(col++).setCellValue(accountName);
             row.createCell(col++).setCellValue(lvReadRight);
             row.createCell(col++).setCellValue(lvUpdateRight);
             row.createCell(col++).setCellValue(lvDeleteRight);

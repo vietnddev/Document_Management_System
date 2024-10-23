@@ -6,7 +6,9 @@ function loadDocuments(pageSize, pageNum) {
         pageSize: pageSize,
         pageNum: pageNum,
         parentId: mvParentId,
-        txtSearch: $("#txtFilter").val()
+        txtSearch: $("#txtFilter").val(),
+        isSearch: mvIsSearch,
+        docType: $("#documentTypeFilter").val()
     }
     $.get(apiURL, params, function (response) {
         if (response.status === "OK") {
@@ -50,4 +52,6 @@ function loadDocuments(pageSize, pageNum) {
     }).fail(function () {
         showErrorModal("Could not connect to the server");
     });
+
+    mvIsSearch = false;
 }

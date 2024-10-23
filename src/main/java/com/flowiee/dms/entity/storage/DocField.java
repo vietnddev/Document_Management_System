@@ -21,7 +21,7 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DocField extends BaseEntity implements Serializable {
-    @Column(name = "type", nullable = false)
+    @Column(name = "type", nullable = false, length = 20)
     String type;
 
     @Column(name = "name", nullable = false)

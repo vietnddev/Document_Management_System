@@ -27,7 +27,7 @@ public class Account extends BaseEntity implements Serializable {
 	String username;
 
 	@JsonIgnore
-	@Column(name = "password", nullable = false)
+	@Column(name = "password", nullable = false, length = 100)
 	String password;
 
 	@Column(name = "fullname", nullable = false)
@@ -36,22 +36,22 @@ public class Account extends BaseEntity implements Serializable {
 	@Column(name = "sex", nullable = false)
 	boolean sex;
 
-	@Column(name = "phone_number")
+	@Column(name = "phone_number", length = 15)
 	String phoneNumber;
 
-	@Column(name = "email")
+	@Column(name = "email", length = 50)
 	String email;
 
-	@Column(name = "address")
+	@Column(name = "address", length = 500)
 	String diaChi;
 
 	@Column(name = "avatar")
 	String avatar;
 
-	@Column(name = "remark")
+	@Column(name = "remark", length = 500)
 	String remark;
 
-	@Column(name = "role")
+	@Column(name = "role", length = 20)
 	String role;
 
 	@JsonIgnore

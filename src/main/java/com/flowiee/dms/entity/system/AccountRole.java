@@ -19,11 +19,11 @@ import javax.validation.constraints.NotNull;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AccountRole extends BaseEntity implements java.io.Serializable {
-	@Column(name = "module", nullable = false)
+	@Column(name = "module", nullable = false, length = 20)
 	@NotNull
 	String module;
 
-	@Column(name = "action", nullable = false)
+	@Column(name = "action", nullable = false, length = 10)
 	@NotNull
 	String action;
 

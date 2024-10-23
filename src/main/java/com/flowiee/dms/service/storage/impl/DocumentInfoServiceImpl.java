@@ -45,14 +45,14 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Long parentId, List<Long> listId, String isFolder, String pTxtSearch, Boolean isDeleted) {
+    public Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Long parentId, List<Long> listId, String isFolder, String pTxtSearch, Long pDocType, Boolean isDeleted) {
         Pageable pageable = Pageable.unpaged();
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
         }
         Account currentAccount = CommonUtils.getUserPrincipal();
         boolean isAdmin = AppConstants.ADMINISTRATOR.equals(currentAccount.getUsername());
-        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), null, isFolder, listId, isDeleted, pageable);
+        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), pDocType, isFolder, listId, isDeleted, pageable);
         return new PageImpl<>(DocumentDTO.fromDocuments(documents.getContent()), pageable, documents.getTotalElements());
     }
 
@@ -106,10 +106,10 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         }
         List<DocumentDTO> docDTOs = new ArrayList<>();
         if (!fullLevel) {
-            docDTOs = this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, isDeleted).getContent();
+            docDTOs = this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, null, isDeleted).getContent();
         } else {
             List<DocumentDTO> subFolderTemps = new ArrayList<>();
-            for (DocumentDTO dto : this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, isDeleted).getContent()) {
+            for (DocumentDTO dto : this.findDocuments(-1, -1, parentId, null, lvIsFolder, null, null, isDeleted).getContent()) {
                 if (dto.getIsFolder().equals("Y")) {
                     subFolderTemps.add(dto);
                 }
@@ -198,12 +198,16 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
             List<Object[]> listData = documentRepository.findMetadata(documentId);
             if (!listData.isEmpty()) {
                 for (Object[] data : listData) {
+                    Long lvDocDataId = ObjectUtils.isNotEmpty(data[2]) ? Long.parseLong(String.valueOf(data[2])) : 0;
+                    String lvDocDataValue = ObjectUtils.isNotEmpty(data[3]) ? String.valueOf(data[3]) : null;
+
                     listReturn.add(DocMetaModel.builder()
                             .fieldId(Long.parseLong(String.valueOf(data[0])))
                             .fieldName(String.valueOf(data[1]))
-                            .dataId(ObjectUtils.isNotEmpty(data[2]) ? Long.parseLong(String.valueOf(data[2])) : 0)
-                            .dataValue(ObjectUtils.isNotEmpty(data[3]) ? String.valueOf(data[3]) : null)
-                            .fieldType(String.valueOf(data[4])).fieldRequired(String.valueOf(data[5]).equals("1"))
+                            .dataId(lvDocDataId)
+                            .dataValue(lvDocDataValue)
+                            .fieldType(String.valueOf(data[4]))
+                            .fieldRequired(String.valueOf(data[5]).equals("1"))
                             .build());
                 }
             }

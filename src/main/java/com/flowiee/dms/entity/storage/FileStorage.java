@@ -26,16 +26,16 @@ import java.util.List;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStorage extends BaseEntity implements Serializable {
-	@Column(name = "customize_name")
+	@Column(name = "customize_name", length = 200)
     String customizeName;
 
-    @Column(name = "saved_name", nullable = false)
+    @Column(name = "saved_name", nullable = false, length = 200)
     String storageName;
 
-    @Column(name = "original_name", nullable = false)
+    @Column(name = "original_name", nullable = false, length = 200)
     String originalName;
 
-    @Column(name = "note")
+    @Column(name = "note", length = 500)
     String note;
 
     @Column(name = "extension", length = 10)
@@ -59,7 +59,7 @@ public class FileStorage extends BaseEntity implements Serializable {
     @Column(name = "status", nullable = false)
     boolean status;
 
-    @Column(name = "module", nullable = false)
+    @Column(name = "module", nullable = false, length = 20)
     String module;
 
     @ManyToOne(fetch = FetchType.LAZY)

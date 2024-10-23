@@ -56,7 +56,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
                    "    and dc.id = :documentId " +
                    "where 1=1 " +
                    "    and (f.doc_type_id = dc.doc_type_id) " +
-                   "    and d.deletedAt is null " +
+                   "    and dc.deleted_at is null " +
                    "order by f.sort",
            nativeQuery = true)
     List<Object[]> findMetadata(@Param("documentId") long documentId);

@@ -35,7 +35,7 @@ public class Document extends BaseEntity implements Serializable {
     @Column(name = "as_name", nullable = false)
     String asName;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 500)
     String description;
 
     @JsonIgnore

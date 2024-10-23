@@ -2,6 +2,7 @@ package com.flowiee.dms.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.flowiee.dms.entity.category.Category;
 import com.flowiee.dms.entity.storage.Document;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -39,15 +40,17 @@ public class DocumentDTO extends Document implements Serializable {
     String copySourceName;
 
     public static DocumentDTO fromDocument(Document document) {
+        Category docType = document.getDocType();
+
         DocumentDTO dto = new DocumentDTO();
         dto.setId(document.getId());
         dto.setName(document.getName());
         dto.setAsName(document.getAsName());
         dto.setDescription(document.getDescription() != null ? document.getDescription() : "-");
         dto.setParentId(document.getParentId());
-        if (document.getDocType() != null) {
-            dto.setDocTypeId(document.getDocType().getId());
-            dto.setDocTypeName(document.getDocType().getName() != null ? document.getDocType().getName() : "-");
+        if (docType != null) {
+            dto.setDocTypeId(docType.getId());
+            dto.setDocTypeName(docType.getName() != null ? docType.getName() : "-");
         } else {
             dto.setDocTypeName("-");
         }

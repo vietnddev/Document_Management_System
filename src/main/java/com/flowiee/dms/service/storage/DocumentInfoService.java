@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface DocumentInfoService {
     Optional<DocumentDTO> findById(Long id);
 
-    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Long parentId, List<Long> listId, String isFolder, String pTxtSearch, Boolean isDeleted);
+    Page<DocumentDTO> findDocuments(Integer pageSize, Integer pageNum, Long parentId, List<Long> listId, String isFolder, String pTxtSearch, Long pDocType, Boolean isDeleted);
 
     Page<Document> findAllDeletedDocument(int pageSize, int pageNum);
 

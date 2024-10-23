@@ -23,10 +23,10 @@ public class CategoryHistory extends BaseEntity implements Serializable {
     @JoinColumn(name = "category_id")
     Category category;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 300)
     String title;
 
-    @Column(name = "field", nullable = false)
+    @Column(name = "field", nullable = false, length = 50)
     String field;
 
     @Lob

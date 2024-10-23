@@ -23,13 +23,13 @@ public class GroupAccount extends BaseEntity implements Serializable {
     @Serial
     static final long serialVersionUID = 1L;
 
-    @Column(name = "group_code")
+    @Column(name = "group_code", length = 20)
     String groupCode;
 
     @Column(name = "group_name", nullable = false)
     String groupName;
 
-    @Column(name = "note")
+    @Column(name = "note", length = 500)
     String note;
 
     public GroupAccount(Long id, String groupCode, String groupName) {

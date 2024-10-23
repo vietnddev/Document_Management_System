@@ -39,13 +39,13 @@ public class Category extends BaseEntity implements Serializable {
 	@Column(name = "icon")
 	String icon;
 
-	@Column(name = "color")
+	@Column(name = "color", length = 20)
 	String color;
 
 	@Column(name = "parent_id")
 	Integer parentId;
 
-	@Column(name = "note", length = 255)
+	@Column(name = "note", length = 500)
 	String note;
 
 	@Column(name = "endpoint", length = 50)

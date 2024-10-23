@@ -121,6 +121,7 @@
         let mvTotalElements = 1;
         let mvPagination;
         let mvListOfSelectedDocuments = [];
+        let mvIsSearch = false;
 
         $(document).ready(function () {
             init();
@@ -145,6 +146,7 @@
 
         function search() {
             $("#btnSearch").on("click", function () {
+                mvIsSearch = true;
                 loadDocuments(mvPageSize, mvPageNum);
             })
         }
