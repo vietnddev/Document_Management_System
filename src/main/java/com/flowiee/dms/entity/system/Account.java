@@ -59,6 +59,9 @@ public class Account extends BaseEntity implements Serializable {
 	@JoinColumn(name = "group_account")
 	GroupAccount groupAccount;
 
+	@Column(name = "reset_tokens", unique = true)
+	String resetTokens;
+
 	@Column(name = "status")
 	boolean status;
 

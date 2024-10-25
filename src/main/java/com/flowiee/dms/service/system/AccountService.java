@@ -11,4 +11,10 @@ public interface AccountService extends BaseCurdService<Account> {
     Account findByUsername(String username);
 
     Account findCurrentAccount();
+
+    Account getUserByResetTokens(String token);
+
+    void updateTokenForResetPassword(String email, String resetToken);
+
+    void resetPassword(Account account);
 }

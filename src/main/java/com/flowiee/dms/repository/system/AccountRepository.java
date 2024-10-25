@@ -10,4 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface AccountRepository extends JpaRepository<Account, Long>{
     @Query("from Account a where a.username=:username")
     Account findByUsername(@Param("username") String username);
+
+    Account findByEmail(String email);
+
+    Account findByResetTokens(String token);
 }

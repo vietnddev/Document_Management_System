@@ -178,4 +178,21 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 		}
 		throw new BadRequestException();
 	}
+
+	@Override
+	public Account getUserByResetTokens(String token) {
+		return accountRepository.findByResetTokens(token);
+	}
+
+	@Override
+	public void updateTokenForResetPassword(String email, String resetToken) {
+		Account account = accountRepository.findByEmail(email);
+		account.setResetTokens(resetToken);
+		accountRepository.save(account);
+	}
+
+	@Override
+	public void resetPassword(Account account) {
+		accountRepository.save(account);
+	}
 }
