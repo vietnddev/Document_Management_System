@@ -94,6 +94,16 @@ public class Account extends BaseEntity implements Serializable {
 		this.fullName = fullName;
 	}
 
+	public FileStorage getAvatar() {
+		if (getListFileStorage() != null) {
+			for (FileStorage avatar : getListFileStorage()) {
+				if (avatar.isActive())
+					return avatar;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

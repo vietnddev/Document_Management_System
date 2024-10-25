@@ -1,11 +1,13 @@
 package com.flowiee.dms.service.system.impl;
 
+import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.ConfigService;
 import com.flowiee.dms.service.system.LanguageService;
+import com.flowiee.dms.utils.constants.ConfigCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -69,7 +71,20 @@ public class ConfigServiceImpl extends BaseService implements ConfigService {
             //
             languageService.reloadMessage("vi");
             languageService.reloadMessage("en");
-            return "Completed";
+
+            SystemConfig resUploadPathConfigMdl = sysConfigRepository.findByCode(ConfigCode.resourceUploadPath.name());
+            if (resUploadPathConfigMdl != null) {
+                StartUp.mvResourceUploadPath = resUploadPathConfigMdl.getValue();
+            }
+
+            List<SystemConfig> systemConfigs = sysConfigRepository.findAll();
+
+            int i = 1;
+            return new StringBuilder()
+                    .append("Completed the following tasks: ")
+                    .append("\n " + i++ + ". ").append("Reload message vi & en")
+                    .append("\n " + i++ + ". ").append("Reload resource upload path")
+                    .toString();
         } catch (RuntimeException ex) {
             logger.error("An error occurred while refresh app", ex);
             throw new AppException();

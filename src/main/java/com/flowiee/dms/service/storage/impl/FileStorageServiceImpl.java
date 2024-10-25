@@ -6,6 +6,7 @@ import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
+import com.flowiee.dms.exception.StorageLimitExceededException;
 import com.flowiee.dms.model.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
@@ -15,6 +16,7 @@ import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
+import com.flowiee.dms.service.system.SendMailService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.ImageUtils;
@@ -28,10 +30,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -44,17 +49,32 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     DocumentInfoService documentInfoService;
     FileStorageRepository fileRepository;
     SystemConfigRepository configRepository;
+    SendMailService sendMailService;
 
     @Override
     public Optional<FileStorage> findById(Long fileId) {
         return fileRepository.findById(fileId);
     }
 
+    @Transactional
     @Override
     public FileStorage save(FileStorage fileStorage) {
-        FileStorage fileStorageSaved = fileRepository.save(fileStorage);
+        String vldStorageLimitMsg = "The storage limit of the Flowiee system was exceeded!";
+        if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), true)) {
+            throw new StorageLimitExceededException(vldStorageLimitMsg);
+        }
+        if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), false)) {
+            try {
+                sendMailService.sendMail("Flowiee System notification", "nguyenducviet.vietnd@gmail.com", vldStorageLimitMsg);
+            } catch (UnsupportedEncodingException | MessagingException ex) {
+                logger.error(vldStorageLimitMsg, ex);
+            }
+            throw new StorageLimitExceededException(vldStorageLimitMsg);
+        }
 
+        FileStorage fileStorageSaved = fileRepository.save(fileStorage);
         vldResourceUploadPath(true);
+
         Path pathDest = Paths.get(CommonUtils.getPathDirectory(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
         try {
             saveFileAttach(fileStorage.getFileAttach(), pathDest);
@@ -87,7 +107,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileDTO getFileDisplay(long documentId) {
-        Optional<FileStorage> fileStorageOpt = this.findFileIsActiveOfDocument(documentId);
+        Optional<FileStorage> fileStorageOpt = this.findFileIsActiveOfDocument(documentId);//change in the future
         if (fileStorageOpt.isPresent())
         {
             FileStorage fileStorage = fileStorageOpt.get();
@@ -125,7 +145,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         FileStorage fileSaved = this.save(fileInfo);
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
-        fileUpload.transferTo(path);
+        //saveFileAttach(fileUpload, path);
 
         try {
             PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
@@ -143,7 +163,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     public String saveFileOfImport(MultipartFile fileImport, FileStorage fileInfo) throws IOException {
         fileRepository.save(fileInfo);
         fileInfo.setStorageName("I_" + fileInfo.getStorageName());
-        fileImport.transferTo(Paths.get(CommonUtils.getPathDirectory(fileInfo.getModule()) + "/" + fileInfo.getStorageName()));
+        //saveFileAttach(fileImport, Paths.get(CommonUtils.getPathDirectory(fileInfo.getModule()) + "/" + fileInfo.getStorageName()));
         return "OK";
     }
 
@@ -167,7 +187,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         FileStorage fileSaved = this.save(fileInfo);
 
         Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
-        fileUpload.transferTo(path);
+        //saveFileAttach(fileUpload, path);
 
         try {
             PdfUtils.cloneFileToPdf(path.toFile(), fileSaved.getExtension());
@@ -186,6 +206,12 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         if (vldResourceUploadPath(true)) {
             multipartFile.transferTo(dest);
         }
+    }
+
+    @Override
+    public long getTotalMemoryUsed(long accountId) {
+        //Unit is bytes
+        return fileRepository.getCurrentStorageUsage(accountId);
     }
 
     @Override
@@ -210,6 +236,25 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
                 } else {
                     return false;
                 }
+            }
+        }
+        return true;
+    }
+
+    private boolean vldStorageLimitValid(long fileSize, boolean isCheckingForUser) {
+        long limitOfUser = Long.parseLong(StartUp.getSystemConfig(ConfigCode.storageLimitPerUser).getValue());//default is GB unit
+        long limitOfSystem = Long.parseLong(StartUp.getSystemConfig(ConfigCode.storageLimitAllUser).getValue());//default is GB unit
+        if (isCheckingForUser) {
+            long limitOfUserBytes = limitOfUser * 1024 * 1024 * 1024;
+            long memoryUsed = fileRepository.getCurrentStorageUsage(CommonUtils.getUserPrincipal().getId());
+            if (memoryUsed + fileSize > limitOfUserBytes) {
+                return false;
+            }
+        } else {
+            long limitOfSystemBytes = limitOfSystem * 1024 * 1024 * 1024;
+            long memoryUsed = fileRepository.getCurrentStorageUsage(null);
+            if (memoryUsed + fileSize > limitOfSystemBytes) {
+                return false;
             }
         }
         return true;

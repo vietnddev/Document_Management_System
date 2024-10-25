@@ -10,5 +10,7 @@ public enum ConfigCode {
     maxSizeFileUpload,
     extensionAllowedFileUpload,
     resourceUploadPath,
-    timeStorageFileInRecycleBin
+    timeStorageFileInRecycleBin,
+    storageLimitPerUser,
+    storageLimitAllUser
 }

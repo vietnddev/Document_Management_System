@@ -14,9 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Configuration
 public class StartUp {
@@ -26,6 +24,7 @@ public class StartUp {
     protected Logger logger = LoggerFactory.getLogger(getClass());
     public static Date START_APP_TIME = null;
     public static String mvResourceUploadPath = null;
+    public static List<SystemConfig> mvSystemConfigs;
 
 	public StartUp(LanguageService languageService, SystemConfigRepository configRepository) {
 		this.languageService = languageService;
@@ -39,6 +38,9 @@ public class StartUp {
             loadLanguageMessages("en");
             loadLanguageMessages("vi");
             initResourceConfig();
+
+            mvSystemConfigs = new ArrayList<>(configRepository.findAll());
+
             START_APP_TIME = new Date();
         };
     }
@@ -58,6 +60,8 @@ public class StartUp {
             cnf.add(initDefaultAudit(ConfigCode.extensionAllowedFileUpload, "Định dạng file được phép upload", null));
             cnf.add(initDefaultAudit(ConfigCode.resourceUploadPath, "Thư mực chứa tệp upload", null));
             cnf.add(initDefaultAudit(ConfigCode.timeStorageFileInRecycleBin, "Thời gian lưu trữ tệp ở thùng rác", "15"));
+            cnf.add(initDefaultAudit(ConfigCode.storageLimitPerUser, "Dung lượng lưu trữ của mỗi người dùng", "10"));
+            cnf.add(initDefaultAudit(ConfigCode.storageLimitAllUser, "Dung lượng lưu trữ của hệ thống", "1000"));
             configRepository.saveAll(cnf);
         }
     }
@@ -100,5 +104,18 @@ public class StartUp {
 
     public static String getResourceUploadPath() {
         return mvResourceUploadPath;
+    }
+
+    public static List<SystemConfig> getSystemConfigs() {
+        return mvSystemConfigs;
+    }
+
+    public static SystemConfig getSystemConfig(ConfigCode pConfigCode) {
+	    for (SystemConfig cnf : getSystemConfigs()) {
+	        if (pConfigCode.name().equalsIgnoreCase(cnf.getCode())) {
+                return cnf;
+            }
+        }
+	    return null;
     }
 }

@@ -22,9 +22,9 @@ public class SendMailServiceImpl extends BaseService implements SendMailService 
 
     @Override
     public boolean sendMail(String subject, String to, String body) throws UnsupportedEncodingException, MessagingException {
-        Assert.isNull(subject, "Subject cannot be null!");
-        Assert.isNull(to, "Recipient cannot be null!");
-        Assert.isNull(body, "Content cannot be null!");
+        Assert.notNull(subject, "Subject cannot be null!");
+        Assert.notNull(to, "Recipient cannot be null!");
+        Assert.notNull(body, "Content cannot be null!");
 
         MimeMessage mimeMessage = mvJavaMailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);

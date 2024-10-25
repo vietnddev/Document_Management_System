@@ -25,4 +25,6 @@ public interface FileStorageService extends BaseCurdService<FileStorage> {
     FileDTO getFileDisplay(long documentId);
 
     void saveFileAttach(MultipartFile multipartFile, Path dest) throws IOException;
+
+    long getTotalMemoryUsed(long accountId);
 }

@@ -30,8 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.Column;
-import javax.persistence.Lob;
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -43,18 +41,19 @@ import java.util.Optional;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocActionServiceImpl extends BaseService implements DocActionService {
-    AccountService      accountService;
-    DocDataService      docDataService;
-    DocShareService     docShareService;
-    DocHistoryService   docHistoryService;
-    FolderTreeService   folderTreeService;
-    FileStorageService  fileStorageService;
-    DocumentRepository  documentRepository;
-    DocShareRepository  docShareRepository;
-    DocumentInfoService documentInfoService;
-    NotificationService notificationService;
+    AccountService       accountService;
+    DocDataService       docDataService;
+    DocShareService      docShareService;
+    DocHistoryService    docHistoryService;
+    FolderTreeService    folderTreeService;
+    FileStorageService   fileStorageService;
+    DocumentRepository   documentRepository;
+    DocShareRepository   docShareRepository;
+    DocumentInfoService  documentInfoService;
+    NotificationService  notificationService;
     DocHistoryRepository docHistoryRepository;
 
+    @Transactional
     @Override
     public DocumentDTO saveDoc(DocumentDTO documentDTO) {
         try {
@@ -93,10 +92,11 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
             return DocumentDTO.fromDocument(documentSaved);
         } catch (RuntimeException | IOException | DocumentException ex) {
-            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document"), ex);
+            throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "document: ") + ex.getMessage(), ex);
         }
     }
 
+    @Transactional
     @Override
     public DocumentDTO updateDoc(DocumentDTO data, Long documentId) {
         Optional<Document> document = documentRepository.findById(documentId);
@@ -120,6 +120,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         return DocumentDTO.fromDocument(documentRepository.save(document.get()));
     }
 
+    @Transactional
     @Override
     public String updateMetadata(List<DocMetaModel> metaDTOs, Long documentId) {
         Optional<Document> document = documentRepository.findById(documentId);

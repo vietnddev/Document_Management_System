@@ -8,10 +8,12 @@ import com.flowiee.dms.model.dto.DocumentDTO;
 import javax.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Builder
 @Entity
@@ -60,11 +62,19 @@ public class Document extends BaseEntity implements Serializable {
     @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
     List<DocHistory> listDocHistory;
 
+    @ManyToMany
+    @JoinTable(
+            name = "document_tags",
+            joinColumns = @JoinColumn(name = "document_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id"))
+    private Set<Tags> tags;
+
     public Document(Long id) {
     	super.id = id;
     }
     
     public Document(Long id, String name) {
+        this.id = id;
     	this.name = name;
     }
 
@@ -84,6 +94,7 @@ public class Document extends BaseEntity implements Serializable {
     }
 
     public boolean isFile() {
+        Assert.notNull(isFolder, "Flag isFolder is null!");
         return Objects.equals(isFolder, "N");
     }
 
