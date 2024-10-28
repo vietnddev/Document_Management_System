@@ -19,9 +19,10 @@ import java.util.concurrent.TimeUnit;
 public class CleanUpFolderDownloadTempScheduleExecutor extends ScheduleService {
     private int pendingTimeDelete = 10;//minutes
 
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "*/15 * * * * ?")
     @Override
     public void execute() {
+        logger.info("CleanUpFolderDownloadTempScheduleExecutor start");
         ScheduleStatus scheduleStatus = startSchedule(ScheduleTask.CleanUpFolderDownloadTemp);
         try {
             File folderTemp = FileUtils.getDownloadStorageTempPath().toFile();
@@ -43,6 +44,7 @@ public class CleanUpFolderDownloadTempScheduleExecutor extends ScheduleService {
         } finally {
             endSchedule(scheduleStatus);
         }
+        logger.info("CleanUpFolderDownloadTempScheduleExecutor end");
     }
 
     private boolean canDelete(File file) throws IOException {

@@ -35,7 +35,7 @@ public class DocData extends BaseEntity implements Serializable {
     Document document;
 
     @OneToMany(mappedBy = "docData", fetch = FetchType.LAZY)
-    List<DocHistory> listDocHistory;
+    List<StorageHistory> listStorageHistory;
 
     public Map<String, String> compareTo(DocData entityToCompare) {
         Map<String, String> map = new HashMap<>();

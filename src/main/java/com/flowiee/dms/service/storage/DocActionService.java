@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
+import com.itextpdf.text.DocumentException;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,5 +36,5 @@ public interface DocActionService {
 
     List<DocumentDTO> importDoc(long docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
 
-    void restore(long documentId);
+    void restoreTrash(long documentId);
 }

@@ -7,7 +7,7 @@ import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.StorageLimitExceededException;
-import com.flowiee.dms.model.FileExtension;
+import com.flowiee.dms.utils.constants.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.dto.FileDTO;
@@ -59,27 +59,30 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     @Transactional
     @Override
     public FileStorage save(FileStorage fileStorage) {
-        String vldStorageLimitMsg = "The storage limit of the Flowiee system was exceeded!";
-        if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), true)) {
-            throw new StorageLimitExceededException(vldStorageLimitMsg);
-        }
-        if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), false)) {
-            try {
-                sendMailService.sendMail("Flowiee System notification", "nguyenducviet.vietnd@gmail.com", vldStorageLimitMsg);
-            } catch (UnsupportedEncodingException | MessagingException ex) {
-                logger.error(vldStorageLimitMsg, ex);
-            }
-            throw new StorageLimitExceededException(vldStorageLimitMsg);
-        }
-
         FileStorage fileStorageSaved = fileRepository.save(fileStorage);
-        vldResourceUploadPath(true);
 
-        Path pathDest = Paths.get(CommonUtils.getPathDirectory(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
-        try {
-            saveFileAttach(fileStorage.getFileAttach(), pathDest);
-        } catch (IOException ex) {
-            throw new AppException("An error occurred while saving the attachment!", ex);
+        if (fileStorage.getFileAttach() != null) {
+            String vldStorageLimitMsg = "The storage limit of the Flowiee system was exceeded!";
+            if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), true)) {
+                throw new StorageLimitExceededException(vldStorageLimitMsg);
+            }
+            if (!vldStorageLimitValid(fileStorage.getFileAttach().getSize(), false)) {
+                try {
+                    sendMailService.sendMail("Flowiee System notification", "nguyenducviet.vietnd@gmail.com", vldStorageLimitMsg);
+                } catch (UnsupportedEncodingException | MessagingException ex) {
+                    logger.error(vldStorageLimitMsg, ex);
+                }
+                throw new StorageLimitExceededException(vldStorageLimitMsg);
+            }
+
+            vldResourceUploadPath(true);
+
+            Path pathDest = Paths.get(CommonUtils.getPathDirectory(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
+            try {
+                saveFileAttach(fileStorage.getFileAttach(), pathDest);
+            } catch (IOException ex) {
+                throw new AppException("An error occurred while saving the attachment!", ex);
+            }
         }
 
         return fileStorageSaved;
@@ -92,7 +95,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
     }
 
     @Override
-    public Optional<FileStorage> findFileIsActiveOfDocument(Long documentId) {
+    public Optional<FileStorage> getFileActiveOfDocument(Long documentId) {
         List<FileStorage> listFiles = fileRepository.findFileOfDocument(documentId, true);
         if (listFiles != null && !listFiles.isEmpty()) {
             return Optional.of(listFiles.get(0));
@@ -107,7 +110,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
     @Override
     public FileDTO getFileDisplay(long documentId) {
-        Optional<FileStorage> fileStorageOpt = this.findFileIsActiveOfDocument(documentId);//change in the future
+        Optional<FileStorage> fileStorageOpt = this.getFileActiveOfDocument(documentId);//change in the future
         if (fileStorageOpt.isPresent())
         {
             FileStorage fileStorage = fileStorageOpt.get();
@@ -133,7 +136,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
             return fileDTO;
         }
-        return new FileDTO();
+        return FileDTO.builder().build();
     }
 
     @Override

@@ -26,9 +26,10 @@ public class CleanUpRecycleBinScheduleExecutor extends ScheduleService {
     DocActionService docActionService;
     SystemConfigRepository systemConfigRepository;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "*/15 * * * * ?")
     @Override
     public void execute() {
+        logger.info("CleanUpRecycleBinScheduleExecutor start");
         ScheduleStatus scheduleStatus = startSchedule(ScheduleTask.CleanUpRecycleBin);
         try {
             SystemConfig systemConfig = systemConfigRepository.findByCode(ConfigCode.timeStorageFileInRecycleBin.name());
@@ -45,5 +46,6 @@ public class CleanUpRecycleBinScheduleExecutor extends ScheduleService {
         } finally {
             endSchedule(scheduleStatus);
         }
+        logger.info("CleanUpRecycleBinScheduleExecutor end");
     }
 }

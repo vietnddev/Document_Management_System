@@ -27,7 +27,7 @@ public interface DocumentInfoService {
 
     List<DocumentDTO> findSharedDocFromOthers(Long accountId);
 
-    List<DocMetaModel> findMetadata(Long documentId);
+    List<DocMetaModel> getMetadata(Long documentId);
 
     SummaryQuota getSummaryQuota(int pageSize, int pageNum, String sortBy, Sort.Direction sortMode);
 

@@ -18,7 +18,7 @@ public interface FileStorageService extends BaseCurdService<FileStorage> {
 
     String changFileOfDocument(MultipartFile fileUpload, Long documentId) throws IOException, DocumentException;
 
-    Optional<FileStorage> findFileIsActiveOfDocument(Long documentId);
+    Optional<FileStorage> getFileActiveOfDocument(Long documentId);
 
     List<FileStorage> findFilesOfDocument(Long documentId);
 

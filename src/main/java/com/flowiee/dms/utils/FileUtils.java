@@ -3,40 +3,33 @@ package com.flowiee.dms.utils;
 import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
-import com.flowiee.dms.model.FileExtension;
+import com.flowiee.dms.utils.constants.FileExtension;
 import com.flowiee.dms.model.FolderTree;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Phrase;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.flowiee.dms.model.dto.FileDTO;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.*;
-import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public class FileUtils {
+    private static final Logger mvLogger = LoggerFactory.getLogger(FileUtils.class);
     public static String templatePath = "src/main/resources/static";
     public static String fileUploadPath = StartUp.getResourceUploadPath() + File.separator + "uploads" + File.separator;
     public static String fileDownloadPath = StartUp.getResourceUploadPath() + File.separator + "downloads" + File.separator;
@@ -44,6 +37,8 @@ public class FileUtils {
     public static String reportTemplatePath = templatePath + File.separator + "report";
     public static String excelTemplatePath = templatePath + File.separator + "templates/excel";
     public static Path logoPath = Paths.get(StartUp.getResourceUploadPath() + File.separator + "dist/img/FlowieeLogo.png");
+    // Bản đồ dùng để lưu trữ khóa file theo đường dẫn
+    private static final ConcurrentHashMap<String, FileLock> mvFileLocks = new ConcurrentHashMap<>();
 
     public static void createCellCombobox(XSSFWorkbook workbook, XSSFSheet sheet, XSSFSheet hsheet, List<String> listValue, int row, int column, String nameName) {
         //Put các tên danh mục vào column trong sheet danh mục ẩn
@@ -124,19 +119,44 @@ public class FileUtils {
         return Path.of(fileUploadPath + "/temp");
     }
 
-    public static boolean lockFile(File file) {
-        try (RandomAccessFile raf = new RandomAccessFile(file, "rw");
-             FileChannel channel = raf.getChannel();
-             FileLock lock = channel.lock()) {
-            // File đã được khóa thành công
-            System.out.println("File đã được khóa thành công: " + file.getAbsolutePath());
+    public static boolean lockFile(File pFile) {
+        if (mvFileLocks.get(pFile.getAbsolutePath()) != null) {
+            mvLogger.info("File is locking!");
+            return true;
+        }
+        try {
+            // Mở file và tạo khóa cho nó
+            RandomAccessFile raf = new RandomAccessFile(pFile, "rw");
+            FileChannel channel = raf.getChannel();
+            FileLock lock = channel.lock();
+            // Lưu trữ khóa để sử dụng trong unlockFile
+            mvFileLocks.put(pFile.getAbsolutePath(), lock);
+            mvLogger.info("File locked: " + pFile.getAbsolutePath());
             return true;
         } catch (IOException e) {
-            // Không thể khóa file, có thể file đang được sử dụng hoặc lỗi khác xảy ra
-            System.out.println("Không thể khóa file, có thể file đang được sử dụng hoặc có lỗi khác: " + file.getAbsolutePath());
+            mvLogger.error("Cannot lock the file, it may be in use or another error has occurred.: " + pFile.getAbsolutePath());
+            return false;
         }
+    }
 
-        return false;
+    public static boolean unlockFile(File pFile) {
+        String lvFilePath = pFile.getAbsolutePath();
+        FileLock lock = mvFileLocks.get(lvFilePath);
+        if (lock != null) {
+            try {
+                lock.release();// Mở khóa pFile
+                lock.channel().close();
+                mvFileLocks.remove(lvFilePath);
+                mvLogger.info("File unlocked: " + lvFilePath);
+                return true;
+            } catch (IOException e) {
+                mvLogger.error("File cannot unlock: " + e.getMessage());
+                return false;
+            }
+        } else {
+            mvLogger.info("Cannot unlock because the file is not locked.");
+            return false;
+        }
     }
 
     public static void addFileToDirectory(String filePath, String directoryPath, StandardCopyOption copyOption) {
@@ -339,5 +359,46 @@ public class FileUtils {
         }
 
         return length;
+    }
+
+    public static List<FileDTO> getDocumentFiles(FileStorage pFileModel) {
+        File lvFileUploaded = getFileUploaded(pFileModel);
+        if (!lvFileUploaded.exists())
+            return List.of();
+
+        List<FileDTO> lvFileList = new ArrayList<>();
+        lvFileList.add(FileDTO.builder()
+                .id(pFileModel.getId())
+                .file(lvFileUploaded)
+                .build());
+
+        String extension = "." + pFileModel.getExtension();
+        if (FileExtension.DOC.key().equals(pFileModel.getExtension()) || FileExtension.DOCX.key().equals(pFileModel.getExtension()) ||
+                FileExtension.XLS.key().equals(pFileModel.getExtension()) || FileExtension.XLSX.key().equals(pFileModel.getExtension()))
+        {
+            //pdf
+            FileStorage pdfModel = ObjectUtils.clone(pFileModel);
+            pdfModel.setStorageName(pdfModel.getStorageName().replaceAll(extension, ".pdf"));
+            File lvFilePdf = FileUtils.getFileUploaded(pdfModel);
+            if (lvFilePdf.exists()) {
+                lvFileList.add(FileDTO.builder()
+                        .id(pFileModel.getId())
+                        .file(lvFilePdf)
+                        .build());
+            }
+            //png
+            FileStorage imageModel = ObjectUtils.clone(pFileModel);
+            imageModel.setStorageName(imageModel.getStorageName().replaceAll(extension, ".png"));
+            File lvFileImage = FileUtils.getFileUploaded(imageModel);
+            if (lvFileImage.exists()) {
+                lvFileList.add(FileDTO.builder()
+                        .id(pFileModel.getId())
+                        .file(lvFileImage)
+                        .build());
+            }
+            //others file type
+        }
+
+        return lvFileList;
     }
 }

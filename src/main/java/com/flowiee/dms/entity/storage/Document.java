@@ -60,7 +60,11 @@ public class Document extends BaseEntity implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
-    List<DocHistory> listDocHistory;
+    List<StorageHistory> listStorageHistory;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "document", fetch = FetchType.LAZY)
+    List<DocVersion> listDocVersion;
 
     @ManyToMany
     @JoinTable(

@@ -20,8 +20,8 @@ import java.io.UnsupportedEncodingException;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
 public class SystemNotificationScheduleExecutor extends ScheduleService {
-    FileStorageRepository mvFileStorageRepository;
-    SendMailService mvSendMailService;
+    FileStorageRepository fileStorageRepository;
+    SendMailService       sendMailService;
 
     @Scheduled(cron = "0 0 1 * * ?")
     @Override
@@ -34,10 +34,10 @@ public class SystemNotificationScheduleExecutor extends ScheduleService {
         try {
             long limitOfSystem = Long.parseLong(StartUp.getSystemConfig(ConfigCode.storageLimitAllUser).getValue());//default is GB unit
             long limitOfSystemBytes = limitOfSystem * 1024 * 1024 * 1024;
-            long memoryUsed = mvFileStorageRepository.getCurrentStorageUsage(null);//Bytes
+            long memoryUsed = fileStorageRepository.getCurrentStorageUsage(null);//Bytes
             float percentUsed = memoryUsed / limitOfSystemBytes * 100;
             if (percentUsed >= usageWarningPercent) {
-                mvSendMailService.sendMail(subjectWR, emailReceiveWR, contentWR);
+                sendMailService.sendMail(subjectWR, emailReceiveWR, contentWR);
             }
         } catch (AppException | UnsupportedEncodingException | MessagingException ex) {
             logger.info(String.format("An error occurred while processing schedule %s", ScheduleTask.CleanUpRecycleBin), ex);

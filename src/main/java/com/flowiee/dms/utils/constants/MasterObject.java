@@ -1,6 +1,7 @@
 package com.flowiee.dms.utils.constants;
 
 public enum MasterObject {
+    DocVersion,
     DocData,
     DocField,
     DocHistory,

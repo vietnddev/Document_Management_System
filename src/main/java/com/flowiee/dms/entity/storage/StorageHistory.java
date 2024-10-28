@@ -11,14 +11,14 @@ import java.io.Serializable;
 
 @Builder
 @Entity
-@Table(name = "doc_history")
+@Table(name = "storage_history")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DocHistory extends BaseEntity implements Serializable {
+public class StorageHistory extends BaseEntity implements Serializable {
     public static String EMPTY = "-";
 
     @ManyToOne(fetch = FetchType.LAZY)

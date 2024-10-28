@@ -1,4 +1,4 @@
-package com.flowiee.dms.model;
+package com.flowiee.dms.utils.constants;
 
 import lombok.Getter;
 

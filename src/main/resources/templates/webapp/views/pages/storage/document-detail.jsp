@@ -84,7 +84,7 @@
                                                         </div>
                                                         <div class="form-group row">
                                                             <div class="offset-sm-4 col-sm-9">
-                                                                <button class="btn btn-sm btn-primary" style="font-weight: bold;">Lưu</button>
+                                                                <button class="btn btn-sm btn-primary" style="font-weight: bold">Cập nhật</button>
                                                             </div>
                                                         </div>
                                                     </form>
@@ -111,6 +111,11 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="card-footer">
+                                            <div class="text-center">
+                                                <button class="btn btn-sm btn-info" style="font-weight: bold" id="btnArchive">Lưu lại phiên bản</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -121,6 +126,8 @@
             <!-- Modal change file of document -->
             <div th:replace="pages/storage/fragments/document-fragments :: modalChangeFile"></div>
         </div>
+
+        <div th:replace="modal_fragments :: confirm_modal"></div>
 
         <aside class="control-sidebar control-sidebar-dark"></aside>
 
@@ -133,6 +140,8 @@
         $(document).ready(function () {
             loadFolderTreeOnSideBar();
             loadFileVersion();
+            archiveDoc();
+            revertDoc();
         });
 
         function loadFileVersion() {
@@ -161,6 +170,46 @@
                 });
             })
         }
+
+        function archiveDoc() {
+            $("#btnArchive").on("click", function () {
+                $(this).attr("entityId", mvDocId);
+                $(this).attr("actionType", "archive");
+                showConfirmModal($(this), "Lưu trữ tài liệu?", "Bạn chắc chắn muốn lưu trữ tài liệu này?");
+            });
+        }
+
+        function revertDoc() {
+
+        }
+
+        $('#yesButton').on("click", function () {
+            let actionType = $(this).attr("actionType");
+            if (actionType === "archive") {
+                let apiURL = mvHostURLCallApi + "/stg/doc/archive-version";
+                let body = {
+                    documentId: mvDocId,
+                    versionName: ""
+                }
+                $.ajax({
+                    url: apiURL,
+                    type: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify(body),
+                    success: function(response, textStatus, jqXHR) {
+                        if (response.status === "OK") {
+                            alert(response.message);
+                            window.location.reload();
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert(status + ': ' + JSON.stringify(xhr.responseJSON.message));
+                    }
+                });
+            } else if (actionType === "revert") {
+
+            }
+        });
     </script>
 </body>
 </html>

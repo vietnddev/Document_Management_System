@@ -12,8 +12,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.List;
 
 @Builder
@@ -82,7 +80,7 @@ public class FileStorage extends BaseEntity implements Serializable {
 
     @JsonIgnore
     @OneToMany(mappedBy = "fileStorage", fetch = FetchType.LAZY)
-    List<DocHistory> listDocHistory;
+    List<StorageHistory> listStorageHistory;
 
     public FileStorage(MultipartFile file, MODULE pModule) {
         this.module = pModule.name();
@@ -101,5 +99,5 @@ public class FileStorage extends BaseEntity implements Serializable {
 	public String toString() {
 		return "FileStorage [id=" + super.id + ", customizeName=" + customizeName + ", storageName=" + storageName +
                 ", originalName=" + originalName + ", status=" + status + ", module=" + module + ", isActive=" + isActive + "]";
-	}        
+	}
 }

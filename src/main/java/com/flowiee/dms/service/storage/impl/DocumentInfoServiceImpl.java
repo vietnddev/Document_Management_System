@@ -4,7 +4,6 @@ import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.exception.AppException;
-import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.SummaryQuota;
 import com.flowiee.dms.model.dto.DocumentDTO;
@@ -192,7 +191,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     }
 
     @Override
-    public List<DocMetaModel> findMetadata(Long documentId) {
+    public List<DocMetaModel> getMetadata(Long documentId) {
         List<DocMetaModel> listReturn = new ArrayList<>();
         try {
             List<Object[]> listData = documentRepository.findMetadata(documentId);

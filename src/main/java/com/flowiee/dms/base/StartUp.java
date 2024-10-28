@@ -73,7 +73,7 @@ public class StartUp {
     public void initResourceConfig() {
         SystemConfig systemConfig = configRepository.findByCode(ConfigCode.resourceUploadPath.name());
         if (systemConfig != null) {
-            mvResourceUploadPath = systemConfig.getValue();
+            mvResourceUploadPath = systemConfig.getValue().trim();
             logger.info(systemConfig.getCode() + ": " + mvResourceUploadPath);
         }
 

@@ -3,16 +3,20 @@ package com.flowiee.dms.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.flowiee.dms.entity.storage.FileStorage;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
 
+import javax.persistence.Transient;
+import java.io.File;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -35,9 +39,11 @@ public class FileDTO implements Serializable{
     byte[] content;
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     LocalDateTime uploadAt;
+    @Transient
+    File file;
 
     public static FileDTO fromFileStorage(FileStorage fileStorage) {
-        FileDTO dto = new FileDTO();
+        FileDTO dto = FileDTO.builder().build();
         if (ObjectUtils.isNotEmpty(fileStorage)) {
             dto.setId(fileStorage.getId());
             if (ObjectUtils.isNotEmpty(fileStorage.getDocument())) {

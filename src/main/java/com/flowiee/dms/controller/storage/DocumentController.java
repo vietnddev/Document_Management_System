@@ -1,19 +1,24 @@
 package com.flowiee.dms.controller.storage;
 
 import com.flowiee.dms.base.BaseController;
+import com.flowiee.dms.entity.storage.DocVersion;
 import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.model.SummaryQuota;
+import com.flowiee.dms.model.payload.ArchiveDocumentReq;
 import com.flowiee.dms.model.payload.MoveDocumentReq;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import com.flowiee.dms.model.payload.RestoreDocumentReq;
+import com.flowiee.dms.model.payload.RevertDocumentReq;
 import com.flowiee.dms.service.storage.DocActionService;
+import com.flowiee.dms.service.storage.DocArchiveService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
+import com.itextpdf.text.DocumentException;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +41,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DocumentController extends BaseController {
     DocActionService    docActionService;
+    DocArchiveService   docArchiveService;
     DocumentInfoService documentInfoService;
 
     @Operation(summary = "Find all documents")
@@ -194,7 +200,7 @@ public class DocumentController extends BaseController {
         if (documentId == null || documentId <= 0) {
             throw new BadRequestException("Request invalid!");
         }
-        docActionService.restore(documentId);
+        docActionService.restoreTrash(documentId);
         return ApiResponse.ok("Khôi phục thành công!", null);
     }
 
@@ -206,7 +212,7 @@ public class DocumentController extends BaseController {
             throw new BadRequestException("Request invalid!");
         }
         for (int documentId : requestBody.getSelectedDocuments()) {
-            docActionService.restore(documentId);
+            docActionService.restoreTrash(documentId);
         }
         return ApiResponse.ok("Khôi phục thành công!", null);
     }
@@ -229,5 +235,27 @@ public class DocumentController extends BaseController {
                                                                          @RequestParam("pageNum") Integer pageNum) {
         Page<DocumentDTO> documentDTOPage = documentInfoService.getDocumentsSharedByOthers(pageSize, pageNum - 1);
         return ApiResponse.ok(documentDTOPage.getContent(), pageNum, pageSize, documentDTOPage.getTotalPages(), documentDTOPage.getTotalElements());
+    }
+
+    @Operation(summary = "Save the current version of the document")
+    @PostMapping("/doc/archive-version")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ApiResponse<String> archiveCurrentVersion(@RequestBody ArchiveDocumentReq request) throws DocumentException, IOException {
+        if (request.getDocumentId() <= 0) {
+            throw new BadRequestException("Document invalid!");
+        }
+        docArchiveService.archiveVersion(request.getDocumentId(), DocVersion.builder().versionName(request.getVersionName()).build());
+        return ApiResponse.ok("Archived successfully!", null);
+    }
+
+    @Operation(summary = "Save the current version of the document")
+    @PutMapping("/doc/revert-version")
+    @PreAuthorize("@vldModuleStorage.readDoc(true)")
+    public ApiResponse<String> revertVersion(@RequestBody RevertDocumentReq request) throws DocumentException, IOException {
+        if (request.getDocumentId() <= 0 || request.getVersionId() <= 0) {
+            throw new BadRequestException("Document invalid!");
+        }
+        docArchiveService.restoreOldVersion(request.getDocumentId(), request.getVersionId());
+        return ApiResponse.ok("Reverted successfully!", null);
     }
 }

@@ -83,7 +83,7 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a th:href="@{/stg/doc/shared-by-others}" class="nav-link"><i class="fa-solid fa-share-nodes mr-2"></i>Shared by others</a>
+                                <a th:href="@{/stg/doc/shared-by-others}" class="nav-link"><i class="fa-solid fa-share-nodes mr-2"></i>Shared with me</a>
                             </li>
                             <li class="nav-item">
                                 <a th:href="@{/stg/doc/quota}" class="nav-link"><i class="fa-solid fa-cloud mr-2"></i>Bộ nhớ</a>

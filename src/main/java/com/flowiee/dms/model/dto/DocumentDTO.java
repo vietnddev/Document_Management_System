@@ -50,10 +50,8 @@ public class DocumentDTO extends Document implements Serializable {
         dto.setParentId(document.getParentId());
         if (docType != null) {
             dto.setDocTypeId(docType.getId());
-            dto.setDocTypeName(docType.getName() != null ? docType.getName() : "-");
-        } else {
-            dto.setDocTypeName("-");
         }
+        dto.setDocTypeName(docType.getName() != null ? docType.getName() : "-");
         dto.setIsFolder(document.getIsFolder());
         dto.setCreatedAt(document.getCreatedAt());
         dto.setLastUpdatedAt(document.getLastUpdatedAt());
@@ -61,7 +59,7 @@ public class DocumentDTO extends Document implements Serializable {
         dto.setListDocFile(document.getListDocFile());
         dto.setListDocData(document.getListDocData());
         dto.setListDocShare(document.getListDocShare());
-        dto.setListDocHistory(document.getListDocHistory());
+        dto.setListStorageHistory(document.getListStorageHistory());
         return dto;
     }
 

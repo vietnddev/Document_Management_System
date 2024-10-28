@@ -26,6 +26,7 @@ public enum ACTION {
     STG_MATERIAL_DELETE("Xóa nguyên vật liệu", "STORAGE"),
     STG_TICKET_IMPORT_GOODS("Nhập hàng", "STORAGE"),
     STG_TICKET_EXPORT_GOODS("Xuất hàng", "STORAGE"),
+    STG_DOC_ARCHIVE("Lưu trữ phiên bản", "STORAGE"),
 
     SYS_ROLE_READ("Xem quyền hệ thống", "SYSTEM"),
     SYS_LOG_READ("Xem nhật ký hệ thống", "SYSTEM"),

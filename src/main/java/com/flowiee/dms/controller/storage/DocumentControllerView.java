@@ -93,7 +93,7 @@ public class DocumentControllerView extends BaseController {
 
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT_DETAIL);
                 modelAndView.addObject("docDetail", docDTO);
-                modelAndView.addObject("docMeta", documentInfoService.findMetadata(document.getId()));
+                modelAndView.addObject("docMeta", documentInfoService.getMetadata(document.getId()));
                 modelAndView.addObject("documentId", document.getId());
             }
             return baseView(modelAndView);

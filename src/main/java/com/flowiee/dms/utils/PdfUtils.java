@@ -1,6 +1,6 @@
 package com.flowiee.dms.utils;
 
-import com.flowiee.dms.model.FileExtension;
+import com.flowiee.dms.utils.constants.FileExtension;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;

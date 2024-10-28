@@ -10,9 +10,8 @@ import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.ResourceNotFoundException;
 import com.flowiee.dms.model.*;
 import com.flowiee.dms.model.dto.DocumentDTO;
-import com.flowiee.dms.repository.storage.DocHistoryRepository;
-import com.flowiee.dms.repository.storage.DocShareRepository;
-import com.flowiee.dms.repository.storage.DocumentRepository;
+import com.flowiee.dms.model.dto.FileDTO;
+import com.flowiee.dms.repository.storage.*;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.*;
 import com.flowiee.dms.service.system.AccountService;
@@ -20,9 +19,7 @@ import com.flowiee.dms.service.system.NotificationService;
 import com.flowiee.dms.utils.*;
 import com.flowiee.dms.utils.constants.*;
 import com.itextpdf.text.DocumentException;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
@@ -38,20 +35,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocActionServiceImpl extends BaseService implements DocActionService {
-    AccountService       accountService;
-    DocDataService       docDataService;
-    DocShareService      docShareService;
-    DocHistoryService    docHistoryService;
-    FolderTreeService    folderTreeService;
-    FileStorageService   fileStorageService;
-    DocumentRepository   documentRepository;
-    DocShareRepository   docShareRepository;
-    DocumentInfoService  documentInfoService;
-    NotificationService  notificationService;
-    DocHistoryRepository docHistoryRepository;
+    private final AccountService           accountService;
+    private final DocDataService           docDataService;
+    private final DocShareService          docShareService;
+    private final DocHistoryService        docHistoryService;
+    private final FolderTreeService        folderTreeService;
+    private final FileStorageService       fileStorageService;
+    private final DocumentRepository       documentRepository;
+    private final DocShareRepository       docShareRepository;
+    private final DocumentInfoService      documentInfoService;
+    private final NotificationService      notificationService;
+    private final StorageHistoryRepository storageHistoryRepository;
 
     @Transactional
     @Override
@@ -83,10 +79,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                 content = String.format("Sao chép [%s] từ [%s]", content, documentDTO.getCopySourceName());
             }
             systemLogService.writeLogCreate(MODULE.STORAGE, ACTION.STG_DOC_CREATE, MasterObject.Document, message, content);
-            docHistoryService.save(DocHistory.builder()
+            docHistoryService.save(StorageHistory.builder()
                     .document(documentSaved)
                     .title("Thêm mới " + documentSaved.getName())
-                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                    .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                     .build());
             logger.info("{}: {} {}", DocumentInfoServiceImpl.class.getName(), message, DocumentDTO.fromDocument(documentSaved));
 
@@ -139,7 +135,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .value(metaDTO.getDataValue())
                         .build());
             }
-            docHistoryService.saveDocDataHistory(document.get(), docDataCurrent, docDataCurrent.getDocField().getName(), docDataCurrent.getValue(), metaDTO.getDataValue());
+            //docHistoryService.saveDocDataHistory(document.get(), docDataCurrent, docDataCurrent.getDocField().getName(), docDataCurrent.getValue(), metaDTO.getDataValue());
         }
 
         systemLogService.writeLogUpdate(MODULE.STORAGE, ACTION.STG_DOC_UPDATE, MasterObject.Document, "Update metadata of " + document.get().getName(), SystemLog.EMPTY, SystemLog.EMPTY);
@@ -172,10 +168,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             document.get().setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
             document.get().setDeletedAt(LocalDateTime.now());
             Document documentMovedToTrash = documentRepository.save(document.get());
-            docHistoryService.save(DocHistory.builder()
+            docHistoryService.save(StorageHistory.builder()
                     .document(documentMovedToTrash)
                     .title("Chuyển vào thùng rác")
-                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                    .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                     .build());
         }
         if ("Y".equals(document.get().getIsFolder()) && isDeleteSubDoc) {
@@ -188,10 +184,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     subDocToDelete.setDeletedBy(CommonUtils.getUserPrincipal().getUsername());
                     subDocToDelete.setDeletedAt(LocalDateTime.now());
                     Document subDocumentMovedToTrash = documentRepository.save(subDocToDelete);
-                    docHistoryService.save(DocHistory.builder()
+                    docHistoryService.save(StorageHistory.builder()
                             .document(subDocumentMovedToTrash)
                             .title("Chuyển vào thùng rác")
-                            .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                            .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                             .build());
                 }
             }
@@ -217,7 +213,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
     @Transactional
     public void deleteDoc(long documentId) {
         deleteFileOfDocument(documentId);
-        docHistoryRepository.deleteAllByDocument(documentId);
+        storageHistoryRepository.deleteAllByDocument(documentId);
         docShareService.deleteByDocument(documentId);
         docDataService.deleteAllByDocument(documentId);
         documentRepository.deleteById(documentId);
@@ -227,7 +223,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         List<FileStorage> fileStorages = fileStorageService.findFilesOfDocument(documentId);
         for (FileStorage fileStorage : fileStorages) {
             String fileExtension = fileStorage.getExtension();
-            String filePathStr = CommonUtils.rootPath + "/" + fileStorage.getDirectoryPath() + "/" + fileStorage.getStorageName();
+            String filePathStr = CommonUtils.rootPath + File.separator + fileStorage.getDirectoryPath() + File.separator + fileStorage.getStorageName();
             String filePathTempStr = "";
             if (FileExtension.DOC.key().equals(fileExtension)
                     || FileExtension.DOCX.key().equals(fileExtension)
@@ -264,12 +260,13 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             throw new BadRequestException("System does not support copy a document as folder type!");
         }
         //Copy doc
-        doc.get().setId(null);
-        doc.get().setAction(ACTION.STG_DOC_COPY.name());
-        doc.get().setCopySourceName(doc.get().getName());
-        doc.get().setName(nameCopy);
-        doc.get().setAsName(CommonUtils.generateAliasName(nameCopy));
-        Document docCopied = this.saveDoc(doc.get());
+        DocumentDTO docCopy = doc.get();
+        docCopy.setId(null);
+        docCopy.setAction(ACTION.STG_DOC_COPY.name());
+        docCopy.setCopySourceName(docCopy.getName());
+        docCopy.setName(nameCopy);
+        docCopy.setAsName(CommonUtils.generateAliasName(nameCopy));
+        Document docCopied = this.saveDoc(docCopy);
         //Copy metadata
         for (DocData docData : docDataService.findByDocument(docId)) {
             DocData docDataNew = DocData.builder()
@@ -280,20 +277,20 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             docDataService.save(docDataNew);
         }
         //Copy file attach
-        Optional<FileStorage> fileUploaded = fileStorageService.findFileIsActiveOfDocument(docId);
+        Optional<FileStorage> fileUploaded = fileStorageService.getFileActiveOfDocument(docId);
         if (fileUploaded.isPresent()) {
             String newNameFile = CommonUtils.generateUniqueString() + "." + FileUtils.getFileExtension(fileUploaded.get().getStorageName());
-            String directoryPath = StartUp.getResourceUploadPath() + "/" + fileUploaded.get().getDirectoryPath();
-            Path pathSrc = Paths.get(directoryPath + "/" + fileUploaded.get().getStorageName());
-            Path pathDes = Paths.get(directoryPath + "/" + newNameFile);
+            String directoryPath = StartUp.getResourceUploadPath() + File.separator + fileUploaded.get().getDirectoryPath() + File.separator;
+            Path pathSrc = Paths.get(directoryPath + fileUploaded.get().getStorageName());
+            Path pathDes = Paths.get(directoryPath + newNameFile);
+            String pathDesStr = pathDes.toString();
             try {
-                File fileCloned = Files.copy(pathSrc, pathDes, StandardCopyOption.COPY_ATTRIBUTES).toFile();
                 FileStorage fileCloneInfo = FileStorage.builder()
                         .module(MODULE.STORAGE.name())
                         .extension(CommonUtils.getFileExtension(newNameFile))
                         .originalName(newNameFile)
                         .storageName(newNameFile)
-                        .fileSize(fileCloned.length())
+                        .fileSize(pathSrc.toFile().length())
                         .contentType(Files.probeContentType(pathDes))
                         .directoryPath(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).substring(CommonUtils.getPathDirectory(MODULE.STORAGE.name()).indexOf("uploads")))
                         .account(CommonUtils.getUserPrincipal().toAccountEntity())
@@ -303,18 +300,14 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                         .build();
                 FileStorage fileClonedInfo = fileStorageService.save(fileCloneInfo);
 
-                String pdfPathSrc = pathSrc.toString().replace("." + fileClonedInfo.getExtension(), ".pdf");
-                String pdfPathDes = pathDes.toString().replace("." + fileClonedInfo.getExtension(), ".pdf");
-                File pdfFile = new File(pdfPathSrc);
-                if (pdfFile.exists()) {
-                    Files.copy(pdfFile.toPath(), Path.of(pdfPathDes), StandardCopyOption.COPY_ATTRIBUTES).toFile();
-                }
-
-                String pngPathSrc = pathSrc.toString().replace("." + fileClonedInfo.getExtension(), ".png");
-                String pngPathDes = pathDes.toString().replace("." + fileClonedInfo.getExtension(), ".png");
-                File pngFile = new File(pngPathSrc);
-                if (pngFile.exists()) {
-                    Files.copy(pngFile.toPath(), Path.of(pngPathDes), StandardCopyOption.COPY_ATTRIBUTES).toFile();
+                for (FileDTO file : FileUtils.getDocumentFiles(fileUploaded.get())) {
+                    if (file.getFile() != null && file.getFile().exists()) {
+                        String pathDestinationStr = pathDesStr.replaceAll(FileUtils.getFileExtension(pathDesStr.substring(pathDesStr.lastIndexOf(File.separator) + 1)),
+                                FileUtils.getFileExtension(file.getFile().getName()));
+                        Path lvPathSource = file.getFile().toPath();
+                        Path lvPathDestination = Path.of(pathDestinationStr);
+                        Files.copy(lvPathSource, lvPathDestination, StandardCopyOption.COPY_ATTRIBUTES).toFile();
+                    }
                 }
             } catch (IOException e) {
                 logger.error("Copy file attachment failed!", e);
@@ -339,10 +332,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         }
         docToMove.get().setParentId(destinationId);
         Document documentMoved = documentRepository.save(docToMove.get());
-        docHistoryService.save(DocHistory.builder()
+        docHistoryService.save(StorageHistory.builder()
                 .document(documentMoved)
                 .title("Di chuyển đến thư mục [" + documentMoved.getName() + "]")
-                .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                 .build());
         return "Move successfully!";
     }
@@ -380,10 +373,10 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     .receiver(accountOpt.get())
                     .message(String.format("%s đã chia sẽ cho bạn tài liệu '%s'", accountOpt.get().getFullName(), doc.get().getName()))
                     .build());
-            docHistoryService.save(DocHistory.builder()
+            docHistoryService.save(StorageHistory.builder()
                     .document(new Document(pDocId))
                     .title("Phân quyền")
-                    .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                    .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                     .build());
         }
         return docShared;
@@ -422,7 +415,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         File fileResponse = null;
         try {
             if (doc.get().getIsFolder().equals("N")) {
-                Optional<FileStorage> fileOpt = fileStorageService.findFileIsActiveOfDocument(documentId);
+                Optional<FileStorage> fileOpt = fileStorageService.getFileActiveOfDocument(documentId);
                 if (fileOpt.isEmpty()) {
                     throw new ResourceNotFoundException("File attachment of this document does not exist!", false);
                 }
@@ -431,7 +424,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     throw new ResourceNotFoundException("File attachment of this document does not exist!!", false);
                 }
             } else {
-                folder = new File(Paths.get(FileUtils.getDownloadStorageTempPath().toString() + "/" + CommonUtils.generateUniqueString()).toUri());
+                folder = new File(Paths.get(FileUtils.getDownloadStorageTempPath().toString() + File.separator + CommonUtils.generateUniqueString()).toUri());
                 if (!folder.exists())
                     folder.mkdir();
                 List<DocumentDTO> listSubFolderFullLevel = documentInfoService.findSubDocByParentId(documentId, null, true, true, false);
@@ -441,19 +434,20 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
                     if (docDTO.getIsFolder().equals("Y")) {
                         if (path.contains("/")) {
                             String currentPath = "";
-                            for (String s : path.split("/")) {
-                                currentPath += s.trim() + "/";
-                                Files.createDirectories(Path.of(folder.getPath() + "/" + currentPath));
+                            for (String s : path.split(File.separator)) {
+                                currentPath += s.trim() + File.separator;
+                                Files.createDirectories(Path.of(folder.getPath() + File.separator + currentPath));
                             }
                         } else
-                            Files.createDirectories(Path.of(folder.getPath() + "/" + path.trim()));
+                            Files.createDirectories(Path.of(folder.getPath() + File.separator + path.trim()));
                     } else {
-                        Optional<FileStorage> fileStorage = fileStorageService.findFileIsActiveOfDocument(docDTO.getId());
-                        if (fileStorage.isPresent()) {
-                            File fileUploaded = FileUtils.getFileUploaded(fileStorage.get());
+                        Optional<FileStorage> fileStorageOpt = fileStorageService.getFileActiveOfDocument(docDTO.getId());
+                        if (fileStorageOpt.isPresent()) {
+                            FileStorage fileStorage = fileStorageOpt.get();
+                            File fileUploaded = FileUtils.getFileUploaded(fileStorage);
                             if ((fileUploaded != null && fileUploaded.exists()) && (folder != null && folder.exists())) {
                                 Path pathSrc = Paths.get(fileUploaded.toURI());
-                                Path pathDest = Paths.get(folder.toPath() + "/" + getPathOfFolder(path) + "." + fileStorage.get().getExtension());
+                                Path pathDest = Paths.get(folder.toPath() + File.separator + getPathOfFolder(path) + "." + fileStorage.getExtension());
                                 prepareDirectoriesTempForDownload(pathDest);
                                 Files.copy(pathSrc, pathDest, StandardCopyOption.COPY_ATTRIBUTES);
                             }
@@ -486,12 +480,12 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     private String getPathOfFolder(String path) {
         String currentPath = "";
-        if (path.contains("/")) {
-            for (int i = 0; i < path.split("/").length; i++) {
-                if (i < path.split("/").length - 1) {
-                    currentPath += path.split("/")[i].trim() + "/";
+        if (path.contains(File.separator)) {
+            for (int i = 0; i < path.split(File.separator).length; i++) {
+                if (i < path.split(File.separator).length - 1) {
+                    currentPath += path.split(File.separator)[i].trim() + File.separator;
                 } else {
-                    currentPath += path.split("/")[i].trim();
+                    currentPath += path.split(File.separator)[i].trim();
                 }
             }
         } else {
@@ -511,7 +505,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
             }
         }
         //Tạo thư mục tạm lưu file upload
-        File folderTemp = Path.of(FileUtils.getImportStorageTempPath() + "/" + CommonUtils.generateUniqueString()).toFile();
+        File folderTemp = Path.of(FileUtils.getImportStorageTempPath() + File.separator + CommonUtils.generateUniqueString()).toFile();
         if (!folderTemp.exists()) folderTemp.mkdirs();
         FolderTree folderTree = null;
         try {
@@ -541,7 +535,7 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
 
     @Transactional
     @Override
-    public void restore(long documentId) {
+    public void restoreTrash(long documentId) {
         Optional<Document> documentOpt = documentRepository.findById(documentId);
         if (documentOpt.isEmpty()) {
             throw new BadRequestException(String.format("Document with id %s not found!", documentId));
@@ -553,20 +547,20 @@ public class DocActionServiceImpl extends BaseService implements DocActionServic
         document.setDeletedAt(null);
         document.setDeletedBy(null);
         Document documentRestored = documentRepository.save(document);
-        docHistoryService.save(DocHistory.builder()
+        docHistoryService.save(StorageHistory.builder()
                 .document(documentRestored)
                 .title("Khôi phục khỏi thùng rác")
-                .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                 .build());
 
         if (!document.isFile()) {
             List<DocumentDTO> subDocDTOs = documentInfoService.findSubDocByParentId(documentId, null, true, true, true);
             for (DocumentDTO d : subDocDTOs) {
                 documentRepository.setDeleteInformation(d.getId(), null, null);
-                docHistoryService.save(DocHistory.builder()
+                docHistoryService.save(StorageHistory.builder()
                         .document(new Document(d.getId()))
                         .title("Khôi phục khỏi thùng rác")
-                        .fieldName(DocHistory.EMPTY).oldValue(DocHistory.EMPTY).newValue(DocHistory.EMPTY)
+                        .fieldName(StorageHistory.EMPTY).oldValue(StorageHistory.EMPTY).newValue(StorageHistory.EMPTY)
                         .build());
             }
         }
