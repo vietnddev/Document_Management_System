@@ -62,6 +62,8 @@ public class StartUp {
             cnf.add(initDefaultAudit(ConfigCode.timeStorageFileInRecycleBin, "Thời gian lưu trữ tệp ở thùng rác", "15"));
             cnf.add(initDefaultAudit(ConfigCode.storageLimitPerUser, "Dung lượng lưu trữ của mỗi người dùng", "10"));
             cnf.add(initDefaultAudit(ConfigCode.storageLimitAllUser, "Dung lượng lưu trữ của hệ thống", "1000"));
+            cnf.add(initDefaultAudit(ConfigCode.deleteSystemLog, "Xóa nhật ký hệ thống tự động", "N"));
+            cnf.add(initDefaultAudit(ConfigCode.dayDeleteSystemLog, "Thời gian xóa nhật ký hệ thống, các nhật ký có thời gian tạo từ >= ? ngày sẽ được xóa tự động", "100"));
             configRepository.saveAll(cnf);
         }
     }

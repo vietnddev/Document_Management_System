@@ -12,5 +12,7 @@ public enum ConfigCode {
     resourceUploadPath,
     timeStorageFileInRecycleBin,
     storageLimitPerUser,
-    storageLimitAllUser
+    storageLimitAllUser,
+    deleteSystemLog,
+    dayDeleteSystemLog
 }
