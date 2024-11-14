@@ -4,8 +4,6 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.utils.EndPointUtil;
 import com.flowiee.dms.utils.PagesUtils;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -26,17 +24,12 @@ public class ProfileControllerView extends BaseController {
 	}
 
 	@PostMapping(EndPointUtil.SYS_PROFILE_UPDATE)
-	public ModelAndView updateProfile(@AuthenticationPrincipal UserDetails userDetails, @ModelAttribute("account") Account accountEntity) {
-		String username = userDetails.getUsername();
-		String password = accountService.findByUsername(username).getPassword();
-		long accountID = accountService.findByUsername(username).getId();
-
-		accountEntity.setId(accountID);
-		accountEntity.setUsername(username);
-		accountEntity.setPassword(password);
-		accountEntity.setStatus(true);
-		accountService.save(accountEntity);
-
+	public ModelAndView updateProfile(@ModelAttribute("account") Account pAccount) {
+		Account account = accountService.findCurrentAccount();
+		account.setPhoneNumber(pAccount.getPhoneNumber());
+		account.setEmail(pAccount.getEmail());
+		account.setDiaChi(pAccount.getDiaChi());
+		accountService.update(account, account.getId());
 		return new ModelAndView("redirect:/profile");
 	}
 

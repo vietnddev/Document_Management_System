@@ -3,8 +3,10 @@ package com.flowiee.dms.entity.storage.view;
 import com.flowiee.dms.base.BaseEntity;
 import com.flowiee.dms.model.dto.DocumentDTO;
 import lombok.Data;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Data
 @Entity
@@ -54,5 +56,10 @@ public class DocumentTreeView extends BaseEntity {
         docDTO.setCreatedAt(docTreeView.getCreatedAt());
         docDTO.setCreatedBy(docTreeView.getCreatedBy());
         return docDTO;
+    }
+
+    public boolean isFile() {
+        Assert.notNull(isFolder, "Flag isFolder is null!");
+        return Objects.equals(isFolder, "N");
     }
 }

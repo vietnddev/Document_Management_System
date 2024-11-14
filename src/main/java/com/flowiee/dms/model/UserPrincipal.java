@@ -37,6 +37,12 @@ public class UserPrincipal extends Account implements UserDetails {
         this.setEmail(account.getEmail());
     }
 
+    public UserPrincipal(Long id, String username, String ip) {
+        this.id = id;
+        this.username = username;
+        this.ip = ip;
+    }
+
     public void setAuthorities(List<GrantedAuthority> grantedAuthorities) {
         this.grantedAuthorities = grantedAuthorities;
     }
@@ -82,5 +88,9 @@ public class UserPrincipal extends Account implements UserDetails {
 
     public Account toAccountEntity() {
         return new Account(this.id);
+    }
+
+    public static UserPrincipal anonymousUser() {
+        return new UserPrincipal(0l, "anonymous", "unknown");
     }
 }

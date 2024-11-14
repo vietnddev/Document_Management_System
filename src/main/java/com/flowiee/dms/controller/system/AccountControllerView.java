@@ -11,6 +11,7 @@ import com.flowiee.dms.service.system.GroupAccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.PagesUtils;
+import com.flowiee.dms.utils.constants.AccountStatus;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -95,7 +96,7 @@ public class AccountControllerView extends BaseController {
             throw new ResourceNotFoundException("Account not found!", true);
         }
         Account account = accountOptional.get();
-        account.setStatus(false);
+        account.setStatus(AccountStatus.C.name());
         accountService.save(account);
         return baseView(new ModelAndView("redirect:/sys/tai-khoan"));
     }

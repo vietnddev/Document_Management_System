@@ -11,9 +11,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "category")
@@ -77,15 +75,8 @@ public class Category extends BaseEntity implements Serializable {
 		this.name = name;
 	}
 
-	public Map<String, String> compareTo(Category categoryToCompare) {
-		Map<String, String> map = new HashMap<>();
-		if (!this.getCode().equals(categoryToCompare.getCode())) {
-			map.put("CODE", this.getCode() + "#" + categoryToCompare.getCode());
-		}
-		if (!this.getName().equals(categoryToCompare.getName())) {
-			map.put("NAME", this.getName() + "#" + categoryToCompare.getName());
-		}
-		return map;
+	public boolean isDefault() {
+		return (isDefault == null || isDefault.isBlank()) ? false : "Y".equals(isDefault.trim());
 	}
 
 	@Override
