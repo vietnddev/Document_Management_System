@@ -14,5 +14,6 @@ public enum ConfigCode {
     storageLimitPerUser,
     storageLimitAllUser,
     deleteSystemLog,
-    dayDeleteSystemLog
+    dayDeleteSystemLog,
+    FailLogonCount
 }

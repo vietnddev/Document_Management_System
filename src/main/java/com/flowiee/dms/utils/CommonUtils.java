@@ -99,12 +99,12 @@ public class CommonUtils {
 
     public static UserPrincipal getUserPrincipal() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated()) {
             if (!"anonymousUser".equalsIgnoreCase(authentication.getPrincipal().toString())) {
                 return (UserPrincipal) authentication.getPrincipal();
             }
         }
-        throw new AuthenticationException();
+        return UserPrincipal.anonymousUser();
     }
 
     public static String generateUniqueString() {

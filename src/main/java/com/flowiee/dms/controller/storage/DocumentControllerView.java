@@ -83,11 +83,10 @@ public class DocumentControllerView extends BaseController {
             modelAndView.addObject("docBreadcrumb", documentInfoService.findHierarchyOfDocument(document.getId(), document.getParentId()));
             modelAndView.addObject("folderTree", documentInfoService.findSubDocByParentId(0l, true, false, false, false));
             modelAndView.addObject("documentParentName", document.getName());
-            if (document.getIsFolder().equals("Y")) {
+            if (!document.isFile()) {
                 modelAndView.setViewName(PagesUtils.STG_DOCUMENT);
                 modelAndView.addObject("parentId", document.getId());
-            }
-            if (document.getIsFolder().equals("N")) {
+            } else {
                 DocumentDTO docDTO = DocumentDTO.fromDocument(document);
                 docDTO.setFile(fileStorageService.getFileDisplay(documentId));
 

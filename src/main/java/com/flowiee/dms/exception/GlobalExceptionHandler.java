@@ -58,6 +58,19 @@ public class GlobalExceptionHandler extends BaseController {
     }
 
     @ExceptionHandler
+    public Object exceptionHandler(AccountLockedException ex) {
+        logger.error(ex.getMessage(), ex);
+        if (ex.isRedirectView()) {
+            ErrorResponse error = new ErrorResponse(HttpStatus.LOCKED.value(), ex.getMessage());
+            ModelAndView modelAndView = new ModelAndView(ex.getView() != null ? ex.getView() : PagesUtils.SYS_ERROR);
+            modelAndView.addObject("error", error);
+            return baseView(modelAndView);
+        } else {
+            return ResponseEntity.badRequest().body(ApiResponse.fail(ex.getMessage(), ex, HttpStatus.LOCKED));
+        }
+    }
+
+    @ExceptionHandler
     public ResponseEntity<ApiResponse<Object>> exceptionHandler(AppException ex) {
         logger.error(ex.getMessage(), ex);
         return ResponseEntity.badRequest().body(ApiResponse.fail(ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR));

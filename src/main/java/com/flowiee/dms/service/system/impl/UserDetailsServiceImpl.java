@@ -1,5 +1,6 @@
 package com.flowiee.dms.service.system.impl;
 
+import com.flowiee.dms.exception.AccountLockedException;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.AuthenticationException;
 import com.flowiee.dms.entity.system.Account;
@@ -16,12 +17,8 @@ import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.constants.LogType;
-import com.flowiee.dms.utils.constants.MasterObject;
-import com.flowiee.dms.utils.constants.MessageCode;
-import lombok.AccessLevel;
+import com.flowiee.dms.utils.constants.*;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,18 +36,24 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl extends BaseService implements UserDetailsService, AccountService {
-	RoleService         roleService;
-	SystemLogRepository systemLogRepo;
-	AccountRepository   accountRepository;
+	private final RoleService         roleService;
+	private final SystemLogRepository systemLogRepo;
+	private final AccountRepository   accountRepository;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Account account = this.findByUsername(username);
 		UserPrincipal userPrincipal;
 		if (account != null) {
+			if (account.isLocked()) {
+				throw new AccountLockedException();
+			}
+			if (account.isPasswordExpired()) {
+				throw new AppException("Password has expired for operator " + account.getUsername());
+			}
+
 			userPrincipal = new UserPrincipal(account);
 
 			List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -92,7 +95,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 			systemLog.setCreatedBy(account.getId());
 			systemLogRepo.save(systemLog);
 		} else {
-			throw new AuthenticationException("Login fail! Account not found by username=" + username);
+			throw new AuthenticationException("Login fail! Account not found by username is " + username);
 		}
 		return userPrincipal;
 	}
