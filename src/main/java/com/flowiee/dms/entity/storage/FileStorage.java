@@ -5,14 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.model.MODULE;
-import com.flowiee.dms.utils.CommonUtils;
+
 import javax.persistence.*;
+
+import com.flowiee.dms.utils.FileUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 @Builder
 @Entity
@@ -84,13 +88,13 @@ public class FileStorage extends BaseEntity implements Serializable {
 
     public FileStorage(MultipartFile file, MODULE pModule) {
         this.module = pModule.name();
-        this.extension = CommonUtils.getFileExtension(file.getOriginalFilename());
+        this.extension = FileUtils.getFileExtension(file.getOriginalFilename());
         this.originalName = file.getOriginalFilename();
-        this.storageName = CommonUtils.generateUniqueString() + "." + this.extension;
+        this.storageName = UUID.randomUUID() + "." + this.extension;
         this.fileSize = file.getSize();
         this.contentType = file.getContentType();
-        this.directoryPath = CommonUtils.getPathDirectory(pModule.name()).substring(CommonUtils.getPathDirectory(pModule.name()).indexOf("uploads"));
-        this.account = CommonUtils.getUserPrincipal().toAccountEntity();
+        this.directoryPath = FileUtils.getUploadPathDir(pModule.name()).substring(FileUtils.getUploadPathDir(pModule.name()).indexOf("uploads"));
+        this.account = SecurityUtils.getCurrentUser().toAccountEntity();
         this.isActive = false;
         this.fileAttach = file;
     }

@@ -30,11 +30,13 @@ public class CategoryHistory extends BaseEntity implements Serializable {
     String field;
 
     @Lob
-    @Column(name = "old_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    //Oracle @Column(name = "old_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    @Column(name = "old_value", nullable = false, columnDefinition = "TEXT")
     String oldValue;
 
     @Lob
-    @Column(name = "new_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    //Oracle @Column(name = "new_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    @Column(name = "new_value", nullable = false, columnDefinition = "TEXT")
     String newValue;
 
 	@Override

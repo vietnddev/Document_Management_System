@@ -4,9 +4,10 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Account;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.SendMailService;
-import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.PagesUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class HomeControllerView extends BaseController {
@@ -48,18 +50,18 @@ public class HomeControllerView extends BaseController {
 
     @GetMapping(value = "/reset-password")
     public ModelAndView resetPassword(HttpSession session, HttpServletRequest request) throws UnsupportedEncodingException, MessagingException {
-        String email = CommonUtils.getUserPrincipal().getEmail();
+        String email = SecurityUtils.getCurrentUser().getEmail();
         if(!ObjectUtils.isEmpty(email)) {
             String resetToken = UUID.randomUUID().toString();
-            logger.info("Reset password ");
-            logger.info("Email: " + email);
-            logger.info("Token: " + resetToken);
+            log.info("Reset password ");
+            log.info("Email: " + email);
+            log.info("Token: " + resetToken);
             mvAccountService.updateTokenForResetPassword(email, resetToken);
 
             //URL Like This : http://localhost:8080/reset-password?token=dfjdlkfjsldfdlfkdflkdfjdlk
             String fullURL = request.getRequestURL().toString();
             String resetPwdURL = fullURL.replace(request.getServletPath(), "") + "/reset-password?token=" + resetToken;
-            logger.info("URL: " + resetPwdURL);
+            log.info("URL: " + resetPwdURL);
 
             String subject = "Password Reset for FLOWIEE account";
             String content = "<p>Hello, </p>" +

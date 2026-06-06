@@ -8,7 +8,7 @@ import com.flowiee.dms.repository.system.SystemLogRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.SystemLogService;
 import com.flowiee.dms.utils.ChangeLog;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import com.flowiee.dms.utils.constants.LogType;
 import com.flowiee.dms.utils.constants.MasterObject;
 import lombok.AccessLevel;
@@ -84,11 +84,11 @@ public class SystemLogServiceImpl extends BaseService implements SystemLogServic
             systemLog.setCreatedBy(pSystemLog.getCreatedBy());
         }
         if (systemLog.getIp() == null)
-            systemLog.setIp(CommonUtils.getUserPrincipal().getIp());
+            systemLog.setIp(SecurityUtils.getCurrentUser().getIp());
         if (systemLog.getAccount() == null)
-            systemLog.setAccount(new Account(CommonUtils.getUserPrincipal().getId()));
+            systemLog.setAccount(new Account(SecurityUtils.getCurrentUser().getId()));
         if (systemLog.getCreatedBy() == null)
-            systemLog.setCreatedBy(CommonUtils.getUserPrincipal().getId());
+            systemLog.setCreatedBy(SecurityUtils.getCurrentUser().getId());
 
         return systemLogRepository.save(systemLog);
     }

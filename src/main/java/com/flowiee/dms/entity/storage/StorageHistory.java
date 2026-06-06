@@ -40,11 +40,11 @@ public class StorageHistory extends BaseEntity implements Serializable {
     String fieldName;
 
     @Lob
-    @Column(name = "old_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    @Column(name = "old_value", nullable = false, length = 9999, columnDefinition = "TEXT") //CLOB => TEXT
     String oldValue;
 
     @Lob
-    @Column(name = "new_value", nullable = false, length = 9999, columnDefinition = "CLOB")
+    @Column(name = "new_value", nullable = false, length = 9999, columnDefinition = "TEXT") //CLOB => TEXT
     String newValue;
 
 	@Override

@@ -25,7 +25,7 @@ public class Category extends BaseEntity implements Serializable {
 	@Column(name = "type", length = 20, nullable = false)
 	String type;
 
-	@Column(name = "code", length = 20, columnDefinition = "VARCHAR2(20) DEFAULT ''")
+	@Column(name = "code", length = 20)
 	String code;
 
 	@Column(name = "name", length = 50, nullable = false)
@@ -69,6 +69,10 @@ public class Category extends BaseEntity implements Serializable {
 	@JsonIgnore
 	@OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
 	List<CategoryHistory> listCategoryHistory;
+
+	public Category(Long id) {
+		super.id = id;
+	}
 
 	public Category(Long id, String name) {
 		super.id = id;

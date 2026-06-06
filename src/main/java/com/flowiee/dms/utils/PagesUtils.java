@@ -1,7 +1,7 @@
 package com.flowiee.dms.utils;
 
 public class PagesUtils {
-    private static final String mdlSYS = "/pages/system";
+    private static final String mdlSYS = "pages/system";
     public static final String CTG_CATEGORY = mdlSYS + "/category";
     public static final String CTG_CATEGORY_DETAIL = mdlSYS + "/category-detail";
     public static final String SYS_LOGIN = "/login";
@@ -16,7 +16,7 @@ public class PagesUtils {
     public static final String SYS_UNAUTHORIZED = mdlSYS + "/unauthorized";
     public static final String SYS_ERROR = mdlSYS + "/error";
 
-    private static final String mdlSTORAGE = "/pages/storage";
+    private static final String mdlSTORAGE = "pages/storage";
     public static final String STG_DASHBOARD = mdlSTORAGE + "/dashboard";
     public static final String STG_DOCUMENT = mdlSTORAGE + "/document";
     public static final String STG_DOCUMENT_DETAIL = mdlSTORAGE + "/document-detail";

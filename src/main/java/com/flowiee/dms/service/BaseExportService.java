@@ -2,7 +2,7 @@ package com.flowiee.dms.service;
 
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.model.EximModel;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.RequestUtils;
 import com.flowiee.dms.utils.constants.TemplateExport;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -54,7 +54,7 @@ public abstract class BaseExportService extends BaseService implements ExportSer
     }
 
     private void setHttpHeaders() {
-        mvEximModel.setHttpHeaders(CommonUtils.getHttpHeaders(mvEximModel.getDefaultOutputName()));
+        mvEximModel.setHttpHeaders(RequestUtils.createHttpHeader(mvEximModel.getDefaultOutputName()));
     }
 
     private void setFileContent(ByteArrayOutputStream byteArrayOS) {

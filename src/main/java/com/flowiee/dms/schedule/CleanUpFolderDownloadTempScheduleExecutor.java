@@ -4,6 +4,7 @@ import com.flowiee.dms.entity.system.ScheduleStatus;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ScheduleTask;
+import com.flowiee.dms.utils.constants.SystemPath;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +20,13 @@ import java.util.concurrent.TimeUnit;
 public class CleanUpFolderDownloadTempScheduleExecutor extends ScheduleService {
     private int pendingTimeDelete = 10;//minutes
 
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     @Override
     public void execute() {
         logger.info("CleanUpFolderDownloadTempScheduleExecutor start");
         ScheduleStatus scheduleStatus = startSchedule(ScheduleTask.CleanUpFolderDownloadTemp);
         try {
-            File folderTemp = FileUtils.getDownloadStorageTempPath().toFile();
+            File folderTemp = FileUtils.getSystemPath(SystemPath.DownloadStorageTemp).toFile();
             if (folderTemp != null) {
                 for (File file : folderTemp.listFiles()) {
                     if (!file.exists()) {

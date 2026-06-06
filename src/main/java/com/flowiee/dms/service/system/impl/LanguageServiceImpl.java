@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.*;
@@ -49,7 +50,15 @@ public class LanguageServiceImpl extends BaseService implements LanguageService 
 		try {
 			Map<String, String> enMessages = this.findAllLanguageMessages(langCode);
 			Properties properties = new Properties();
-			OutputStream outputStream = new FileOutputStream(String.format("src/main/resources/language/messages_%s.properties", langCode));
+
+			String outputFolder = System.getProperty("user.dir") + "/languages";
+			File folder = new File(outputFolder);
+			if (!folder.exists()) {
+				folder.mkdirs();
+			}
+
+			//OutputStream outputStream = new FileOutputStream(String.format("src/main/resources/language/messages_%s.properties", langCode));
+			OutputStream outputStream = new FileOutputStream(String.format("%s/messages_%s.properties", outputFolder, langCode));
 			for (Map.Entry<String, String> entry : enMessages.entrySet()) {
 				properties.setProperty(entry.getKey(), entry.getValue());
 			}

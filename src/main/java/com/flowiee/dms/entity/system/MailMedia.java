@@ -35,7 +35,8 @@ public class MailMedia implements Serializable {
     private String language;
 
     @Lob
-    @Column(name = "message", nullable = false, columnDefinition = "CLOB")
+    //Oracle @Column(name = "message", nullable = false, columnDefinition = "CLOB")
+    @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "is_html", nullable = false)

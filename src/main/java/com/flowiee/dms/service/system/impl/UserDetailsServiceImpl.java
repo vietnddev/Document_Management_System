@@ -16,7 +16,7 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.RoleService;
 import com.flowiee.dms.utils.AppConstants;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import com.flowiee.dms.utils.constants.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -117,7 +117,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 			String password = account.getPassword();
 			account.setPassword(bCrypt.encode(password));
 			Account accountSaved = accountRepository.save(account);
-			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_CREATE.name(), "Thêm mới account: " + account.getUsername(), null, SecurityUtils.getCurrentUser().getId(), SecurityUtils.getCurrentUser().getIp());
 			//systemLogService.writeLog(systemLog);
 			logger.info("Insert account success! username=" + account.getUsername());
 			return accountSaved;
@@ -136,7 +136,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 			} else {
 				account.setRole("USER");
 			}
-			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+			//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_UPDATE.name(), "Cập nhật account: " + account.getUsername(), null, SecurityUtils.getCurrentUser().getId(), SecurityUtils.getCurrentUser().getIp());
 			//systemLogService.writeLog(systemLog);
 			logger.info("Update account success! username=" + account.getUsername());
 			return accountRepository.save(account);
@@ -153,7 +153,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 			account = accountRepository.findById(accountId).orElse(null);
 			if (account != null) {
 				accountRepository.delete(account);
-				//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, CommonUtils.getUserPrincipal().getId(), CommonUtils.getUserPrincipal().getIp());
+				//SystemLog systemLog = new SystemLog(MODULE.SYSTEM.name(), ACTION.SYS_ACCOUNT_DELETE.name(), "Xóa account " + account.getUsername(), null, SecurityUtils.getCurrentUser().getId(), SecurityUtils.getCurrentUser().getIp());
 				//systemLogService.writeLog(systemLog);
 			}
 			logger.info("Delete account success! id=" + accountId);
@@ -175,7 +175,7 @@ public class UserDetailsServiceImpl extends BaseService implements UserDetailsSe
 
 	@Override
 	public Account findCurrentAccount() {
-		Optional<Account> account = this.findById(CommonUtils.getUserPrincipal().getId());
+		Optional<Account> account = this.findById(SecurityUtils.getCurrentUser().getId());
 		if (account.isPresent()) {
 			return account.get();
 		}

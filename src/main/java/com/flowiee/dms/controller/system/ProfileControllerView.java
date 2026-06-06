@@ -2,7 +2,7 @@ package com.flowiee.dms.controller.system;
 
 import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Account;
-import com.flowiee.dms.utils.EndPointUtil;
+import com.flowiee.dms.utils.AppConstants;
 import com.flowiee.dms.utils.PagesUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping
 public class ProfileControllerView extends BaseController {
-	@GetMapping(EndPointUtil.SYS_PROFILE)
+	@GetMapping(AppConstants.EP_SYS_PROFILE)
 	public ModelAndView showInformation(@ModelAttribute("message") String message) {
 		ModelAndView modelAndView = new ModelAndView(PagesUtils.SYS_PROFILE);
 		modelAndView.addObject("message", message);
@@ -23,7 +23,7 @@ public class ProfileControllerView extends BaseController {
 		return baseView(modelAndView);
 	}
 
-	@PostMapping(EndPointUtil.SYS_PROFILE_UPDATE)
+	@PostMapping(AppConstants.EP_SYS_PROFILE_UPDATE)
 	public ModelAndView updateProfile(@ModelAttribute("account") Account pAccount) {
 		Account account = accountService.findCurrentAccount();
 		account.setPhoneNumber(pAccount.getPhoneNumber());
@@ -33,7 +33,7 @@ public class ProfileControllerView extends BaseController {
 		return new ModelAndView("redirect:/profile");
 	}
 
-	@PostMapping(EndPointUtil.SYS_PROFILE_CHANGEPASSWORD)
+	@PostMapping(AppConstants.EP_SYS_PROFILE_CHANGEPASSWORD)
 	public ModelAndView changePassword(HttpServletRequest request,
 									   @ModelAttribute("account") Account accountEntity,
 									   RedirectAttributes redirectAttributes) {

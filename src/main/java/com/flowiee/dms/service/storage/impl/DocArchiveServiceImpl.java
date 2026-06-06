@@ -13,7 +13,6 @@ import com.flowiee.dms.service.storage.DocDataService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.service.system.SystemLogService;
-import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.MasterObject;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +28,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -108,7 +108,7 @@ public class DocArchiveServiceImpl implements DocArchiveService {
         if (fileList.isEmpty()) {
             throw new BadRequestException("File attachment not found!!");
         }
-        String cloneFileName = CommonUtils.generateUniqueString();
+        String cloneFileName = UUID.randomUUID().toString();
         for (FileDTO file : fileList) {
             String directoryPath = StartUp.getResourceUploadPath() + File.separator + currentFileMdl.getDirectoryPath();
             Path lvPathSource = file.getFile().toPath();

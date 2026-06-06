@@ -89,7 +89,6 @@ public class Document extends BaseEntity implements Serializable {
         document.setIsFolder(dto.getIsFolder());
         document.setName(dto.getName());
         document.setAsName(dto.getAsName());
-        document.setParentId(dto.getParentId());
         document.setDescription(dto.getDescription());
         if (dto.getDocTypeId() != null) {
             document.setDocType(new Category(dto.getDocTypeId(), dto.getDocTypeName()));

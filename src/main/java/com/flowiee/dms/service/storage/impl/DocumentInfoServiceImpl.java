@@ -12,13 +12,12 @@ import com.flowiee.dms.repository.storage.DocumentRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.AppConstants;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.ErrorCode;
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import net.logstash.logback.encoder.org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -30,12 +29,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DocumentInfoServiceImpl extends BaseService implements DocumentInfoService {
-    EntityManager      entityManager;
-    DocShareRepository docShareRepository;
-    DocumentRepository documentRepository;
+    private final EntityManager      entityManager;
+    private final DocShareRepository docShareRepository;
+    private final DocumentRepository documentRepository;
+
+    @Value("${app.isOracleDB}")
+    private Boolean isOracleDB;
 
     @Override
     public Optional<DocumentDTO> findById(Long id) {
@@ -49,9 +50,9 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
         if (pageSize >= 0 && pageNum >= 0) {
             pageable = PageRequest.of(pageNum, pageSize, Sort.by("isFolder", "createdAt").descending());
         }
-        Account currentAccount = CommonUtils.getUserPrincipal();
+        Account currentAccount = SecurityUtils.getCurrentUser();
         boolean isAdmin = AppConstants.ADMINISTRATOR.equals(currentAccount.getUsername());
-        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, CommonUtils.getUserPrincipal().getId(), pDocType, isFolder, listId, isDeleted, pageable);
+        Page<Document> documents = documentRepository.findAll(pTxtSearch, parentId, currentAccount.getId(), isAdmin, SecurityUtils.getCurrentUser().getId(), pDocType, isFolder, listId, isDeleted, pageable);
         return new PageImpl<>(DocumentDTO.fromDocuments(documents.getContent()), pageable, documents.getTotalElements());
     }
 
@@ -80,14 +81,14 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     @Override
     public List<DocumentDTO> setInfoRights(List<DocumentDTO> documentDTOs) {
         for (DocumentDTO d : documentDTOs) {
-            List<DocShare> sharesOfDoc = docShareRepository.findByDocAndAccount(d.getId(), CommonUtils.getUserPrincipal().getId(), null);
+            List<DocShare> sharesOfDoc = docShareRepository.findByDocAndAccount(d.getId(), SecurityUtils.getCurrentUser().getId(), null);
             for (DocShare ds : sharesOfDoc) {
                 if (DocRight.UPDATE.getValue().equals(ds.getRole())) d.setThisAccCanUpdate(true);
                 if (DocRight.DELETE.getValue().equals(ds.getRole())) d.setThisAccCanDelete(true);
                 if (DocRight.MOVE.getValue().equals(ds.getRole())) d.setThisAccCanMove(true);
                 if (DocRight.SHARE.getValue().equals(ds.getRole())) d.setThisAccCanShare(true);
             }
-            if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
+            if (AppConstants.ADMINISTRATOR.equals(SecurityUtils.getCurrentUser().getUsername())) {
                 d.setThisAccCanUpdate(true);
                 d.setThisAccCanDelete(true);
                 d.setThisAccCanMove(true);
@@ -140,7 +141,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     @Override
     public List<DocumentDTO> findHierarchyOfDocument(Long documentId, Long parentId) {
         List<DocumentDTO> hierarchy = new ArrayList<>();
-        String strSQL = "WITH DocumentHierarchy(ID, NAME, AS_NAME, PARENT_ID, H_LEVEL) AS ( " +
+        String strOracle = "WITH DocumentHierarchy(ID, NAME, AS_NAME, PARENT_ID, H_LEVEL) AS ( " +
                         "    SELECT ID, NAME, AS_NAME, PARENT_ID, 1 " +
                         "    FROM DOCUMENT " +
                         "    WHERE id = ? " +
@@ -162,11 +163,25 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
                         "START WITH ID = ? " +
                         "CONNECT BY PRIOR PARENT_ID = ID " +
                         "ORDER BY H_LEVEL DESC";
+        String strMySQL = "WITH RECURSIVE DocumentHierarchy AS ( " +
+                        "    SELECT ID, NAME, AS_NAME, PARENT_ID, 1 AS H_LEVEL " +
+                        "    FROM document " +
+                        "    WHERE ID = ? " +
+                        "    UNION ALL " +
+                        "    SELECT d.ID, d.NAME, d.AS_NAME, d.PARENT_ID, dh.H_LEVEL + 1 " +
+                        "    FROM document d " +
+                        "    INNER JOIN DocumentHierarchy dh ON dh.PARENT_ID = d.ID " +
+                        ") " +
+                        "SELECT ID, NAME, CONCAT(AS_NAME, '-', ID) AS AS_NAME, PARENT_ID, H_LEVEL " +
+                        "FROM DocumentHierarchy " +
+                        "ORDER BY H_LEVEL DESC";
         logger.info("Load hierarchy of document (breadcrumb)");
-        Query query = entityManager.createNativeQuery(strSQL);
+        Query query = entityManager.createNativeQuery(isOracleDB ?  strOracle : strMySQL);
         query.setParameter(1, documentId);
-        query.setParameter(2, documentId);
-        query.setParameter(3, parentId);
+        if (isOracleDB) {
+            query.setParameter(2, documentId);
+            query.setParameter(3, parentId);
+        }
         @SuppressWarnings("unchecked")
         List<Object[]> list = query.getResultList();
         DocumentDTO rootHierarchy = new DocumentDTO();
@@ -287,7 +302,7 @@ public class DocumentInfoServiceImpl extends BaseService implements DocumentInfo
     @Override
     public Page<DocumentDTO> getDocumentsSharedByOthers(int pageSize, int pageNum) {
         Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("createdAt").descending());
-        Page<Document> documentPage = documentRepository.findDocumentsSharedByOthers(CommonUtils.getUserPrincipal().getId(), pageable);
+        Page<Document> documentPage = documentRepository.findDocumentsSharedByOthers(SecurityUtils.getCurrentUser().getId(), pageable);
         List<DocumentDTO> documentDTOs = DocumentDTO.fromDocuments(documentPage.getContent());
         List<Long> folderIdList = new ArrayList<>();
         for (DocumentDTO dto : documentDTOs) {

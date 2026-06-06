@@ -9,8 +9,8 @@ import com.flowiee.dms.model.role.RoleModel;
 import com.flowiee.dms.service.system.AccountService;
 import com.flowiee.dms.service.system.GroupAccountService;
 import com.flowiee.dms.service.system.RoleService;
-import com.flowiee.dms.utils.CommonUtils;
 import com.flowiee.dms.utils.PagesUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import com.flowiee.dms.utils.constants.AccountStatus;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +83,7 @@ public class AccountControllerView extends BaseController {
         accountEntity.setId(accountId);
         accountEntity.setUsername(account.getUsername());
         accountEntity.setPassword(account.getPassword());
-        accountEntity.setLastUpdatedBy(CommonUtils.getUserPrincipal().getUsername());
+        accountEntity.setLastUpdatedBy(SecurityUtils.getCurrentUser().getUsername());
         accountService.update(accountEntity, accountId);
         return baseView(new ModelAndView("redirect:" + request.getHeader("referer")));
     }

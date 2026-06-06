@@ -4,9 +4,6 @@ import com.flowiee.dms.entity.storage.DocShare;
 import com.flowiee.dms.model.DocMetaModel;
 import com.flowiee.dms.model.DocShareModel;
 import com.flowiee.dms.model.dto.DocumentDTO;
-import com.itextpdf.text.DocumentException;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -31,8 +28,6 @@ public interface DocActionService {
     String moveDoc(Long docId, Long destinationId);
 
     List<DocShare> shareDoc(Long docId, List<DocShareModel> accountShares, boolean applyForSubFolder);
-
-    ResponseEntity<InputStreamResource> downloadDoc(long documentId) throws IOException;
 
     List<DocumentDTO> importDoc(long docParentId, MultipartFile uploadFile, boolean applyRightsParent) throws IOException;
 

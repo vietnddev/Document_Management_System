@@ -5,6 +5,7 @@ import com.flowiee.dms.repository.system.SystemConfigRepository;
 import com.flowiee.dms.service.system.LanguageService;
 import com.flowiee.dms.utils.FileUtils;
 import com.flowiee.dms.utils.constants.ConfigCode;
+import com.flowiee.dms.utils.constants.SystemPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -75,13 +76,15 @@ public class StartUp {
     public void initResourceConfig() {
         SystemConfig systemConfig = configRepository.findByCode(ConfigCode.resourceUploadPath.name());
         if (systemConfig != null) {
-            mvResourceUploadPath = systemConfig.getValue().trim();
-            logger.info(systemConfig.getCode() + ": " + mvResourceUploadPath);
+            if (systemConfig.getValue() != null) {
+                mvResourceUploadPath = systemConfig.getValue().trim();
+                logger.info(systemConfig.getCode() + ": " + mvResourceUploadPath);
+            }
         }
 
-        Path templateTempForExportPath = FileUtils.getTemplateExportTempPath();
-        Path folderTempForDownloadPath = FileUtils.getDownloadStorageTempPath();
-        Path folderTempImportStoragePath = FileUtils.getImportStorageTempPath();
+        Path templateTempForExportPath = FileUtils.getSystemPath(SystemPath.TemplateExportTemp);
+        Path folderTempForDownloadPath = FileUtils.getSystemPath(SystemPath.DownloadStorageTemp);
+        Path folderTempImportStoragePath = FileUtils.getSystemPath(SystemPath.ImportStorageTemp);
         try {
             if (!Files.exists(templateTempForExportPath)) {
                 Files.createDirectories(templateTempForExportPath);

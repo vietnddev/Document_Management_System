@@ -5,7 +5,7 @@ import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.service.category.CategoryService;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.constants.CategoryType;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -47,13 +47,13 @@ public class CategoryController {
                                                   @RequestParam(value = "pageNum", required = false) Integer pageNum,
                                                   @RequestParam(value = "idNotIn", required = false) Long idNotIn) {
         try {
-            if (!CommonUtils.isValidCategory(categoryType)) {
+            if (!CategoryType.isValid(categoryType)) {
                 throw new BadRequestException("Category type inValid!");
             }
             if (Objects.isNull(pageSize) || Objects.isNull(pageNum)) {
-                return ApiResponse.ok(categoryService.findSubCategory(CommonUtils.getCategoryType(categoryType), parentId, idNotIn, -1, -1).getContent());
+                return ApiResponse.ok(categoryService.findSubCategory(CategoryType.getByKey(categoryType).name(), parentId, idNotIn, -1, -1).getContent());
             }
-            Page<Category> categories = categoryService.findSubCategory(CommonUtils.getCategoryType(categoryType), parentId, null, pageSize, pageNum - 1);
+            Page<Category> categories = categoryService.findSubCategory(CategoryType.getByKey(categoryType).name(), parentId, null, pageSize, pageNum - 1);
             return ApiResponse.ok(categories.getContent(), pageNum, pageSize, categories.getTotalPages(), categories.getTotalElements());
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.SEARCH_ERROR.getDescription(), "category"), ex);
@@ -65,7 +65,7 @@ public class CategoryController {
     @PreAuthorize("@vldModuleCategory.insertCategory(true)")
     public ApiResponse<Category> createCategory(@RequestBody Category category) {
         try {
-            category.setType(CommonUtils.getCategoryType(category.getType()));
+            category.setType(CategoryType.getByKey(category.getType()).name());
             return ApiResponse.ok(categoryService.save(category));
         } catch (RuntimeException ex) {
             throw new AppException(String.format(ErrorCode.CREATE_ERROR.getDescription(), "category"), ex);
@@ -80,7 +80,7 @@ public class CategoryController {
             if (categoryService.findById(categoryId).isEmpty()) {
                 throw new BadRequestException();
             }
-            category.setType(CommonUtils.getCategoryType(category.getType()));
+            category.setType(CategoryType.getByKey(category.getType()).name());
             if (category.getCode() == null) {
                 category.setCode("");
             }

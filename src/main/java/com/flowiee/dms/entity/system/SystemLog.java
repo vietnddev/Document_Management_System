@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.flowiee.dms.base.BaseEntity;
 import javax.persistence.*;
 
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -24,7 +24,7 @@ public class SystemLog extends BaseEntity implements java.io.Serializable {
 	@Column(name = "module", length = 50, nullable = false)
 	String module;
 
-	@Column(name = "function", nullable = false)
+	@Column(name = "action_function", nullable = false)
 	String function;
 
 	@Column(name = "title")
@@ -38,7 +38,8 @@ public class SystemLog extends BaseEntity implements java.io.Serializable {
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "content", length = 4000, nullable = false, columnDefinition = "CLOB")
+	//Oracle @Column(name = "content", length = 4000, nullable = false, columnDefinition = "CLOB")
+	@Column(name = "content", nullable = false, columnDefinition = "TEXT")
 	String content;
 
 	@Column(name = "content_change", length = 4000)
@@ -62,7 +63,7 @@ public class SystemLog extends BaseEntity implements java.io.Serializable {
 	public void updateAudit() {
 		if (ip == null) {
 			try {
-				ip = CommonUtils.getUserPrincipal().getIp();
+				ip = SecurityUtils.getCurrentUser().getIp();
 			} catch (Exception ex) {
 				ip = "unknown";
 			}

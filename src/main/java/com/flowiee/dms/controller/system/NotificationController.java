@@ -4,7 +4,7 @@ import com.flowiee.dms.base.BaseController;
 import com.flowiee.dms.entity.system.Notification;
 import com.flowiee.dms.model.ApiResponse;
 import com.flowiee.dms.service.system.NotificationService;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AccessLevel;
@@ -27,7 +27,7 @@ public class NotificationController extends BaseController {
     @GetMapping("/all")
     public ApiResponse<List<Notification>> findAllNotify(@RequestParam("pageSize") Integer pageSize,
                                                          @RequestParam("pageNum") Integer pageNum) {
-        Page<Notification> notifyPage = notificationService.findByReceive(pageNum - 1, pageSize, CommonUtils.getUserPrincipal().getId());
+        Page<Notification> notifyPage = notificationService.findByReceive(pageNum - 1, pageSize, SecurityUtils.getCurrentUser().getId());
         return ApiResponse.ok(notifyPage.getContent(), pageNum, pageSize, notifyPage.getTotalPages(), notifyPage.getTotalElements());
     }
 }

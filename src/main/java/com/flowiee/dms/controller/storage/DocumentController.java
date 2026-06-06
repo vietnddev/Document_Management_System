@@ -6,6 +6,7 @@ import com.flowiee.dms.entity.storage.Document;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.model.ApiResponse;
+import com.flowiee.dms.model.DownloadResource;
 import com.flowiee.dms.model.SummaryQuota;
 import com.flowiee.dms.model.payload.ArchiveDocumentReq;
 import com.flowiee.dms.model.payload.MoveDocumentReq;
@@ -14,8 +15,10 @@ import com.flowiee.dms.model.payload.RestoreDocumentReq;
 import com.flowiee.dms.model.payload.RevertDocumentReq;
 import com.flowiee.dms.service.storage.DocActionService;
 import com.flowiee.dms.service.storage.DocArchiveService;
+import com.flowiee.dms.service.storage.DocDownloadService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.utils.FileUtils;
+import com.flowiee.dms.utils.RequestUtils;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
 import com.itextpdf.text.DocumentException;
@@ -24,9 +27,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +47,7 @@ public class DocumentController extends BaseController {
     DocActionService    docActionService;
     DocArchiveService   docArchiveService;
     DocumentInfoService documentInfoService;
+    DocDownloadService  docDownloadService;
 
     @Operation(summary = "Find all documents")
     @GetMapping("/doc/all")
@@ -162,8 +167,13 @@ public class DocumentController extends BaseController {
     @Operation(summary = "Download document")
     @GetMapping("/doc/download/{id}")
     @PreAuthorize("@vldModuleStorage.readDoc(true)")
-    public ResponseEntity<InputStreamResource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
-        return docActionService.downloadDoc(documentId);
+    public ResponseEntity<Resource> downloadDoc(@PathVariable("id") Integer documentId) throws IOException {
+        DownloadResource download = docDownloadService.download(documentId);
+        return ResponseEntity.ok()
+                .headers(RequestUtils.createHttpHeader(download.getFileName()))
+                .contentLength(download.getContentLength())
+                .contentType(MediaType.parseMediaType(download.getContentType()))
+                .body(download.getResource());
     }
 
     @Operation(summary = "Import documents")

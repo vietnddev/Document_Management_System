@@ -15,7 +15,7 @@ public interface FileStorageRepository extends JpaRepository<FileStorage, Long> 
     @Query("from FileStorage f where f.document.id=:documentId and (:status is null or f.isActive=:status) order by f.isActive, f.createdAt desc")
     List<FileStorage> findFileOfDocument(@Param("documentId") Long documentId, @Param("status") Boolean status);
 
-    @Query("select nvl(sum(f.fileSize), 0) " +
+    @Query("select coalesce(sum(f.fileSize), 0) " +
            "from FileStorage f " +
            "where :userId is null or f.createdBy = :userId")
     Long getCurrentStorageUsage(@Param("userId") Long userId);

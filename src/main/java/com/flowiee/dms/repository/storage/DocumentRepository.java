@@ -68,15 +68,25 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
            "order by d.isFolder, d.createdAt")
     List<Document> findWasSharedDoc(@Param("accountId") Long accountId);
 
-    @Query("select " +
-           "    count(case when d.isFolder = 'Y' then 1 end) as total_folder, " +
-           "    count(case when d.isFolder = 'N' then 1 end) as total_file, " +
-           "    concat(to_char(sum(f.fileSize) / 1024 / 1024, 'FM9999999990.99'), ' MB') AS total_size " +
-           "from Document d " +
-           "left join FileStorage f " +
-           "    on f.document.id = d.id " +
-           "where " +
-           "    d.deletedAt is null ")
+//    @Query("select " +
+//           "    count(case when d.isFolder = 'Y' then 1 end) as total_folder, " +
+//           "    count(case when d.isFolder = 'N' then 1 end) as total_file, " +
+//           "    concat(to_char(sum(f.fileSize) / 1024 / 1024, 'FM9999999990.99'), ' MB') AS total_size " +
+//           "from Document d " +
+//           "left join FileStorage f " +
+//           "    on f.document.id = d.id " +
+//           "where " +
+//           "    d.deletedAt is null ") Oracle
+    @Query("""
+        select
+            count(case when d.isFolder = 'Y' then 1 end),
+            count(case when d.isFolder = 'N' then 1 end),
+            concat(function('format', coalesce(sum(f.fileSize), 0) / 1024 / 1024,2), ' MB')
+        from Document d
+        left join FileStorage f
+            on f.document.id = d.id
+        where d.deletedAt is null
+    """)
     List<Object[]> summaryStorage();
 
     @Query("select d from DocumentTreeView d " +
@@ -114,7 +124,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
            "where d.isFolder = 'N'")
     Page<Object[]> findDocumentSortByMemoryUsed(Pageable pageable);
 
-    @Query("select nvl(sum(f.fileSize), 0) " +
+    @Query("select coalesce(sum(f.fileSize), 0) " +
             "from Document d " +
             "inner join FileStorage f " +
             "    on f.document.id = d.id " +
@@ -124,4 +134,15 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
 
     @Query("from Document d where d.id in (select ds.document.id from DocShare ds where ds.account.id = :accountId)")
     Page<Document> findDocumentsSharedByOthers(@Param("accountId") Long accountId, Pageable pageable);
+
+    @Query("""
+        select (count(d) > 0)
+        from Document d
+        where d.parentId = :parentId
+            and d.name = :name
+            and d.isFolder = :isFolder
+            and d.deletedAt is null
+            and d.deletedBy is null
+    """)
+    boolean existsDocument(Long parentId, String name, String isFolder);
 }

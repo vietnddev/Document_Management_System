@@ -22,7 +22,7 @@ public class MailNotificationScheduleExecutor extends ScheduleService {
     private final MailMediaRepository mailMediaRepository;
     private final MailStatusRepository mailStatusRepository;
 
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     @Override
     public void execute() throws AppException {
         logger.info("MailNotificationScheduleExecutor start");

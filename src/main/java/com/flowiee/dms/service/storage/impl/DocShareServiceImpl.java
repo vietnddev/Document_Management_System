@@ -8,9 +8,9 @@ import com.flowiee.dms.repository.storage.DocShareRepository;
 import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.system.AccountService;
-import com.flowiee.dms.service.storage.DocShareService;;
+import com.flowiee.dms.service.storage.DocShareService;
 import com.flowiee.dms.utils.AppConstants;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import com.flowiee.dms.utils.constants.DocRight;
 import com.flowiee.dms.utils.constants.MessageCode;
 import lombok.AccessLevel;
@@ -79,10 +79,10 @@ public class DocShareServiceImpl extends BaseService implements DocShareService 
 
     @Override
     public boolean isShared(long documentId, String role) {
-        if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
+        if (AppConstants.ADMINISTRATOR.equals(SecurityUtils.getCurrentUser().getUsername())) {
             return true;
         }
-        List<DocShare> docShares = docShareRepository.findByDocAndAccount(documentId, CommonUtils.getUserPrincipal().getId(), role);
+        List<DocShare> docShares = docShareRepository.findByDocAndAccount(documentId, SecurityUtils.getCurrentUser().getId(), role);
         if (ObjectUtils.isNotEmpty(docShares)) {
             return true;
         }

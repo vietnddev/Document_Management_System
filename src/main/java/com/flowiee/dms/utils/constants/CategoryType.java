@@ -20,4 +20,22 @@ public enum CategoryType {
         this.name = name;
         this.label = label;
     }
+
+    public static boolean isValid(String type) {
+        for (CategoryType c : CategoryType.values()) {
+            if (c.getKey().equals(type)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static CategoryType getByKey(String key) {
+        for (CategoryType c : CategoryType.values()) {
+            if (c.getKey().equals(key)) {
+                return c;
+            }
+        }
+        throw new NullPointerException();
+    }
 }

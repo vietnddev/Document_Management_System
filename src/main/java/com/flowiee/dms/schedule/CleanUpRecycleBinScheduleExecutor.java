@@ -26,7 +26,7 @@ public class CleanUpRecycleBinScheduleExecutor extends ScheduleService {
     DocActionService docActionService;
     SystemConfigRepository systemConfigRepository;
 
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     @Override
     public void execute() {
         logger.info("CleanUpRecycleBinScheduleExecutor start");

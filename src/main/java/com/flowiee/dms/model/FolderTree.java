@@ -21,6 +21,7 @@ public class FolderTree {
     private File file;
     private List<FolderTree> subFiles;
 
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)

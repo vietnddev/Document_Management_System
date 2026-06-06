@@ -3,7 +3,7 @@ package com.flowiee.dms.base;
 import com.flowiee.dms.exception.AuthenticationException;
 import com.flowiee.dms.exception.ForbiddenException;
 import com.flowiee.dms.utils.AppConstants;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.SneakyThrows;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -31,7 +31,7 @@ public class BaseAuthorize {
 
     protected boolean isAuthorized(String action, boolean throwException) {
         if (isAuthenticated()) {
-            if (AppConstants.ADMINISTRATOR.equals(CommonUtils.getUserPrincipal().getUsername())) {
+            if (AppConstants.ADMINISTRATOR.equals(SecurityUtils.getCurrentUser().getUsername())) {
                 return true;
             }
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -3,9 +3,11 @@ package com.flowiee.dms.utils;
 import com.flowiee.dms.base.StartUp;
 import com.flowiee.dms.entity.storage.FileStorage;
 import com.flowiee.dms.exception.AppException;
+import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.utils.constants.FileExtension;
 import com.flowiee.dms.model.FolderTree;
 import com.flowiee.dms.model.dto.FileDTO;
+import com.flowiee.dms.utils.constants.SystemPath;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddressList;
@@ -21,9 +23,12 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
@@ -33,10 +38,7 @@ public class FileUtils {
     public static String templatePath = "src/main/resources/static";
     public static String fileUploadPath = StartUp.getResourceUploadPath() + File.separator + "uploads" + File.separator;
     public static String fileDownloadPath = StartUp.getResourceUploadPath() + File.separator + "downloads" + File.separator;
-    public static String initCsvDataPath = templatePath + File.separator + "data/csv";
-    public static String reportTemplatePath = templatePath + File.separator + "report";
     public static String excelTemplatePath = templatePath + File.separator + "templates/excel";
-    public static Path logoPath = Paths.get(StartUp.getResourceUploadPath() + File.separator + "dist/img/FlowieeLogo.png");
     // Bản đồ dùng để lưu trữ khóa file theo đường dẫn
     private static final ConcurrentHashMap<String, FileLock> mvFileLocks = new ConcurrentHashMap<>();
 
@@ -73,10 +75,6 @@ public class FileUtils {
         sheet.addValidationData(dataValidation);
     }
 
-    public static File getFileDataCategoryInit() {
-        return Paths.get(initCsvDataPath + "/Category.csv").toFile();
-    }
-
     public static String getFileExtension(String fileName) {
         String extension = "";
         if (ObjectUtils.isNotEmpty(fileName)) {
@@ -107,16 +105,16 @@ public class FileUtils {
         return new File(path.toUri());
     }
 
-    public static Path getTemplateExportTempPath() {
-        return Paths.get(excelTemplatePath + "/temp");
-    }
-
-    public static Path getDownloadStorageTempPath() {
-        return Path.of(fileDownloadPath + "/storage/temp" );
-    }
-
-    public static Path getImportStorageTempPath() {
-        return Path.of(fileUploadPath + "/temp");
+    public static Path getSystemPath(SystemPath systemPath) {
+        return switch (systemPath) {
+            case TemplateExportTemp -> Path.of(excelTemplatePath + "/temp");
+            case DownloadStorageTemp -> Path.of(fileDownloadPath + "/storage/temp");
+            case ImportStorageTemp -> Path.of(fileUploadPath + "/temp");
+            case InitDataCsv -> Paths.get(templatePath + File.separator + "data/csv/Category.csv");
+            case Report -> Paths.get(templatePath + File.separator + "report");
+            case Logo -> Paths.get(StartUp.getResourceUploadPath() + File.separator + "dist/img/FlowieeLogo.png");
+            default -> throw new IllegalStateException("Unexpected value: " + systemPath);
+        };
     }
 
     public static boolean lockFile(File pFile) {
@@ -236,7 +234,7 @@ public class FileUtils {
                     // Gọi đệ quy cho thư mục con
                     folderTree.getSubFiles().add(buildFolderTree(file, level + 1, parentId, folder.getName()));
                 } else {
-                    isAllowUpload(CommonUtils.getFileExtension(file.getName()), true, "Tồn tại tệp có định dạng .%s chưa được hỗ trợ!");
+                    isAllowUpload(FileUtils.getFileExtension(file.getName()), true, "Tồn tại tệp có định dạng .%s chưa được hỗ trợ!");
                     // Thêm file vào danh sách subFiles (ở đây chỉ thêm file, không gọi đệ quy)
                     folderTree.getSubFiles().add(FolderTree.builder()
                             .name(file.getName())
@@ -400,5 +398,51 @@ public class FileUtils {
         }
 
         return lvFileList;
+    }
+
+    public static String generateAliasName(String text) {
+        String transformedText = "";
+        if (text != null) {
+            // Loại bỏ dấu tiếng Việt và ký tự đặc biệt
+            String normalizedText = Normalizer.normalize(text, Normalizer.Form.NFD);
+            Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+            String textWithoutAccents = pattern.matcher(normalizedText).replaceAll("");
+            String cleanedText = textWithoutAccents.replaceAll("[^a-zA-Z0-9 ]", "");
+
+            // Chuyển đổi thành chữ thường (lowercase)
+            String lowercaseText = cleanedText.toLowerCase();
+
+            // Thay thế khoảng trắng bằng dấu gạch ngang ("-")
+            transformedText = lowercaseText.replace(" ", "-");
+
+            if (transformedText.endsWith("-")) {
+                transformedText = transformedText.substring(0, transformedText.length() - 1);
+            }
+        }
+        return transformedText;
+    }
+
+    public static String getUploadPathDir(String systemModule) {
+        try {
+            StringBuilder path = new StringBuilder(FileUtils.getFileUploadPath());
+            if (MODULE.STORAGE.name().equals(systemModule)) {
+                path.append("storage");
+            } else if (MODULE.CATEGORY.name().equals(systemModule)) {
+                path.append("category");
+            }
+            path.append("/").append(LocalDateTime.now().getYear());
+            path.append("/").append(LocalDateTime.now().getMonth().getValue());
+            path.append("/").append(LocalDateTime.now().getDayOfMonth());
+            File folder = new File(path.toString());
+            if (!folder.exists()) {
+                if (folder.mkdirs()) {
+                    System.out.println("mkdir OK");
+                }
+            }
+            return path.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
     }
 }

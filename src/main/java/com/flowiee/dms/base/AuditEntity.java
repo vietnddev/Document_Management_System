@@ -2,7 +2,7 @@ package com.flowiee.dms.base;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -50,10 +50,10 @@ public class AuditEntity {
     @PrePersist
     public void updateAudit() {
         if (createdBy == null) {
-            createdBy = CommonUtils.getUserPrincipal().getId();
+            createdBy = SecurityUtils.getCurrentUser().getId();
         }
         if (lastUpdatedBy == null) {
-            lastUpdatedBy = CommonUtils.getUserPrincipal().getUsername();
+            lastUpdatedBy = SecurityUtils.getCurrentUser().getUsername();
         }
     }
 }

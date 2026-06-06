@@ -7,6 +7,7 @@ import com.flowiee.dms.entity.system.SystemConfig;
 import com.flowiee.dms.exception.AppException;
 import com.flowiee.dms.exception.BadRequestException;
 import com.flowiee.dms.exception.StorageLimitExceededException;
+import com.flowiee.dms.utils.*;
 import com.flowiee.dms.utils.constants.FileExtension;
 import com.flowiee.dms.model.MODULE;
 import com.flowiee.dms.model.dto.DocumentDTO;
@@ -17,10 +18,6 @@ import com.flowiee.dms.service.BaseService;
 import com.flowiee.dms.service.storage.DocumentInfoService;
 import com.flowiee.dms.service.storage.FileStorageService;
 import com.flowiee.dms.service.system.SendMailService;
-import com.flowiee.dms.utils.CommonUtils;
-import com.flowiee.dms.utils.FileUtils;
-import com.flowiee.dms.utils.ImageUtils;
-import com.flowiee.dms.utils.PdfUtils;
 import com.flowiee.dms.utils.constants.ConfigCode;
 import com.flowiee.dms.utils.constants.ErrorCode;
 import com.flowiee.dms.utils.constants.MessageCode;
@@ -77,7 +74,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
 
             vldResourceUploadPath(true);
 
-            Path pathDest = Paths.get(CommonUtils.getPathDirectory(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
+            Path pathDest = Paths.get(FileUtils.getUploadPathDir(fileStorage.getModule().toUpperCase()) + File.separator + fileStorageSaved.getStorageName());
             try {
                 saveFileAttach(fileStorage.getFileAttach(), pathDest);
             } catch (IOException ex) {
@@ -147,7 +144,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         fileInfo.setActive(true);
         FileStorage fileSaved = this.save(fileInfo);
 
-        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
+        Path path = Paths.get(FileUtils.getUploadPathDir(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         //saveFileAttach(fileUpload, path);
 
         try {
@@ -189,7 +186,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         fileInfo.setActive(true);
         FileStorage fileSaved = this.save(fileInfo);
 
-        Path path = Paths.get(CommonUtils.getPathDirectory(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
+        Path path = Paths.get(FileUtils.getUploadPathDir(MODULE.STORAGE.name()) + "/" + fileSaved.getStorageName());
         //saveFileAttach(fileUpload, path);
 
         try {
@@ -249,7 +246,7 @@ public class FileStorageServiceImpl extends BaseService implements FileStorageSe
         long limitOfSystem = Long.parseLong(StartUp.getSystemConfig(ConfigCode.storageLimitAllUser).getValue());//default is GB unit
         if (isCheckingForUser) {
             long limitOfUserBytes = limitOfUser * 1024 * 1024 * 1024;
-            long memoryUsed = fileRepository.getCurrentStorageUsage(CommonUtils.getUserPrincipal().getId());
+            long memoryUsed = fileRepository.getCurrentStorageUsage(SecurityUtils.getCurrentUser().getId());
             if (memoryUsed + fileSize > limitOfUserBytes) {
                 return false;
             }

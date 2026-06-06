@@ -2,38 +2,34 @@ package com.flowiee.dms.base;
 
 import com.flowiee.dms.entity.system.EventLog;
 import com.flowiee.dms.repository.system.EventLogRepository;
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.service.system.EventLogService;
+import com.flowiee.dms.utils.RequestUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.Signature;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Enumeration;
 
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class RestControllerAspect {
-    private final Logger log = LoggerFactory.getLogger(getClass());
-    private final EventLogRepository eventLogRepository;
+    private final EventLogRepository mvEventLogRepository;
+    private final EventLogService mvEventLogService;
+
     private ThreadLocal<RequestContext> mvRequestContext = ThreadLocal.withInitial(RequestContext::new); // Tạo ThreadLocal để lưu thông tin của request
 
     @Getter
@@ -45,107 +41,77 @@ public class RestControllerAspect {
         private String ip;
     }
 
-    public RequestContext getRequestContext() {
-        return mvRequestContext.get();
-    }
-
-    @Before("execution(* com.flowiee.dms.controller.*.*.*(..))")
-    public void beforeCall(JoinPoint joinPoint) {
+    @Around("execution(* com.flowiee.dms.controller.*.*.*(..))")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-        Object[] args = joinPoint.getArgs();
-        log.info("AOP Before call system controller {} with arguments: {}", joinPoint, Arrays.toString(args));
-
-        //Save request info into db
-        Signature signature = joinPoint.getSignature();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        EventLog eventLog = eventLogRepository.save(EventLog.builder()
-                .httpMethod(getHttpMethod(attributes))// Lấy tên HTTP method (GET, POST, etc.)
-                .processClass(signature.getDeclaringTypeName())
-                .processMethod(signature.getName())
-                .requestUrl(getRequestUrl(attributes))
-                .requestParam(getRequestParam(attributes))
-                .requestBody(getRequestBody(joinPoint))
-                .createdBy(CommonUtils.getUserPrincipal().getUsername())
-                .createdTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault()))
-                .ipAddress(CommonUtils.getUserPrincipal().getIp())
-                .application(CommonUtils.productID)
-                .build());
+        String lvProcessMethod = RequestUtils.getProcessMethod(joinPoint);
+        String lvUri = attributes.getRequest().getRequestURI();
+        if (!lvUri.contains("/api/v1") || "handleFileRequest".equals(lvProcessMethod)) {
+            return joinPoint.proceed();
+        }
+        LocalDateTime lvRequestTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime), ZoneId.systemDefault());
+
+        EventLog eventLog = mvEventLogService.writeLog(attributes, joinPoint, lvRequestTime, "DMS");
+        long lvRequestId = eventLog.getRequestId();
+        String lvUsername = eventLog.getCreatedBy();
+        String lvIpAddress = eventLog.getIpAddress();
 
         RequestContext lvRequestContext = mvRequestContext.get();
-        lvRequestContext.setRequestId(eventLog.getRequestId());
+        lvRequestContext.setRequestId(lvRequestId);
         lvRequestContext.setStartTime(startTime);
-        lvRequestContext.setUsername(CommonUtils.getUserPrincipal().getUsername());
-        lvRequestContext.setIp(CommonUtils.getUserPrincipal().getIp());
+        lvRequestContext.setUsername(lvUsername);
+        lvRequestContext.setIp(lvIpAddress);
         mvRequestContext.set(lvRequestContext);
-    }
 
-    @After("execution(* com.flowiee.dms.controller.*.*.*(..))")
-    public void afterCall(JoinPoint joinPoint) {
-        RequestContext lvRequestContext = mvRequestContext.get();
-        long duration = System.currentTimeMillis() - lvRequestContext.getStartTime();
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        MDC.put("customKey", String.valueOf(lvRequestContext.getRequestId()));
 
-        EventLog eventLog = eventLogRepository.find(lvRequestContext.getRequestId(),
-                null,//getHttpMethod(attributes)
-                null,//getRequestUrl(attributes)
-                null);//LocalDateTime.ofInstant(Instant.ofEpochMilli(lvRequestContext.getStartTime()), ZoneId.systemDefault())
-        if (eventLog != null) {
+        log.info("[REQUEST {}] {}",
+                lvRequestContext.getRequestId(),
+                formatRequestInfo(attributes.getRequest(), joinPoint, attributes, lvUsername));
+
+        Object result;
+        try {
+            result = joinPoint.proceed();
+            long duration = System.currentTimeMillis() - startTime;
+
             eventLog.setDuration(duration);
-            eventLogRepository.save(eventLog);
+            mvEventLogRepository.save(eventLog);
+
+            log.info("[RESPONSE {}] ({} ms) {}",
+                    lvRequestContext.getRequestId(),
+                    duration,
+                    result.toString());
+            return result;
+        } catch (Throwable ex) {
+            log.error("[EXCEPTION {}] {}",
+                    lvRequestContext.getRequestId(),
+                    formatRequestException(attributes.getRequest(), joinPoint, ex.getMessage()),
+                    ex);
+            throw ex;
+        } finally {
+            MDC.remove("customKey");
+            mvRequestContext.remove();
         }
-        mvRequestContext.remove();
     }
 
-    private String getHttpMethod(ServletRequestAttributes attributes) {
-        if (attributes != null) {
-            return attributes.getRequest().getMethod();
-        }
-        return null;
+    public String formatRequestException(HttpServletRequest pRequest, JoinPoint pJoinPoint, String pMessage) {
+        String lvHttpMethod = pRequest != null ? pRequest.getMethod() : "N/A";
+        String lvUri = pRequest != null ? pRequest.getRequestURI() : "N/A";
+        String lvClassName = pJoinPoint.getTarget().getClass().getSimpleName();
+        String lvProcessMethod = RequestUtils.getProcessMethod(pJoinPoint);
+
+        return String.format("%s %s - %s.%s with error: %s", lvHttpMethod, lvUri, lvClassName, lvProcessMethod, pMessage);
     }
 
-    private String getRequestUrl(ServletRequestAttributes attributes) {
-        if (attributes != null) {
-            HttpServletRequest httpServletRequest = attributes.getRequest();
-            return httpServletRequest.getRequestURL().toString();
-        }
-        return null;
-    }
+    public String formatRequestInfo(HttpServletRequest pRequest, JoinPoint pJoinPoint, ServletRequestAttributes pAttributes, String pUser) {
+        String lvHttpMethod = pRequest != null ? pRequest.getMethod() : "N/A";
+        String lvUri = pRequest != null ? pRequest.getRequestURI() : "N/A";
+        String lvClassName = pJoinPoint.getTarget().getClass().getSimpleName();
+        String lvProcessMethod = RequestUtils.getProcessMethod(pJoinPoint);
+        String lvRequestParam = RequestUtils.getRequestParam(pAttributes);
+        String lvRequestBody = RequestUtils.getRequestBody(pJoinPoint);
 
-    private String getRequestParam(ServletRequestAttributes attributes) {
-        if (attributes != null) {
-            HttpServletRequest request = attributes.getRequest();
-            Enumeration<String> parameterNames = request.getParameterNames();
-            StringBuilder params = new StringBuilder();
-            while (parameterNames.hasMoreElements()) {
-                String paramName = parameterNames.nextElement();
-                String paramValue = request.getParameter(paramName);
-                params.append(paramName).append("=").append(paramValue).append(", ");
-            }
-            String paramsStr = params.toString();
-            if (paramsStr.endsWith(", ")) {
-                paramsStr = paramsStr.substring(0, paramsStr.length() - 2);
-            }
-            return paramsStr;
-        }
-        return null;
-    }
-
-    private String getRequestBody(JoinPoint joinPoint) {
-        // Lấy ra chữ ký của phương thức (MethodSignature)
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        // Lấy danh sách tham số của phương thức
-        Object[] args = joinPoint.getArgs();
-        // Lấy danh sách các annotation của từng tham số
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        // Loop qua các tham số và kiểm tra xem có annotation @RequestBody không
-        for (int i = 0; i < args.length; i++) {
-            for (Annotation annotation : parameterAnnotations[i]) {
-                if (annotation instanceof RequestBody) {
-                    return args[i].toString();
-                }
-            }
-        }
-        return null;
+        return String.format("%s %s - %s - %s.%s with params: [%s] & body: [%s]", lvHttpMethod, lvUri, pUser, lvClassName, lvProcessMethod, lvRequestParam, lvRequestBody);
     }
 }

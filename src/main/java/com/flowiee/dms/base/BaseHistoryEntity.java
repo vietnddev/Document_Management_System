@@ -2,7 +2,7 @@ package com.flowiee.dms.base;
 
 import javax.persistence.*;
 
-import com.flowiee.dms.utils.CommonUtils;
+import com.flowiee.dms.utils.SecurityUtils;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -28,7 +28,7 @@ public class BaseHistoryEntity implements Cloneable {
     @PrePersist
     public void updateAudit() {
         if (createdBy == null) {
-            createdBy = CommonUtils.getUserPrincipal().getUsername();
+            createdBy = SecurityUtils.getCurrentUser().getUsername();
         }
     }
 }
